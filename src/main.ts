@@ -175,9 +175,62 @@ function getPatternCoords(match: any) {
 }
 
 function checkGameOver() {
+    // 1. Verify Game End Condition
     if (game.checkGameOver() && !activeConstruction) {
-        // Show Game Over Modal logic here (call ScoreManager, etc.)
-        // You can reuse the showGameOverScreen logic from before
+        
+        // 2. Calculate Final Scores
+        const result = game.getScore();
+        
+        // 3. Get DOM Elements
+        const modal = document.getElementById('game-over-modal');
+        const finalScoreEl = document.getElementById('final-score');
+        const listEl = document.getElementById('score-breakdown-list');
+
+        if (modal && finalScoreEl && listEl) {
+            // A. Set Big Score
+            finalScoreEl.textContent = result.total.toString();
+
+            // B. Build the Breakdown List
+            listEl.innerHTML = ''; // Clear previous entries
+
+            // Add standard buildings
+            for (const [name, score] of Object.entries(result.breakdown)) {
+                if (score === 0) continue; // Optional: Hide things worth 0
+
+                const li = document.createElement('li');
+                // Simple inline flex for alignment
+                li.style.display = 'flex';
+                li.style.justifyContent = 'space-between';
+                li.style.marginBottom = '5px';
+                
+                // Format: "Cottage ...... 12"
+                li.innerHTML = `
+                    <span style="text-transform: capitalize;">${name.toLowerCase()}</span>
+                    <strong>${score}</strong>
+                `;
+                listEl.appendChild(li);
+            }
+
+            // Add Penalties (Red text)
+            if (result.penaltyCount > 0) {
+                const li = document.createElement('li');
+                li.style.display = 'flex';
+                li.style.justifyContent = 'space-between';
+                li.style.color = '#ef5350'; // Red
+                li.style.marginTop = '10px';
+                li.style.borderTop = '1px solid #eee';
+                li.style.paddingTop = '5px';
+
+                li.innerHTML = `
+                    <span>Empty Spaces</span>
+                    <strong>-${result.penaltyCount}</strong>
+                `;
+                listEl.appendChild(li);
+            }
+
+            // C. Show the Modal
+            modal.classList.remove('hidden');
+        }
     }
 }
 
