@@ -368,49 +368,19 @@ h1 { margin-bottom: 20px; color: #2c3e50; }
     background-image: url('/buildings/cathedral.png');
 }
 
-/* --- Fallback CSS Art for Monuments (If no PNG exists) --- */
-
-.ARCHIVE {
-    background-color: #e91e63; color: white;
-    border: 4px solid #880e4f;
-    box-shadow: 0 0 10px #f48fb1;
+.cell.MONUMENT {
+    background-image: url('/buildings/monument.png');
+    /* 85% is too big for some icons, 60% fits nicely inside the white tile */
+    background-size: 60%; 
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
-.OBELISK {
-    background-color: #263238; color: #80deea;
-    border: 4px solid #006064;
-    background-image: radial-gradient(circle at 30% 30%, #4dd0e1 0%, #263238 20%);
-    box-shadow: 0 0 15px #00bcd4;
-}
-
-.MANDRAS {
-    background-color: #fbc02d; color: #3e2723;
-    border: 4px solid #fff9c4;
-    background-image: repeating-linear-gradient(90deg, #fbc02d, #fbc02d 10px, #f9a825 10px, #f9a825 20px);
-}
-
-.SHRINE {
-    background-color: #33691e; color: #c5e1a5;
-    border: 4px solid #1b5e20;
-    background-image: repeating-linear-gradient(45deg, #33691e, #33691e 10px, #1b5e20 10px, #1b5e20 20px);
-}
-
-.BATHS {
-    background-color: #0277bd; color: #e1f5fe;
-    border: 4px solid #fff;
-    background-image: radial-gradient(circle at 50% 50%, #4fc3f7 0%, #0277bd 60%);
-}
-
-.FORUM {
-    background-color: #d81b60; color: #fce4ec;
-    border: 4px solid #880e4f;
-    background-image: repeating-linear-gradient(90deg, #d81b60, #d81b60 10px, #ad1457 10px, #ad1457 15px);
-}
-
-.MAUSOLEUM { 
-    background-color: #7b1fa2; color: #e1bee7;
-    border: 4px solid #4a148c;
-    background-image: repeating-linear-gradient(45deg, #7b1fa2, #7b1fa2 10px, #6a1b9a 10px, #6a1b9a 20px);
+.building-card.MONUMENT .card-icon {
+    background-image: url('/buildings/monument.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
 

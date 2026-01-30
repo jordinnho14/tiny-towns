@@ -33,11 +33,11 @@ export class Renderer {
     }
 
     // --- 2. BOARD (The Smart Version) ---
-    private renderBoard(game: Game, activeConstruction: any | null, highlightCoords: any[]) {
+   private renderBoard(game: Game, activeConstruction: any | null, highlightCoords: any[]) {
         const hasObelisk = game.hasObeliskAbility();
         const grid = game.board.getGrid();
         
-        // Define resources locally to be safe
+        // Define resources locally
         const RESOURCES = ['WOOD', 'WHEAT', 'BRICK', 'GLASS', 'STONE'];
 
         // PHASE A: INITIALIZATION (Run only once)
@@ -61,53 +61,60 @@ export class Renderer {
             const c = parseInt(div.dataset.c!);
             const cell = grid[r][c];
 
-            // 1. Determine Class Name
-            const safeName = cell.replace(/ /g, '-').replace(/'/g, '').toUpperCase();
-            let className = `cell ${cell === 'NONE' ? 'empty' : safeName}`;
+            // 1. Reset State
+            div.className = 'cell';
+            div.style.backgroundColor = ''; // Reset color to allow CSS to work
+
+            // 2. Apply Classes & Styles based on Content
+            if (cell === 'NONE') {
+                div.classList.add('empty');
+                div.textContent = '';
+            } 
+            else if (RESOURCES.includes(cell)) {
+                div.classList.add(cell); // WOOD, WHEAT, etc.
+                div.textContent = cell;  // Show text for resources
+            } 
+            else {
+                // IT IS A BUILDING
+                div.textContent = ''; // Clear text so icon shows
+                
+                // Find definition to check for Monument status & Color
+                const def = game.gameRegistry.find(b => b.name.toUpperCase() === cell.toUpperCase());
+                
+                if (def) {
+                    div.classList.add('constructed');
+                    
+                    // --- YOUR FIX IS HERE ---
+                    if (def.isMonument) {
+                        div.classList.add('MONUMENT');
+                    } else {
+                        // Regular building (Cottage, Farm, etc.)
+                        const safeName = cell.replace(/ /g, '-').replace(/'/g, '').toUpperCase();
+                        div.classList.add(safeName);
+                    }
+                    // ------------------------
+                    
+                    div.style.backgroundColor = def.color;
+                }
+            }
             
-            // Highlight Logic
+            // 3. Highlight Logic
             if (activeConstruction) {
                 const isPatternPart = highlightCoords.some(p => p.row === r && p.col === c);
                 const isObeliskTarget = hasObelisk && cell === 'NONE';
 
                 if (isPatternPart || isObeliskTarget) {
-                    className += ' match-highlight';
+                    div.classList.add('match-highlight');
                 }
             }
 
-            // 2. IMPORTANT: Update DOM
-            // We check if className changed to trigger CSS animations, 
-            // BUT we always ensure text is correct for the new state.
-            if (div.className !== className) {
-                div.className = className;
-                
-                // --- TEXT CLEANUP LOGIC ---
-                if (cell === 'NONE') {
-                    // Empty: Clear everything
-                    div.textContent = '';
-                    div.style.color = '';
-                } 
-                else if (RESOURCES.includes(cell)) {
-                    // Resource: Show Name (e.g. "WOOD")
-                    div.textContent = cell; 
-                    div.style.color = ''; // Let CSS handle text color
-                } 
-                else {
-                    // Building: Clear text so Icon shows
-                    div.textContent = '';
-                    div.style.color = '';
-                }
-            }
-
-            // 3. Ghost Logic (Previewing placement)
+            // 4. Ghost Logic (Previewing placement)
             if (cell === 'NONE' && game.currentResource && !activeConstruction) {
                  div.onmouseenter = () => {
                     div.classList.add('ghost', game.currentResource!);
-                    div.textContent = ''; 
                  };
                  div.onmouseleave = () => {
                     div.classList.remove('ghost', 'WOOD', 'WHEAT', 'BRICK', 'GLASS', 'STONE');
-                    div.textContent = ''; // Keep it empty on exit
                  };
             } else {
                 div.onmouseenter = null;
@@ -240,8 +247,13 @@ export class Renderer {
         registry.forEach(building => {
             // Card Container
             const card = document.createElement('div');
-            card.className = 'building-card';
-
+            if (building.isMonument) {
+                // All monuments share this single class
+                card.className = `building-card MONUMENT`;
+            } else {
+                // Regular buildings keep their specific class (COTTAGE, FARM, etc.)
+                card.className = `building-card ${building.name.toUpperCase()}`;
+            }
             // Header
             const header = document.createElement('header');
             header.className = 'card-header';

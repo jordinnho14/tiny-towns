@@ -235,4 +235,32 @@ function addScoreListItem(label: string, score: number, isPenalty: boolean = fal
 }
 
 // --- 5. START ---
-initLobby();
+if (import.meta.env.DEV) {
+    // DEV MODE: Lobby
+    initLobby();
+} else {
+    // PROD MODE: Instant Random Start
+    
+    // 1. Setup Data
+    const MONUMENTS = BUILDING_REGISTRY.filter(b => b.isMonument);
+    const REGULAR = BUILDING_REGISTRY.filter(b => !b.isMonument);
+    const randomMonument = MONUMENTS[Math.floor(Math.random() * MONUMENTS.length)];
+    
+    game.activeMonument = randomMonument;
+    game.gameRegistry = [...REGULAR, randomMonument];
+    
+    // 2. Start Logic
+    game.start();
+    
+    // 3. RENDER EVERYTHING
+    renderAll(); // Draws the board
+    
+    if (typeof renderer.renderDeck === 'function') {
+        renderer.renderDeck(game.gameRegistry);
+    } else {
+        console.warn("Could not find renderDeck method. Sidebar might be empty.");
+    }
+
+    // 4. Hide Modal (just in case)
+    elements.startModal.classList.add('hidden');
+}
