@@ -80,7 +80,6 @@ export class Renderer {
                 // <--- CHANGED THIS SECTION ------------------------
                 if (cell === 'NONE') {
                     // Empty square: show coordinates
-                    div.textContent = `${r},${c}`;
                     div.style.color = '';
                 } 
                 else if (RESOURCES.includes(cell)) {
@@ -132,7 +131,7 @@ export class Renderer {
     private renderSidebar(game: Game, activeConstruction: any | null) {
         this.buildMenuEl.innerHTML = '';
         
-        // Render Matches
+        // 1. Render Matches
         if (game.availableMatches.length === 0) {
             const p = document.createElement('p');
             p.textContent = 'No patterns found.';
@@ -143,20 +142,43 @@ export class Renderer {
             game.availableMatches.forEach(match => {
                 const btn = document.createElement('button');
                 btn.textContent = `Build ${match.buildingName}`;
-                // Add coords for clarity:
-                const coordSpan = document.createElement('span');
-                coordSpan.textContent = ` (${match.row},${match.col})`;
-                coordSpan.style.fontSize = '0.8em';
-                btn.appendChild(coordSpan);
 
                 const safeClass = match.buildingName.replace(/ /g, '-').replace(/'/g, '').toUpperCase();
                 btn.className = `build-btn ${safeClass}`;
+                
+                // Click to Build
                 btn.onclick = () => this.onBuildClick(match);
+
+                // --- CHANGED: Calculate the specific grid points from the Pattern ---
+                // The 'match' gives us the Top-Left (row, col) and the shape (pattern)
+                const highlightPoints: {row: number, col: number}[] = [];
+
+                if (match.pattern && Array.isArray(match.pattern)) {
+                    match.pattern.forEach((patternRow: any[], rIndex: number) => {
+                        patternRow.forEach((val: any, cIndex: number) => {
+                            // If there is a resource here (not null/undefined), it's part of the building
+                            if (val && val !== 'NONE') {
+                                highlightPoints.push({
+                                    row: match.row + rIndex,
+                                    col: match.col + cIndex
+                                });
+                            }
+                        });
+                    });
+                } else {
+                    // Fallback if pattern is missing (shouldn't happen)
+                    highlightPoints.push({ row: match.row, col: match.col });
+                }
+
+                // Hover Listeners
+                btn.onmouseenter = () => this.togglePreview(highlightPoints, true);
+                btn.onmouseleave = () => this.togglePreview(highlightPoints, false);
+
                 this.buildMenuEl.appendChild(btn);
             });
         }
 
-        // Render Cancel Button
+        // 2. Render Cancel Button
         if (activeConstruction) {
             const cancelBtn = document.createElement('button');
             cancelBtn.textContent = "Cancel Construction";
@@ -166,6 +188,20 @@ export class Renderer {
             cancelBtn.onclick = () => this.onCancelClick();
             this.buildMenuEl.appendChild(cancelBtn);
         }
+    }
+
+    private togglePreview(coords: {row: number, col: number}[], active: boolean) {
+        coords.forEach(point => {
+            const selector = `div[data-r="${point.row}"][data-c="${point.col}"]`;
+            const cell = this.boardEl.querySelector(selector);
+            if (cell) {
+                if (active) {
+                    cell.classList.add('preview-target');
+                } else {
+                    cell.classList.remove('preview-target');
+                }
+            }
+        });
     }
 
     // --- 4. CONTROLS (Palette) ---
