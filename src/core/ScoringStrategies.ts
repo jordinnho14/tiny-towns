@@ -1,4 +1,4 @@
-import { type GridCell } from './Types';
+import { type Building, type BuildingCategory, type GridCell } from './Types';
 
 // 1. The Data a building needs to calculate its score
 export interface ScoringContext {
@@ -10,6 +10,7 @@ export interface ScoringContext {
     validBuildingNames: string[];
     allFedPositions: Set<string>; // Positions of all fed buildings
     metadata: Map<string, any>; // Additional metadata if needed
+    registry: Building[];
 }
 
 // 2. The Interface
@@ -258,5 +259,63 @@ export class MausoleumStrategy implements ScoringStrategy {
 
         // Award 3 points for every unfed cottage to bring them up to par
         return unfedCottages * 3;
+    }
+}
+
+export class AdjacencyRequirementStrategy implements ScoringStrategy {
+    private targetTypes: string[];
+    private scoreAmount: number;
+
+    constructor(targetTypes: string[], scoreAmount: number) {
+        this.targetTypes = targetTypes;
+        this.scoreAmount = scoreAmount;
+    }
+
+    score(ctx: ScoringContext): number {
+        const deltas = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+        
+        for (const [dr, dc] of deltas) {
+            const nr = ctx.row + dr;
+            const nc = ctx.col + dc;
+            if (nr >= 0 && nr < 4 && nc >= 0 && nc < 4) {
+                const neighbor = ctx.grid[nr][nc];
+                if (this.targetTypes.includes(neighbor)) {
+                    // Found one match, return the score immediately
+                    return this.scoreAmount;
+                }
+            }
+        }
+        return 0;
+    }
+}
+
+// For Millstone: Scores if adjacent to a specific Category (e.g. Red or Yellow)
+export class CategoryAdjacencyStrategy implements ScoringStrategy {
+    private targetCategories: BuildingCategory[];
+    private scoreAmount: number;
+
+    constructor(targetCategories: BuildingCategory[], scoreAmount: number) {
+        this.targetCategories = targetCategories;
+        this.scoreAmount = scoreAmount;
+    }
+
+    score(ctx: ScoringContext): number {
+        const deltas = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+        
+        for (const [dr, dc] of deltas) {
+            const nr = ctx.row + dr;
+            const nc = ctx.col + dc;
+            if (nr >= 0 && nr < 4 && nc >= 0 && nc < 4) {
+                const neighborName = ctx.grid[nr][nc];
+                
+                // Look up the neighbor definition
+                const def = ctx.registry.find(b => b.name.toUpperCase() === neighborName.toUpperCase());
+                
+                if (def && this.targetCategories.includes(def.type)) {
+                    return this.scoreAmount;
+                }
+            }
+        }
+        return 0;
     }
 }

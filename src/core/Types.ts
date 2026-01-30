@@ -1,4 +1,3 @@
-import { ORCHARD } from "./Buildings";
 import type { ScoringStrategy } from "./ScoringStrategies";
 
 export const Resource = {
@@ -18,7 +17,12 @@ export type BuildingCategory = 'BLUE' | 'RED' | 'GRAY' | 'ORANGE' | 'GREEN' | 'Y
 
 export const BuildingType = {
     COTTAGE: 'COTTAGE',
+    // --- GREY BUILDINGS ---
     WELL: 'WELL',
+    SHED: 'SHED',
+    MILLSTONE: 'MILLSTONE',
+    FOUNTAIN: 'FOUNTAIN',
+    // --- BLACK BUILDINGS ---
     FACTORY: 'FACTORY',
     // --- RED BUILDINGS ---
     FARM: 'FARM',

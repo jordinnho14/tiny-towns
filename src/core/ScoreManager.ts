@@ -113,7 +113,8 @@ export class ScoreManager {
                         fedState: finalFedState.has(`${r},${c}`), // Pass the calculated state
                         metadata: metadata,
                         validBuildingNames: validBuildingNames,
-                        allFedPositions: finalFedState
+                        allFedPositions: finalFedState,
+                        registry: registry
                     };
                     const pts = def.scorer.score(ctx);
                     breakdown[cell] = (breakdown[cell] || 0) + pts;
