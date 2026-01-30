@@ -104,6 +104,9 @@ h1 { margin-bottom: 20px; color: #2c3e50; }
     font-size: 14px; color: #90caf9; 
     cursor: pointer;
     transition: background 0.1s;
+    background-position: center;
+    background-size: 90%; /* Leave a little padding */
+    background-repeat: no-repeat;
 }
 
 .cell:hover { background: #fff; }
@@ -348,63 +351,138 @@ h1 { margin-bottom: 20px; color: #2c3e50; }
     background-color: rgba(142, 36, 170, 0.1);
 }
 
+.cell:not(.empty) {
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Ensure the keyframes are there */
+@keyframes popIn {
+    0% { transform: scale(0.1); opacity: 0; }
+    60% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(1); }
+}
+
+/* --- Sidebar / Deck Display --- */
+#deck-display {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+    padding-right: 5px;
+    /* Make it scrollable if the list is long */
+    max-height: 60vh; 
+    overflow-y: auto; 
+}
+
+.building-card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.card-header {
+    font-weight: bold;
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+}
+
+.card-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 4px;
+    /* This will pick up the colors from your .COTTAGE, .FARM, etc classes */
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.card-body {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+/* The Mini Grid inside the card */
+.mini-pattern {
+    display: grid;
+    gap: 2px;
+    /* Columns are set inline by JS */
+}
+
+.pattern-cell {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    background-color: #eee; /* Default for 'NONE' spots in pattern */
+}
+
+/* Re-use your resource colors for the pattern dots */
+.pattern-cell.WOOD { background-color: #8d6e63; }
+.pattern-cell.WHEAT { background-color: #ffd54f; }
+.pattern-cell.BRICK { background-color: #ef5350; }
+.pattern-cell.GLASS { background-color: #42a5f5; }
+.pattern-cell.STONE { background-color: #78909c; }
+
+.card-text {
+    flex: 1;
+    font-size: 11px;
+    color: #666;
+    line-height: 1.3;
+    font-style: italic;
+}
+
 /* --- Buildings --- */
 
 /* 1. Cottage (Blue/Cyan) */
 .COTTAGE {
-    background-color: #00bcd4;
-    color: white;
-    border: 4px solid #006064;
-    border-radius: 4px;
+    background-image: url('/buildings/cottage.png');
+    background-color: transparent; /* Remove the old cyan color */
+    border: none; /* Remove border if the PNG has its own outline */
 }
 
-/* 2. Farm (Red Barn) */
 .FARM {
-    background-color: #f44336;
-    color: white;
-    border: 4px solid #b71c1c;
-    border-radius: 8px 8px 0 0; 
+    background-image: url('/buildings/farm.png');
+    background-color: transparent;
+    border: none;
 }
 
-/* 3. Well (Gray Circle) */
-.WELL {
-    background-color: #9e9e9e;
-    color: white;
-    border: 4px solid #424242;
-    border-radius: 50%;
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
-}
-
-/* 4. Chapel (Orange) */
 .CHAPEL {
-    background-color: #ff9800;
-    color: white;
-    border: 4px solid #e65100;
-    border-top: 8px solid #e65100; 
+    background-image: url('/buildings/chapel.png');
+    background-color: transparent;
+    border: none;
 }
 
-/* 5. Tavern (Green) */
 .TAVERN {
-    background-color: #4caf50;
-    color: white;
-    border: 4px solid #1b5e20;
+    background-image: url('/buildings/tavern.png');
+    background-color: transparent;
+    border: none;
 }
 
-/* 6. Theater (Yellow Diamond-ish) */
 .THEATER {
-    background-color: #ffeb3b;
-    color: black;
-    border: 4px solid #fbc02d;
-    border-radius: 15px 0 15px 0;
+    background-image: url('/buildings/theater.png');
+    background-color: transparent;
+    border: none;
 }
 
-/* 7. Factory (Industrial Black) */
+.WELL {
+    background-image: url('/buildings/well.png');
+    background-color: transparent;
+    border: none;
+}
+
 .FACTORY {
-    background-color: #37474f;
-    color: white;
-    border: 4px solid #263238;
-    background-image: linear-gradient(45deg, #37474f 25%, #455a64 25%, #455a64 50%, #37474f 50%, #37474f 75%, #455a64 75%, #455a64 100%);
-    background-size: 10px 10px;
+    background-image: url('/buildings/factory.png');
+    background-color: transparent;
+    border: none;
 }
 
 /* Monument: Archive of the Second Age */

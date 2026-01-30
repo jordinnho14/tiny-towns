@@ -2,27 +2,34 @@ import { BUILDING_REGISTRY } from './core/Buildings';
 import { Game } from './core/Game';
 import { Renderer } from './ui/Renderer';
 
-// 1. Initialize System
+// --- 1. INITIALIZATION ---
 const game = new Game();
 const renderer = new Renderer();
 
-// 2. Local UI State (Things that don't belong in the core Game logic)
+// UI State
 let activeConstruction: any | null = null;
 let activePatternCoords: { row: number, col: number }[] = [];
 
-// 3. Setup Start Screen & Events
-const startModal = document.getElementById('start-screen-modal')!;
-const startBtn = document.getElementById('start-game-btn')!;
-const restartBtn = document.getElementById('restart-btn')!;
-const undoBtn = document.getElementById('undo-btn')!;
-const monumentGridEl = document.getElementById('monument-pattern-grid')!;
-const monumentSelectEl = document.getElementById('monument-selector') as HTMLSelectElement;
-const monumentDescEl = document.getElementById('monument-desc')!;
+// DOM Elements
+const elements = {
+    startModal: document.getElementById('start-screen-modal')!,
+    startBtn: document.getElementById('start-game-btn')!,
+    restartBtn: document.getElementById('restart-btn')!,
+    undoBtn: document.getElementById('undo-btn')!,
+    monumentGrid: document.getElementById('monument-pattern-grid')!,
+    monumentSelect: document.getElementById('monument-selector') as HTMLSelectElement,
+    monumentDesc: document.getElementById('monument-desc')!,
+    gameOverModal: document.getElementById('game-over-modal')!,
+    finalScore: document.getElementById('final-score')!,
+    scoreList: document.getElementById('score-breakdown-list')!
+};
 
-// 4. Wire up Renderer Callbacks
+// --- 2. EVENT HANDLERS ---
+
+// A. Game Interaction (via Renderer)
 renderer.onResourceSelect = (res) => {
     if (!activeConstruction) {
-        game.currentResource = res as any; // Cast if needed
+        game.currentResource = res as any;
         renderAll();
     }
 };
@@ -34,134 +41,71 @@ renderer.onBuildClick = (match) => {
 };
 
 renderer.onCellClick = (r, c) => {
-    // A. Construction Mode
-    if (activeConstruction) {
-        const isPatternSpot = activePatternCoords.some(p => p.row === r && p.col === c);
-        const isObeliskSpot = game.hasObeliskAbility() && game.board.getGrid()[r][c] === 'NONE';
-        if (isPatternSpot || isObeliskSpot) {
-            try {
-                // Perform build on board
-                game.constructBuilding(activeConstruction, r, c);
-                
-                // Clear UI state
-                activeConstruction = null;
-                activePatternCoords = [];
-                
-                renderAll();
-                checkGameOver();
-            } catch (e) { alert((e as Error).message); }
-        }
-        return;
-    }
-
-    // B. Resource Placement
-    if (!game.currentResource) {
-        alert("Select a resource first!");
-        return;
-    }
-
     try {
-        game.placeResource(r, c);
-        renderAll();
-        checkGameOver();
-    } catch (e) { alert((e as Error).message); }
+        if (activeConstruction) {
+            handleConstructionClick(r, c);
+        } else {
+            handleResourceClick(r, c);
+        }
+    } catch (e) {
+        alert((e as Error).message);
+    }
 };
 
 renderer.onCancelClick = () => {
-    activeConstruction = null;
-    activePatternCoords = [];
+    resetConstructionState();
     renderAll();
 };
 
-// 5. Button Listeners
-undoBtn.onclick = () => {
+// B. Button Listeners
+elements.undoBtn.onclick = () => {
     game.undo();
     renderAll();
 };
 
-startBtn.onclick = () => {
+elements.startBtn.onclick = () => {
     const REGULAR_BUILDINGS = BUILDING_REGISTRY.filter(b => !b.isMonument);
     game.gameRegistry = [...REGULAR_BUILDINGS, game.activeMonument];
+    
     game.start();
-    startModal.classList.add('hidden');
+    elements.startModal.classList.add('hidden');
     renderAll();
+    renderer.renderDeck(game.gameRegistry);
 };
 
-restartBtn.onclick = () => {
-    document.getElementById('game-over-modal')!.classList.add('hidden');
+elements.restartBtn.onclick = () => {
+    elements.gameOverModal.classList.add('hidden');
     initLobby();
 };
 
-// 6. Helpers
-function renderAll() {
-    renderer.render(game, activeConstruction, activePatternCoords);
+
+// --- 3. GAME LOGIC HELPERS ---
+
+function handleConstructionClick(r: number, c: number) {
+    const isPatternSpot = activePatternCoords.some(p => p.row === r && p.col === c);
+    const isObeliskSpot = game.hasObeliskAbility() && game.board.getGrid()[r][c] === 'NONE';
+
+    if (isPatternSpot || isObeliskSpot) {
+        game.constructBuilding(activeConstruction, r, c);
+        resetConstructionState();
+        renderAll();
+        checkAndShowGameOver();
+    }
 }
 
-function initLobby() {
-    // 1. Get all Monuments
-    const MONUMENTS = BUILDING_REGISTRY.filter(b => b.isMonument);
-    
-    // 2. Populate the Dropdown
-    monumentSelectEl.innerHTML = '';
-    MONUMENTS.forEach((m, index) => {
-        const option = document.createElement('option');
-        option.value = index.toString(); // Use index to look it up later
-        option.textContent = m.name;
-        monumentSelectEl.appendChild(option);
-    });
-
-    // 3. Handle Selection Change
-    monumentSelectEl.onchange = () => {
-        const selectedIndex = parseInt(monumentSelectEl.value);
-        const selectedMonument = MONUMENTS[selectedIndex];
-        
-        // Update Game State PREVIEW (we lock it in when clicking Start)
-        game.activeMonument = selectedMonument; 
-        
-        // Update UI
-        updateMonumentPreview(selectedMonument);
-    };
-
-    // 4. Initialize with the first one (or random if you prefer)
-    // Let's default to the first one for consistency, or random:
-    const initialIndex = Math.floor(Math.random() * MONUMENTS.length);
-    monumentSelectEl.value = initialIndex.toString();
-    
-    // Trigger the update manually once
-    monumentSelectEl.onchange(null as any);
-
-    startModal.classList.remove('hidden');
+function handleResourceClick(r: number, c: number) {
+    if (!game.currentResource) {
+        alert("Select a resource first!");
+        return;
+    }
+    game.placeResource(r, c);
+    renderAll();
+    checkAndShowGameOver();
 }
 
-function updateMonumentPreview(monument: any) {
-    // Update Class for color styling (e.g. .BARRETT, .OBELISK)
-    monumentSelectEl.className = `monument-select ${monument.name.toUpperCase()}`;
-
-    // Update Description
-    if (monument.name === 'Archive') monumentDescEl.textContent = "1pt for every unique building type.";
-    else if (monument.name === 'Barrett Castle') monumentDescEl.textContent = "Feeds 2 cottages. Worth 5pts.";
-    else if (monument.name === 'Mandras') monumentDescEl.textContent = "2pts per unique adjacent neighbor.";
-    else if (monument.name === 'Caterina') monumentDescEl.textContent = "Empty spaces are worth +1 instead of -1.";
-    else if (monument.name === 'Obelisk of the Crescent') monumentDescEl.textContent = "ABILITY: Can place buildings anywhere.";
-    else monumentDescEl.textContent = "A unique monument.";
-
-    // Update Grid
-    renderMonumentPattern(monument);
-}
-
-function renderMonumentPattern(building: any) {
-    monumentGridEl.innerHTML = '';
-    const pattern = building.pattern; 
-    const width = pattern[0].length;
-    monumentGridEl.style.gridTemplateColumns = `repeat(${width}, 30px)`;
-
-    pattern.forEach((row: any[]) => {
-        row.forEach((cell: string) => {
-            const div = document.createElement('div');
-            div.className = `mini-cell ${cell}`;
-            monumentGridEl.appendChild(div);
-        });
-    });
+function resetConstructionState() {
+    activeConstruction = null;
+    activePatternCoords = [];
 }
 
 function getPatternCoords(match: any) {
@@ -174,65 +118,121 @@ function getPatternCoords(match: any) {
     return coords;
 }
 
-function checkGameOver() {
-    // 1. Verify Game End Condition
+
+// --- 4. UI HELPERS ---
+
+function renderAll() {
+    renderer.render(game, activeConstruction, activePatternCoords);
+}
+
+function initLobby() {
+    const MONUMENTS = BUILDING_REGISTRY.filter(b => b.isMonument);
+    
+    // Populate Dropdown
+    elements.monumentSelect.innerHTML = '';
+    MONUMENTS.forEach((m, index) => {
+        const option = document.createElement('option');
+        option.value = index.toString();
+        option.textContent = m.name;
+        elements.monumentSelect.appendChild(option);
+    });
+
+    // Handle Change
+    elements.monumentSelect.onchange = () => {
+        const selected = MONUMENTS[parseInt(elements.monumentSelect.value)];
+        game.activeMonument = selected;
+        updateMonumentPreview(selected);
+    };
+
+    // Initialize Randomly
+    const initialIndex = Math.floor(Math.random() * MONUMENTS.length);
+    elements.monumentSelect.value = initialIndex.toString();
+    elements.monumentSelect.onchange(null as any); // Trigger update
+
+    elements.startModal.classList.remove('hidden');
+}
+
+function updateMonumentPreview(monument: any) {
+    elements.monumentSelect.className = `monument-select ${monument.name.toUpperCase()}`; // Color coding
+    
+    // Simple description mapping
+    const descriptions: Record<string, string> = {
+        'Archive': "1pt for every unique building type.",
+        'Barrett Castle': "Feeds 2 cottages. Worth 5pts.",
+        'Mandras': "2pts per unique adjacent neighbor.",
+        'Caterina': "Empty spaces are worth +1 instead of -1.",
+        'Obelisk of the Crescent': "ABILITY: Can place buildings anywhere.",
+        'Shrine of the Elder Tree': "Score depends on when you build it (1-8pts).",
+        'Baths': "2pts for every building type NOT in your town.",
+        'Forum': "1pt + size of largest group of identical buildings.",
+        'Grand Mausoleum': "Unfed cottages score 3pts.",
+        'Cathedral': "2pts. Empty spaces are worth 0."
+    };
+    
+    elements.monumentDesc.textContent = descriptions[monument.name] || "A unique monument.";
+    renderMonumentPattern(monument);
+}
+
+function renderMonumentPattern(building: any) {
+    elements.monumentGrid.innerHTML = '';
+    const pattern = building.pattern; 
+    elements.monumentGrid.style.gridTemplateColumns = `repeat(${pattern[0].length}, 30px)`;
+
+    pattern.forEach((row: any[]) => {
+        row.forEach((cell: string) => {
+            const div = document.createElement('div');
+            div.className = `mini-cell ${cell}`;
+            elements.monumentGrid.appendChild(div);
+        });
+    });
+}
+
+function checkAndShowGameOver() {
     if (game.checkGameOver() && !activeConstruction) {
-        
-        // 2. Calculate Final Scores
         const result = game.getScore();
         
-        // 3. Get DOM Elements
-        const modal = document.getElementById('game-over-modal');
-        const finalScoreEl = document.getElementById('final-score');
-        const listEl = document.getElementById('score-breakdown-list');
+        // Populate Modal Data
+        elements.finalScore.textContent = result.total.toString();
+        elements.scoreList.innerHTML = '';
 
-        if (modal && finalScoreEl && listEl) {
-            // A. Set Big Score
-            finalScoreEl.textContent = result.total.toString();
-
-            // B. Build the Breakdown List
-            listEl.innerHTML = ''; // Clear previous entries
-
-            // Add standard buildings
-            for (const [name, score] of Object.entries(result.breakdown)) {
-                if (score === 0) continue; // Optional: Hide things worth 0
-
-                const li = document.createElement('li');
-                // Simple inline flex for alignment
-                li.style.display = 'flex';
-                li.style.justifyContent = 'space-between';
-                li.style.marginBottom = '5px';
-                
-                // Format: "Cottage ...... 12"
-                li.innerHTML = `
-                    <span style="text-transform: capitalize;">${name.toLowerCase()}</span>
-                    <strong>${score}</strong>
-                `;
-                listEl.appendChild(li);
-            }
-
-            // Add Penalties (Red text)
-            if (result.penaltyCount > 0) {
-                const li = document.createElement('li');
-                li.style.display = 'flex';
-                li.style.justifyContent = 'space-between';
-                li.style.color = '#ef5350'; // Red
-                li.style.marginTop = '10px';
-                li.style.borderTop = '1px solid #eee';
-                li.style.paddingTop = '5px';
-
-                li.innerHTML = `
-                    <span>Empty Spaces</span>
-                    <strong>-${result.penaltyCount}</strong>
-                `;
-                listEl.appendChild(li);
-            }
-
-            // C. Show the Modal
-            modal.classList.remove('hidden');
+        // Add Breakdown
+        for (const [name, score] of Object.entries(result.breakdown)) {
+            if (score === 0) continue;
+            addScoreListItem(name, score);
         }
+
+        // Add Penalty
+        if (result.penaltyCount > 0) {
+            addScoreListItem('Empty Spaces', -result.penaltyCount, true);
+        }
+
+        // Show Modal
+        elements.gameOverModal.classList.remove('hidden');
     }
 }
 
-// Start
+function addScoreListItem(label: string, score: number, isPenalty: boolean = false) {
+    const li = document.createElement('li');
+    li.className = 'score-item'; // You can style this class in CSS for flex layout
+    if (isPenalty) li.classList.add('penalty-text');
+    
+    // Basic inline styles fallback if class not present
+    li.style.display = 'flex';
+    li.style.justifyContent = 'space-between';
+    li.style.marginBottom = '5px';
+    if (isPenalty) {
+        li.style.color = '#ef5350';
+        li.style.marginTop = '10px';
+        li.style.borderTop = '1px solid #eee';
+        li.style.paddingTop = '5px';
+    }
+
+    li.innerHTML = `
+        <span style="text-transform: capitalize;">${label.toLowerCase()}</span>
+        <strong>${score}</strong>
+    `;
+    elements.scoreList.appendChild(li);
+}
+
+// --- 5. START ---
 initLobby();
