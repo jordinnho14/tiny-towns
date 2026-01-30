@@ -81,16 +81,17 @@ export class Renderer {
                 if (cell === 'NONE') {
                     // Empty square: show coordinates
                     div.textContent = `${r},${c}`;
-                    div.style.color = '#ccc'; // Optional: make coords faint
+                    div.style.color = '';
                 } 
                 else if (RESOURCES.includes(cell)) {
                     // Resource: Show the name (or just first letter like cell.charAt(0))
                     div.textContent = cell; 
-                    div.style.color = 'black'; // Ensure text is visible
+                    div.style.color = '';
                 } 
                 else {
                     // Building: REMOVE text so the background image shows!
                     div.textContent = ''; 
+                    div.style.color = '';
                 }
                 // --------------------------------------------------
             }

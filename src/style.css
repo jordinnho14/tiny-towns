@@ -1,15 +1,16 @@
-/* --- Global & Layout --- */
+/* =========================================
+   1. GLOBAL & LAYOUT
+   ========================================= */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f0f2f5;
     color: #333;
     margin: 0;
     padding: 0;
-    /* This forces the whole game to be dead center of the screen */
     display: flex;
     justify-content: center;
     align-items: center; 
-    min-height: 100vh; /* Full viewport height */
+    min-height: 100vh;
 }
 
 h1 { margin-bottom: 20px; color: #2c3e50; }
@@ -22,7 +23,9 @@ h1 { margin-bottom: 20px; color: #2c3e50; }
     width: 100%;
     max-width: 900px; 
     padding: 20px;
-    background-color: #f0f2f5; 
+    background-color: #f0f2f5;
+    /* Wrap for mobile responsiveness */
+    flex-wrap: wrap; 
 }
 
 .main-area {
@@ -32,14 +35,15 @@ h1 { margin-bottom: 20px; color: #2c3e50; }
     flex: 1; 
 }
 
-/* --- The Resource Palette --- */
+/* =========================================
+   2. RESOURCE CONTROLS
+   ========================================= */
 .controls {
-    margin: 0 auto 20px auto; /* Center it and add bottom gap */
+    margin: 0 auto 20px auto;
     background: white;
     padding: 15px 25px;
     border-radius: 12px;
     box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-    /* Prevent the box from stretching too wide */
     width: fit-content;
     min-width: 300px;
     text-align: center;
@@ -56,13 +60,13 @@ h1 { margin-bottom: 20px; color: #2c3e50; }
     width: 45px; height: 45px;
     border-radius: 8px;
     cursor: pointer;
-    display: flex; /* Flex ensures text is centered */
+    display: flex;
     align-items: center; 
     justify-content: center;
     font-weight: bold;
-    font-size: 18px; /* Slightly larger text */
+    font-size: 18px;
     padding: 0;
-    color: rgba(255,255,255,0.8); 
+    color: rgba(255,255,255,0.9); 
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     transition: all 0.2s ease;
     border: 3px solid transparent; 
@@ -70,7 +74,6 @@ h1 { margin-bottom: 20px; color: #2c3e50; }
 
 .res-btn:hover { transform: translateY(-3px); }
 
-/* The Selected State (Thick dark border) */
 .res-btn.selected {
     border-color: #2c3e50;
     transform: scale(1.1);
@@ -78,43 +81,132 @@ h1 { margin-bottom: 20px; color: #2c3e50; }
     z-index: 2;
 }
 
-/* --- The Board --- */
+/* Resource Colors */
+.WOOD { background: #795548; color: white !important; }
+.WHEAT { background: #fdd835; color: black !important; }
+.BRICK { background: #d32f2f; color: white !important; }
+.GLASS { background: #039be5; color: white !important; }
+.STONE { background: #616161; color: white !important; }
+
+/* =========================================
+   3. THE BOARD (Grassy Lawn Look)
+   ========================================= */
 .board {
     display: grid;
     grid-template-columns: repeat(4, 80px);
-    gap: 5px;
-    padding: 15px; /* Add padding so edges breathe */
+    gap: 10px; /* The gaps act as the grid lines */
+    padding: 20px;
     
-    /* Center the board inside the main area */
     margin: 0 auto;
     width: fit-content; 
     justify-content: center;
 
-    background: #bbdefb; /* Light blue tray background */
-    border-radius: 8px;
-    box-shadow: 0 4px 0 #1976d2; 
+    /* Grassy Green Background */
+    background-color: #43a047; 
+    
+    /* Optional: Subtle texture using gradients to look like grass turf */
+    background-image: linear-gradient(
+        rgba(255,255,255,0.1) 1px, 
+        transparent 1px
+    ),
+    linear-gradient(
+        90deg, 
+        rgba(255,255,255,0.1) 1px, 
+        transparent 1px
+    );
+    background-size: 20px 20px; /* Subtle grid pattern on the grass itself */
+
+    border-radius: 12px;
+    
+    /* Deep shadow to make the board look like a physical object */
+    box-shadow: 
+        0 10px 20px rgba(0,0,0,0.2),    /* Drop shadow */
+        inset 0 -5px 0 rgba(0,0,0,0.2); /* Thickness at bottom */
+    
+    border: 5px solid #2e7d32; /* Dark Green Border */
 }
 
+/* =========================================
+   CELLS (The Slots)
+   ========================================= */
 .cell {
     width: 80px; height: 80px;
-    background: #e3f2fd; 
-    border-radius: 6px;
+    border-radius: 8px;
     display: flex;
     align-items: center; justify-content: center;
-    font-size: 14px; color: #90caf9; 
+    font-size: 14px; 
     cursor: pointer;
-    transition: background 0.1s;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    
     background-position: center;
-    background-size: 90%; /* Leave a little padding */
+    background-size: 85%;
     background-repeat: no-repeat;
 }
 
-.cell:hover { background: #fff; }
-.cell.empty:hover { background: #fff; }
+/* --- STATE 1: EMPTY (Lawn/Grass Plot) --- */
+.cell.empty {
+    /* A nice light lawn green (Material Green 100) */
+    background-color: #c8e6c9; 
+    color: #1b5e20; /* Dark green text for coords so it's readable */
+    
+    /* Inner shadow for depth */
+    box-shadow: 
+        inset 3px 3px 6px rgba(0,0,0,0.15), 
+        inset -2px -2px 4px rgba(255,255,255,0.4);
+        
+    border: 1px solid #81c784; /* Medium green border */
+}
 
-/* --- The Sidebar (Build Menu) --- */
+.cell.empty:hover {
+    /* Lighter green on hover (Material Green 50) */
+    background-color: #e8f5e9; 
+    box-shadow: inset 1px 1px 3px rgba(0,0,0,0.1);
+}
+
+.cell.empty:hover {
+    /* On hover, lighten the dirt slightly, but don't go pure white */
+    background-color: #efebe9; 
+    box-shadow: inset 1px 1px 3px rgba(0,0,0,0.1);
+}
+
+.cell.empty:hover {
+    background-color: #ffffff; 
+    box-shadow: inset 1px 1px 3px rgba(0,0,0,0.1);
+}
+
+/* --- STATE 2: OCCUPIED (Pop-up Tiles) --- */
+.cell:not(.empty) {
+    /* Lift it UP */
+    transform: translateY(-4px); 
+    z-index: 2;
+    
+    /* Drop shadow makes it look like a token sitting on the grass */
+    box-shadow: 
+        0 5px 0 rgba(0,0,0,0.15), /* The "side" of the token */
+        0 8px 15px rgba(0,0,0,0.2); /* The cast shadow on the grass */
+        
+    border: 1px solid rgba(255,255,255,0.6); 
+}
+
+/* Resource Colors (Cubes) */
+.cell.WOOD  { background-color: #795548; }
+.cell.WHEAT { background-color: #fdd835; color: rgba(0,0,0,0.6) !important; }
+.cell.BRICK { background-color: #d32f2f; }
+.cell.GLASS { background-color: #039be5; }
+.cell.STONE { background-color: #616161; }
+
+/* Building Base Tiles */
+/* A clean white/cream tile looks great on green grass */
+.cell:not(.empty):not(.WOOD):not(.WHEAT):not(.BRICK):not(.GLASS):not(.STONE) {
+    background-color: #fff; 
+    /* Or use #fcfbf0 for a warmer, creamy look */
+}
+
+/* =========================================
+   4. SIDEBAR & BUILD MENU
+   ========================================= */
 #sidebar {
-    width: 240px;
+    width: 260px;
     background: white;
     padding: 20px;
     border-radius: 12px;
@@ -123,253 +215,53 @@ h1 { margin-bottom: 20px; color: #2c3e50; }
     min-height: 200px; 
 }
 
+/* Base Build Button Style */
 .build-btn {
     width: 100%;
     padding: 12px;
     margin-bottom: 10px;
     border: none;
+    border-radius: 8px;
     cursor: pointer;
     font-weight: bold;
-    text-align: center; /* Center text */
+    text-align: left; /* Align text left */
     color: white; 
     text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-    transition: transform 0.1s;
-    display: flex;
-    justify-content: center; /* Center content horizontally */
+    transition: transform 0.1s, background-color 0.2s;
     
-    /* CRITICAL FIX: Override round borders from .WELL */
-    border-radius: 8px !important; 
+    /* Icon Support on Button (Right side) */
+    background-position: right 10px center;
+    background-repeat: no-repeat;
+    background-size: 24px 24px;
+    padding-right: 40px; 
+    
+    /* Default Color (Green) */
+    background-color: #2e7d32;
 }
 
-.build-btn:hover { transform: scale(1.02); filter: brightness(1.1); }
+.build-btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
 
-/* --- Message Area --- */
-.message {
-    height: 30px; 
-    margin-top: 15px;
-    font-weight: bold;
+/* --- Colorful Build Buttons --- */
+.build-btn.COTTAGE { background-color: #00acc1; background-image: url('/buildings/cottage.png'); }
+.build-btn.FARM    { background-color: #e53935; background-image: url('/buildings/farm.png'); }
+.build-btn.WELL    { background-color: #546e7a; background-image: url('/buildings/well.png'); }
+.build-btn.CHAPEL  { background-color: #fb8c00; background-image: url('/buildings/chapel.png'); }
+.build-btn.TAVERN  { background-color: #43a047; background-image: url('/buildings/tavern.png'); }
+.build-btn.THEATER { background-color: #fdd835; color: #333; text-shadow: none; background-image: url('/buildings/theater.png'); }
+.build-btn.FACTORY { background-color: #424242; background-image: url('/buildings/factory.png'); }
+/* Generic Monument Button Color */
+.build-btn:not(.COTTAGE):not(.FARM):not(.WELL):not(.CHAPEL):not(.TAVERN):not(.THEATER):not(.FACTORY) {
+    background-color: #7b1fa2; 
 }
 
-/* --- Resource Colors --- */
-.WOOD { background: #795548; color: white !important; }
-.WHEAT { background: #fdd835; color: black !important; }
-.BRICK { background: #d32f2f; color: white !important; }
-.GLASS { background: #039be5; color: white !important; }
-.STONE { background: #616161; color: white !important; }
 
-/* --- Match Highlight --- */
-.match-highlight {
-    box-shadow: 0 0 0 4px #ffeb3b; 
-    z-index: 10;
-    transform: scale(0.95); 
-}
-
-/* --- Modals --- */
-.modal-overlay {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.6);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 100;
-    opacity: 1;
-    transition: opacity 0.3s ease;
-}
-
-.modal-overlay.hidden {
-    opacity: 0;
-    pointer-events: none;
-}
-
-.modal-content {
-    background: white;
-    padding: 30px;
-    border-radius: 16px;
-    width: 350px;
-    text-align: center;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    transform: translateY(0);
-    transition: transform 0.3s ease;
-}
-
-.modal-overlay.hidden .modal-content {
-    transform: translateY(20px);
-}
-
-.big-score {
-    font-size: 64px;
-    font-weight: 800;
-    color: #2c3e50;
-    margin: 10px 0;
-}
-
-.score-details {
-    margin: 20px 0;
-    text-align: left;
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: 8px;
-}
-
-#score-breakdown-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.score-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 5px 0;
-    border-bottom: 1px solid #eee;
-    font-size: 14px;
-}
-
-.score-row:last-child {
-    border-bottom: none;
-}
-
-.score-row.penalty {
-    color: #d32f2f;
-    font-weight: bold;
-}
-
-.primary-btn {
-    background: #2c3e50;
-    color: white;
-    border: none;
-    padding: 12px 30px;
-    border-radius: 8px;
-    font-size: 16px;
-    cursor: pointer;
-    font-weight: bold;
-    width: 100%;
-}
-
-.primary-btn:hover {
-    background: #34495e;
-}
-
-.secondary-btn {
-    background-color: #f0f0f0;
-    border: 1px solid #ccc;
-    color: #333;
-    padding: 8px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 14px;
-    margin-top: 10px;
-    transition: all 0.2s;
-}
-
-.secondary-btn:hover:not(:disabled) {
-    background-color: #e0e0e0;
-    transform: translateY(-1px);
-}
-
-.secondary-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
-}
-/* --- Ghost Previews --- */
-.cell.ghost {
-    opacity: 0.6;
-    transform: scale(0.8); /* Slightly smaller to indicate preview */
-    box-shadow: none;
-    cursor: pointer;
-}
-
-/* Specific Ghost Colors (matching your main resources) */
-.cell.ghost.WOOD  { background-color: #795548; }
-.cell.ghost.WHEAT { background-color: #fdd835; }
-.cell.ghost.BRICK { background-color: #d32f2f; }
-.cell.ghost.GLASS { background-color: #039be5; }
-.cell.ghost.STONE { background-color: #616161; }
-
-/* --- Start Screen & Monument Card --- */
-.monument-card {
-    background: #f3e5f5; /* Light Purple background */
-    border: 3px solid #8e24aa;
-    color: #4a148c;
-    padding: 20px;
-    border-radius: 12px;
-    margin: 20px auto;
-    width: 80%;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-/* The Mini Grid for the Pattern Preview */
-.mini-grid {
-    display: grid;
-    gap: 4px;
-    margin-top: 10px;
-    background-color: rgba(0,0,0,0.1);
-    padding: 4px;
-    border-radius: 4px;
-}
-
-/* Tiny Resource Cells */
-.mini-cell {
-    width: 30px;
-    height: 30px;
-    border-radius: 4px;
-    border: 1px solid rgba(0,0,0,0.2);
-}
-
-/* Helper classes for the mini-grid resources */
-.mini-cell.WOOD { background: #795548; }
-.mini-cell.WHEAT { background: #fdd835; }
-.mini-cell.BRICK { background: #d32f2f; }
-.mini-cell.GLASS { background: #039be5; }
-.mini-cell.STONE { background: #616161; }
-.mini-cell.NONE  { background: transparent; border: none; }
-
-/* style.css */
-
-.monument-select {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #4a148c;
-    background: transparent;
-    border: none;
-    border-bottom: 2px solid #8e24aa;
-    padding: 5px;
-    margin-bottom: 10px;
-    text-align: center;
-    width: 100%;
-    cursor: pointer;
-    outline: none;
-}
-
-.monument-select:hover {
-    background-color: rgba(142, 36, 170, 0.1);
-}
-
-.cell:not(.empty) {
-    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-/* Ensure the keyframes are there */
-@keyframes popIn {
-    0% { transform: scale(0.1); opacity: 0; }
-    60% { transform: scale(1.2); opacity: 1; }
-    100% { transform: scale(1); }
-}
-
-/* --- Sidebar / Deck Display --- */
+/* Deck / Reference Display */
 #deck-display {
     display: flex;
     flex-direction: column;
     gap: 12px;
     margin-top: 20px;
     padding-right: 5px;
-    /* Make it scrollable if the list is long */
     max-height: 60vh; 
     overflow-y: auto; 
 }
@@ -399,7 +291,6 @@ h1 { margin-bottom: 20px; color: #2c3e50; }
     width: 30px;
     height: 30px;
     border-radius: 4px;
-    /* This will pick up the colors from your .COTTAGE, .FARM, etc classes */
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
@@ -411,154 +302,234 @@ h1 { margin-bottom: 20px; color: #2c3e50; }
     align-items: flex-start;
 }
 
-/* The Mini Grid inside the card */
-.mini-pattern {
-    display: grid;
-    gap: 2px;
-    /* Columns are set inline by JS */
-}
-
-.pattern-cell {
-    width: 12px;
-    height: 12px;
-    border-radius: 2px;
-    background-color: #eee; /* Default for 'NONE' spots in pattern */
-}
-
-/* Re-use your resource colors for the pattern dots */
-.pattern-cell.WOOD { background-color: #8d6e63; }
-.pattern-cell.WHEAT { background-color: #ffd54f; }
-.pattern-cell.BRICK { background-color: #ef5350; }
-.pattern-cell.GLASS { background-color: #42a5f5; }
-.pattern-cell.STONE { background-color: #78909c; }
+.mini-pattern { display: grid; gap: 2px; }
+.pattern-cell { width: 12px; height: 12px; border-radius: 2px; background-color: #eee; }
+.cell.WOOD, .res-btn.WOOD   { background-color: #795548; color: white !important; }
+.cell.WHEAT, .res-btn.WHEAT { background-color: #fdd835; color: black !important; }
+.cell.BRICK, .res-btn.BRICK { background-color: #d32f2f; color: white !important; }
+.cell.GLASS, .res-btn.GLASS { background-color: #039be5; color: white !important; }
+.cell.STONE, .res-btn.STONE { background-color: #616161; color: white !important; }
 
 .card-text {
-    flex: 1;
-    font-size: 11px;
-    color: #666;
-    line-height: 1.3;
-    font-style: italic;
+    flex: 1; font-size: 11px; color: #666; font-style: italic; line-height: 1.3;
 }
 
-/* --- Buildings --- */
 
-/* 1. Cottage (Blue/Cyan) */
-.COTTAGE {
+/* =========================================
+   5. BUILDING IMAGES & STYLES
+   ========================================= */
+
+/* Shared style for ALL buildings on the grid */
+/* This adds the "Tile" look back so you can see the grid */
+.cell:not(.empty):not(.WOOD):not(.WHEAT):not(.BRICK):not(.GLASS):not(.STONE) {
+    background-color: rgba(255, 255, 255, 0.6) !important; /* Glassy white tile */
+    border: 1px solid rgba(255, 255, 255, 0.8) !important; /* Subtle highlight border */
+    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.5); /* Inner glow */
+}
+
+/* Specific Selectors (Just apply the Image now) */
+/* We removed 'background-color: transparent' so the rule above applies! */
+
+.cell.COTTAGE, .card-icon.COTTAGE {
     background-image: url('/buildings/cottage.png');
-    background-color: transparent; /* Remove the old cyan color */
-    border: none; /* Remove border if the PNG has its own outline */
 }
 
-.FARM {
+.cell.FARM, .card-icon.FARM {
     background-image: url('/buildings/farm.png');
-    background-color: transparent;
-    border: none;
 }
 
-.CHAPEL {
+.cell.CHAPEL, .card-icon.CHAPEL {
     background-image: url('/buildings/chapel.png');
-    background-color: transparent;
-    border: none;
 }
 
-.TAVERN {
+.cell.TAVERN, .card-icon.TAVERN {
     background-image: url('/buildings/tavern.png');
-    background-color: transparent;
-    border: none;
 }
 
-.THEATER {
+.cell.THEATER, .card-icon.THEATER {
     background-image: url('/buildings/theater.png');
-    background-color: transparent;
-    border: none;
 }
 
-.WELL {
+.cell.WELL, .card-icon.WELL {
     background-image: url('/buildings/well.png');
-    background-color: transparent;
-    border: none;
 }
 
-.FACTORY {
+.cell.FACTORY, .card-icon.FACTORY {
     background-image: url('/buildings/factory.png');
-    background-color: transparent;
-    border: none;
 }
 
-/* Monument: Archive of the Second Age */
+.cell.CATHEDRAL, .card-icon.CATHEDRAL {
+    background-image: url('/buildings/cathedral.png');
+}
+
+/* --- Fallback CSS Art for Monuments (If no PNG exists) --- */
+
 .ARCHIVE {
-    background-color: #e91e63; /* Vivid Pink */
-    color: white;
-    border: 4px solid #880e4f; /* Dark Purple border */
-    box-shadow: 0 0 10px #f48fb1; /* Glowing effect */
+    background-color: #e91e63; color: white;
+    border: 4px solid #880e4f;
+    box-shadow: 0 0 10px #f48fb1;
 }
 
 .OBELISK {
-    background-color: #263238;
-    color: #80deea; /* Cyan text */
+    background-color: #263238; color: #80deea;
     border: 4px solid #006064;
-    /* Crescent Moon Shape Gradient */
     background-image: radial-gradient(circle at 30% 30%, #4dd0e1 0%, #263238 20%);
     box-shadow: 0 0 15px #00bcd4;
 }
 
-
 .MANDRAS {
-    background-color: #fbc02d; /* Gold */
-    color: #3e2723; /* Dark Brown Text */
+    background-color: #fbc02d; color: #3e2723;
     border: 4px solid #fff9c4;
-    /* Royal pillars gradient */
     background-image: repeating-linear-gradient(90deg, #fbc02d, #fbc02d 10px, #f9a825 10px, #f9a825 20px);
 }
 
 .SHRINE {
-    background-color: #33691e; /* Dark Green */
-    color: #c5e1a5; /* Light Green Text */
+    background-color: #33691e; color: #c5e1a5;
     border: 4px solid #1b5e20;
-    /* Tree Bark Gradient */
     background-image: repeating-linear-gradient(45deg, #33691e, #33691e 10px, #1b5e20 10px, #1b5e20 20px);
 }
 
 .BATHS {
-    background-color: #0277bd; /* Ocean Blue */
-    color: #e1f5fe; /* White-Blue text */
+    background-color: #0277bd; color: #e1f5fe;
     border: 4px solid #fff;
-    /* Airy cloud/bubble gradient */
     background-image: radial-gradient(circle at 50% 50%, #4fc3f7 0%, #0277bd 60%);
-    box-shadow: 0 0 10px #81d4fa;
 }
 
 .FORUM {
-    background-color: #d81b60; /* Pinkish Red */
-    color: #fce4ec; /* Light Pink Text */
+    background-color: #d81b60; color: #fce4ec;
     border: 4px solid #880e4f;
-    /* Roman Column stripes */
     background-image: repeating-linear-gradient(90deg, #d81b60, #d81b60 10px, #ad1457 10px, #ad1457 15px);
 }
 
 .MAUSOLEUM { 
-    background-color: #7b1fa2; /* Purple */
-    color: #e1bee7; /* Light Lavender Text */
+    background-color: #7b1fa2; color: #e1bee7;
     border: 4px solid #4a148c;
-    /* Spooky diagonal stripes */
-    background-image: repeating-linear-gradient(
-        45deg,
-        #7b1fa2,
-        #7b1fa2 10px,
-        #6a1b9a 10px,
-        #6a1b9a 20px
-    );
-    box-shadow: inset 0 0 15px #000;
+    background-image: repeating-linear-gradient(45deg, #7b1fa2, #7b1fa2 10px, #6a1b9a 10px, #6a1b9a 20px);
 }
 
-.CATHEDRAL {
-    background-color: #5d4037; /* Dark Wood/Stone */
-    color: #ffd54f; /* Light Gold Text */
-    border: 4px solid #3e2723;
-    /* Stained Glass effect */
-    background-image: 
-        linear-gradient(45deg, rgba(255,0,0,0.2) 25%, transparent 25%, transparent 75%, rgba(0,0,255,0.2) 75%, rgba(0,0,255,0.2)), 
-        linear-gradient(45deg, rgba(255,0,0,0.2) 25%, transparent 25%, transparent 75%, rgba(0,0,255,0.2) 75%, rgba(0,0,255,0.2));
-    background-position: 0 0, 10px 10px;
-    background-size: 20px 20px;
+
+/* =========================================
+   6. UI HELPERS & MODALS
+   ========================================= */
+.message {
+    height: 30px; 
+    margin-top: 15px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+.modal-overlay.hidden { opacity: 0; pointer-events: none; }
+
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 16px;
+    width: 350px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.big-score { font-size: 64px; font-weight: 800; color: #2c3e50; margin: 10px 0; }
+
+.score-details {
+    margin: 20px 0; text-align: left;
+    background: #f8f9fa; padding: 15px;
+    border-radius: 8px;
+}
+#score-breakdown-list { list-style: none; padding: 0; margin: 0; }
+.score-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #eee; font-size: 14px; }
+.score-row:last-child { border-bottom: none; }
+.score-row.penalty { color: #d32f2f; font-weight: bold; }
+
+.primary-btn {
+    background: #2c3e50;
+    color: white; border: none;
+    padding: 12px 30px; border-radius: 8px;
+    font-size: 16px; cursor: pointer; font-weight: bold;
+    width: 100%;
+}
+.primary-btn:hover { background: #34495e; }
+
+.secondary-btn {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc; color: #333;
+    padding: 8px 16px; border-radius: 6px;
+    cursor: pointer; font-size: 14px;
+    margin-top: 10px; transition: all 0.2s;
+}
+.secondary-btn:hover:not(:disabled) { background-color: #e0e0e0; transform: translateY(-1px); }
+.secondary-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Start Screen Extras */
+.monument-card {
+    background: #f3e5f5;
+    border: 3px solid #8e24aa;
+    color: #4a148c;
+    padding: 20px;
+    border-radius: 12px;
+    margin: 20px auto;
+    width: 80%;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    display: flex; flex-direction: column; align-items: center;
+}
+.monument-select {
+    font-size: 1.5rem; font-weight: bold; color: #4a148c;
+    background: transparent; border: none;
+    border-bottom: 2px solid #8e24aa;
+    padding: 5px; margin-bottom: 10px; text-align: center;
+    width: 100%; cursor: pointer; outline: none;
+}
+.mini-grid {
+    display: grid; gap: 4px; margin-top: 10px;
+    background-color: rgba(0,0,0,0.1); padding: 4px; border-radius: 4px;
+}
+.mini-cell {
+    width: 30px; height: 30px; border-radius: 4px;
+    border: 1px solid rgba(0,0,0,0.2);
+}
+.mini-cell.WOOD { background: #795548; }
+.mini-cell.WHEAT { background: #fdd835; }
+.mini-cell.BRICK { background: #d32f2f; }
+.mini-cell.GLASS { background: #039be5; }
+.mini-cell.STONE { background: #616161; }
+.mini-cell.NONE  { background: transparent; border: none; }
+
+.pattern-cell.WOOD  { background-color: #795548; }
+.pattern-cell.WHEAT { background-color: #fdd835; }
+.pattern-cell.BRICK { background-color: #d32f2f; }
+.pattern-cell.GLASS { background-color: #039be5; }
+.pattern-cell.STONE { background-color: #616161; }
+
+/* --- MATCH HIGHLIGHT FIX --- */
+
+/* We use .cell.match-highlight to tie specificity, and !important to force the shadow */
+.cell.match-highlight {
+    /* Thick Yellow Glow - !important overrides the "inset" shadow of the empty cell */
+    box-shadow: 0 0 0 5px #ffeb3b, 0 0 15px #ffeb3b !important;
+    
+    /* Make the border yellow too */
+    border-color: #ffeb3b !important;
+    
+    /* Bring it to the very top so it doesn't get covered by neighbors */
+    z-index: 100 !important;
+    
+    /* Optional: Add a pulse animation */
+    animation: highlightPulse 0.8s infinite alternate;
+}
+
+@keyframes highlightPulse {
+    from { transform: scale(0.92); }
+    to { transform: scale(1.0); }
 }
