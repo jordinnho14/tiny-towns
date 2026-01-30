@@ -344,22 +344,21 @@ export class LineCountStrategy implements ScoringStrategy {
 // For Tailor: 1 pt + 1 pt for each OTHER Tailor in the 4 center squares
 export class CenterCountStrategy implements ScoringStrategy {
     score(ctx: ScoringContext): number {
-        let score = 1; // Base score
+        let score = 1; // Everyone gets 1 point base
         
-        // The 4 center coordinates are (1,1), (1,2), (2,1), (2,2)
+        // The 4 center coordinates
         const centers = ["1,1", "1,2", "2,1", "2,2"];
         const myKey = `${ctx.row},${ctx.col}`;
-
-        // If I am NOT in the center, I just get the base score
-        if (!centers.includes(myKey)) return score;
-
         const myName = ctx.grid[ctx.row][ctx.col];
 
-        // Count others in the center
+        // Check the center squares
         centers.forEach(key => {
-            if (key === myKey) return; // Skip self
+            // Do not count myself if I am in the center
+            if (key === myKey) return; 
             
             const [r, c] = key.split(',').map(Number);
+            
+            // If there is a matching building (Tailor) in this center spot, add a point
             if (ctx.grid[r][c] === myName) {
                 score++;
             }
