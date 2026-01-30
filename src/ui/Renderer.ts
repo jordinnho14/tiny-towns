@@ -36,6 +36,9 @@ export class Renderer {
     private renderBoard(game: Game, activeConstruction: any | null, highlightCoords: any[]) {
         const hasObelisk = game.hasObeliskAbility();
         const grid = game.board.getGrid();
+        
+        // Define resources locally to be safe
+        const RESOURCES = ['WOOD', 'WHEAT', 'BRICK', 'GLASS', 'STONE'];
 
         // PHASE A: INITIALIZATION (Run only once)
         if (this.boardEl.children.length === 0) {
@@ -52,9 +55,6 @@ export class Renderer {
 
         // PHASE B: UPDATE (Run every render)
         const domCells = Array.from(this.boardEl.children) as HTMLElement[];
-        
-        // Define what counts as a resource (vs a building)
-        const RESOURCES = ['WOOD', 'WHEAT', 'BRICK', 'GLASS', 'STONE'];
 
         domCells.forEach(div => {
             const r = parseInt(div.dataset.r!);
@@ -65,45 +65,49 @@ export class Renderer {
             const safeName = cell.replace(/ /g, '-').replace(/'/g, '').toUpperCase();
             let className = `cell ${cell === 'NONE' ? 'empty' : safeName}`;
             
+            // Highlight Logic
             if (activeConstruction) {
                 const isPatternPart = highlightCoords.some(p => p.row === r && p.col === c);
                 const isObeliskTarget = hasObelisk && cell === 'NONE';
+
                 if (isPatternPart || isObeliskTarget) {
                     className += ' match-highlight';
                 }
             }
 
-            // 2. IMPORTANT: Only update DOM if something changed! 
+            // 2. IMPORTANT: Update DOM
+            // We check if className changed to trigger CSS animations, 
+            // BUT we always ensure text is correct for the new state.
             if (div.className !== className) {
                 div.className = className;
                 
-                // <--- CHANGED THIS SECTION ------------------------
+                // --- TEXT CLEANUP LOGIC ---
                 if (cell === 'NONE') {
-                    // Empty square: show coordinates
+                    // Empty: Clear everything
+                    div.textContent = '';
                     div.style.color = '';
                 } 
                 else if (RESOURCES.includes(cell)) {
-                    // Resource: Show the name (or just first letter like cell.charAt(0))
+                    // Resource: Show Name (e.g. "WOOD")
                     div.textContent = cell; 
-                    div.style.color = '';
+                    div.style.color = ''; // Let CSS handle text color
                 } 
                 else {
-                    // Building: REMOVE text so the background image shows!
-                    div.textContent = ''; 
+                    // Building: Clear text so Icon shows
+                    div.textContent = '';
                     div.style.color = '';
                 }
-                // --------------------------------------------------
             }
 
-            // 3. Ghost Logic
+            // 3. Ghost Logic (Previewing placement)
             if (cell === 'NONE' && game.currentResource && !activeConstruction) {
                  div.onmouseenter = () => {
                     div.classList.add('ghost', game.currentResource!);
-                    div.textContent = ''; // clear coords when ghosting
+                    div.textContent = ''; 
                  };
                  div.onmouseleave = () => {
                     div.classList.remove('ghost', 'WOOD', 'WHEAT', 'BRICK', 'GLASS', 'STONE');
-                    div.textContent = `${r},${c}`; // put coords back
+                    div.textContent = ''; // Keep it empty on exit
                  };
             } else {
                 div.onmouseenter = null;
@@ -111,7 +115,7 @@ export class Renderer {
             }
         });
 
-        // Message Logic (Kept the same)
+        // Message Logic (Bottom Label)
         if (activeConstruction) {
             this.msgLabel.textContent = `Select a highlighted square to build your ${activeConstruction.buildingName}!`;
             this.msgLabel.style.color = "#d32f2f"; 
@@ -120,7 +124,7 @@ export class Renderer {
             this.msgLabel.style.color = "#333";
         } else if (!game.currentResource) {
             this.msgLabel.textContent = "Select a Resource...";
-            this.msgLabel.style.color = "#1976d2";
+            this.msgLabel.style.color = "#1976d2"; 
         } else {
             this.msgLabel.textContent = `Place ${game.currentResource}...`;
             this.msgLabel.style.color = "#333";
