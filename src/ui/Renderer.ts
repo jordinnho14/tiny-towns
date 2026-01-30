@@ -265,7 +265,6 @@ export class Renderer {
             const grid = document.createElement('div');
             grid.className = 'mini-pattern';
             
-            const rows = building.pattern.length;
             const cols = building.pattern[0].length;
             grid.style.gridTemplateColumns = `repeat(${cols}, 15px)`;
             
