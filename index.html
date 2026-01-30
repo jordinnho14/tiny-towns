@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Tiny Towns</title>
+    <script type="module" crossorigin src="/assets/index-VFogTGIG.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-Tf2j4r9W.css">
+  </head>
+  <body>
+    <div id="start-screen-modal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 500px;">
+            <h1 style="margin-top:0">Tiny Towns</h1>
+            <p>Build the most prosperous town in the forest!</p>
+            
+            <div class="setup-section">
+                <h3>Choose Your Monument</h3>
+                
+                <div id="monument-card" class="monument-card">
+                    <select id="monument-selector" class="monument-select"></select>
+                    
+                    <p id="monument-desc" style="font-size: 14px; margin-bottom: 15px;">Feeds 2 Cottages</p>
+                    <div id="monument-pattern-grid" class="mini-grid"></div>
+                </div>
+            </div>
+
+            <button id="start-game-btn" class="primary-btn">Start Game</button>
+        </div>
+    </div>
+    <div id="app">
+      <h1>Tiny Towns</h1>
+      
+    <div class="controls">
+      <div id="score-display" style="font-size: 20px; font-weight: bold; margin-bottom: 10px;">
+        Score: 0
+      </div>
+        <p>Current Resource:</p>
+        <div id="resource-palette" class="resource-palette"></div>
+        <button id="undo-btn" class="secondary-btn" disabled>Undo Placement</button>
+    </div>
+      <div id="board" class="board"></div>
+      <div id="message" class="message"></div>
+    </div>
+    <div id="sidebar">
+      <h3>Available Builds</h3>
+      <div id="build-menu"></div>
+
+      <h3>Building Reference</h3>
+      <div id="deck-display"></div>
+    </div>
+    <div id="game-over-modal" class="modal-overlay hidden">
+      <div class="modal-content">
+          <h2>Town Complete!</h2>
+          <div id="final-score" class="big-score">0</div>
+          
+          <div class="score-details">
+              <ul id="score-breakdown-list"></ul>
+          </div>
+
+          <div class="modal-actions">
+              <button id="restart-btn" class="primary-btn">Play Again</button>
+          </div>
+      </div>
+    </div>
+  </body>
+</html>
