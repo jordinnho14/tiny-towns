@@ -319,3 +319,52 @@ export class CategoryAdjacencyStrategy implements ScoringStrategy {
         return 0;
     }
 }
+
+export class LineCountStrategy implements ScoringStrategy {
+    score(ctx: ScoringContext): number {
+        let count = 0;
+        const myName = ctx.grid[ctx.row][ctx.col];
+
+        // Scan Row
+        for (let c = 0; c < 4; c++) {
+            if (c === ctx.col) continue; // Skip self
+            if (ctx.grid[ctx.row][c] === myName) count++;
+        }
+
+        // Scan Col
+        for (let r = 0; r < 4; r++) {
+            if (r === ctx.row) continue; // Skip self
+            if (ctx.grid[r][ctx.col] === myName) count++;
+        }
+
+        return count;
+    }
+}
+
+// For Tailor: 1 pt + 1 pt for each OTHER Tailor in the 4 center squares
+export class CenterCountStrategy implements ScoringStrategy {
+    score(ctx: ScoringContext): number {
+        let score = 1; // Base score
+        
+        // The 4 center coordinates are (1,1), (1,2), (2,1), (2,2)
+        const centers = ["1,1", "1,2", "2,1", "2,2"];
+        const myKey = `${ctx.row},${ctx.col}`;
+
+        // If I am NOT in the center, I just get the base score
+        if (!centers.includes(myKey)) return score;
+
+        const myName = ctx.grid[ctx.row][ctx.col];
+
+        // Count others in the center
+        centers.forEach(key => {
+            if (key === myKey) return; // Skip self
+            
+            const [r, c] = key.split(',').map(Number);
+            if (ctx.grid[r][c] === myName) {
+                score++;
+            }
+        });
+
+        return score;
+    }
+}

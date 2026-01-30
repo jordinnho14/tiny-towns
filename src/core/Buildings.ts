@@ -1,5 +1,5 @@
 import { AdjacentFeederStrategy, ContiguousFeederStrategy, GlobalFeederStrategy, RowColFeederStrategy } from './FeederStrategies';
-import { AdjacencyRequirementStrategy, AdjacencyStrategy, CategoryAdjacencyStrategy, FixedScoreStrategy, GlobalUniqueStrategy, LargestGroupStrategy, MausoleumStrategy, MissingTypeStrategy, SavedScoreStrategy, UniqueLineStrategy, UniqueNeighborStrategy } from './ScoringStrategies';
+import { AdjacencyRequirementStrategy, AdjacencyStrategy, CategoryAdjacencyStrategy, CenterCountStrategy, FixedScoreStrategy, GlobalUniqueStrategy, LargestGroupStrategy, LineCountStrategy, MausoleumStrategy, MissingTypeStrategy, SavedScoreStrategy, UniqueLineStrategy, UniqueNeighborStrategy } from './ScoringStrategies';
 import { type Building, BuildingType, Resource } from './Types';
 
 // --- BLUE (Cottages) ---
@@ -124,7 +124,42 @@ export const THEATER: Building = {
     scorer: new UniqueLineStrategy(),
     description: '1 point for each unique building type in the same row and column.'
 };
-export const YELLOW_BUILDINGS = [THEATER];
+
+export const BAKERY: Building = {
+    name: 'Bakery',
+    type: 'YELLOW',
+    description: "3 points if adjacent to a Food (Red) building.",
+    pattern: [
+        [Resource.NONE, Resource.WHEAT, Resource.NONE],
+        [Resource.BRICK, Resource.GLASS, Resource.BRICK]
+    ],
+    // Reusing the strategy from Millstone!
+    scorer: new CategoryAdjacencyStrategy(['RED'], 3)
+};
+
+export const MARKET: Building = {
+    name: 'Market',
+    type: 'YELLOW',
+    description: "1 point for each other Market in the same row or column.",
+    pattern: [
+        [Resource.NONE, Resource.WOOD, Resource.NONE],
+        [Resource.STONE, Resource.GLASS, Resource.STONE]
+    ],
+    scorer: new LineCountStrategy()
+};
+
+export const TAILOR: Building = {
+    name: 'Tailor',
+    type: 'YELLOW',
+    description: "1 point. +1 point for each other Tailor in the 4 center squares.",
+    pattern: [
+        [Resource.NONE, Resource.WHEAT, Resource.NONE],
+        [Resource.STONE, Resource.GLASS, Resource.STONE]
+    ],
+    scorer: new CenterCountStrategy()
+};
+
+export const YELLOW_BUILDINGS = [THEATER, BAKERY, MARKET, TAILOR];
 
 
 // --- BLACK (Factory/Goods) ---
