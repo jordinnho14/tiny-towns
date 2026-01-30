@@ -1,4 +1,4 @@
-import { AdjacentFeederStrategy, ContiguousFeederStrategy, GlobalFeederStrategy } from './FeederStrategies';
+import { AdjacentFeederStrategy, ContiguousFeederStrategy, GlobalFeederStrategy, RowColFeederStrategy } from './FeederStrategies';
 import { AdjacencyStrategy, FixedScoreStrategy, GlobalUniqueStrategy, LargestGroupStrategy, MausoleumStrategy, MissingTypeStrategy, SavedScoreStrategy, UniqueLineStrategy, UniqueNeighborStrategy } from './ScoringStrategies';
 import { type Building, BuildingType, Resource } from './Types';
 
@@ -51,8 +51,18 @@ export const GREENHOUSE: Building = {
     description: "Feeds one contiguous group of Cottages.",
 };
 
-export const RED_BUILDINGS = [FARM, GRANARY, GREENHOUSE];
+export const ORCHARD: Building = {
+    name: 'Orchard',
+    type: 'RED',
+    description: "Feeds Cottages in the same row and column.",
+    pattern: [
+        [Resource.STONE, Resource.WHEAT],
+        [Resource.WHEAT, Resource.WOOD]
+    ],
+    feeder: new RowColFeederStrategy()
+};
 
+export const RED_BUILDINGS = [FARM, GRANARY, GREENHOUSE, ORCHARD];
 
 // --- GRAY (Wells/Industry) ---
 export const WELL: Building = {

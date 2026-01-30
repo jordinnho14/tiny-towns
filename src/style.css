@@ -341,34 +341,31 @@ h1 { margin-bottom: 20px; color: #2c3e50; }
     background-image: url('/buildings/cottage.png');
 }
 
-.cell.FARM, .card-icon.FARM, .cell.GRANARY, .card-icon.GRANARY, .cell.GREENHOUSE, .card-icon.GREENHOUSE {
+.cell.FARM, .card-icon.FARM, .cell.GRANARY, .card-icon.GRANARY, .cell.GREENHOUSE, .card-icon.GREENHOUSE, .cell.ORCHARD, .card-icon.ORCHARD {
     background-image: url('/buildings/farm.png');
 }
 
 
-.cell.CHAPEL, .card-icon.CHAPEL {
+.cell.CHAPEL, .card-icon.CHAPEL, .cell.ABBEY, .card-icon.ABBEY, .cell.CLOISTER, .card-icon.CLOISTER, .cell.TEMPLE, .card-icon.TEMPLE {
     background-image: url('/buildings/chapel.png');
 }
 
-.cell.TAVERN, .card-icon.TAVERN {
+.cell.TAVERN, .card-icon.TAVERN, .cell.ALMSHOUSE, .card-icon.ALMSHOUSE, .cell.INN, .card-icon.INN, .cell.FEAST_HALL, .card-icon.FEAST_HALL {
     background-image: url('/buildings/tavern.png');
 }
 
-.cell.THEATER, .card-icon.THEATER {
+.cell.THEATER, .card-icon.THEATER, .cell.BAKERY, .card-icon.BAKERY, .cell.TAILOR, .card-icon.TAILOR, .cell.MARKET, .card-icon.MARKET {
     background-image: url('/buildings/theater.png');
 }
 
-.cell.WELL, .card-icon.WELL {
+.cell.WELL, .card-icon.WELL, .cell.FOUNTAIN, .card-icon.FOUNTAIN, .cell.SHED, .card-icon.SHED, .cell.MILLSTONE, .card-icon.MILLSTONE {
     background-image: url('/buildings/well.png');
 }
 
-.cell.FACTORY, .card-icon.FACTORY {
+.cell.FACTORY, .card-icon.FACTORY, .cell.BANK, .card-icon.BANK, .cell.WAREHOUSE, .card-icon.WAREHOUSE, .cell.TRADING_POST, .card-icon.TRADING_POST {
     background-image: url('/buildings/factory.png');
 }
 
-.cell.CATHEDRAL, .card-icon.CATHEDRAL {
-    background-image: url('/buildings/cathedral.png');
-}
 
 .cell.MONUMENT {
     background-image: url('/buildings/monument.png');

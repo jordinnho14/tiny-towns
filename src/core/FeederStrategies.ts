@@ -96,3 +96,22 @@ export class ContiguousFeederStrategy implements FeederStrategy {
         return groups[0];
     }
 }
+
+export class RowColFeederStrategy implements FeederStrategy {
+    getFedPositions(row: number, col: number, _grid: GridCell[][]): {r: number, c: number}[] {
+        const fed: {r: number, c: number}[] = [];
+        
+        // Feed entire Row
+        for (let c = 0; c < 4; c++) {
+            // Optional: Don't feed itself (though Orchard isn't a Cottage so it doesn't matter)
+            if (c !== col) fed.push({r: row, c});
+        }
+
+        // Feed entire Column
+        for (let r = 0; r < 4; r++) {
+            if (r !== row) fed.push({r, c: col});
+        }
+
+        return fed;
+    }
+}
