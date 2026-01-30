@@ -250,6 +250,7 @@ h1 { margin-bottom: 20px; color: #2c3e50; }
 /* --- Colorful Build Buttons --- */
 .build-btn.COTTAGE { background-color: #00acc1; background-image: url('/buildings/cottage.png'); }
 .build-btn.FARM    { background-color: #e53935; background-image: url('/buildings/farm.png'); }
+.build-btn.GRANARY { background-color: #e53935; background-image: url('/buildings/farm.png'); }
 .build-btn.WELL    { background-color: #546e7a; background-image: url('/buildings/well.png'); }
 .build-btn.CHAPEL  { background-color: #fb8c00; background-image: url('/buildings/chapel.png'); }
 .build-btn.TAVERN  { background-color: #43a047; background-image: url('/buildings/tavern.png'); }
@@ -340,9 +341,10 @@ h1 { margin-bottom: 20px; color: #2c3e50; }
     background-image: url('/buildings/cottage.png');
 }
 
-.cell.FARM, .card-icon.FARM {
+.cell.FARM, .card-icon.FARM, .cell.GRANARY, .card-icon.GRANARY, .cell.GREENHOUSE, .card-icon.GREENHOUSE {
     background-image: url('/buildings/farm.png');
 }
+
 
 .cell.CHAPEL, .card-icon.CHAPEL {
     background-image: url('/buildings/chapel.png');

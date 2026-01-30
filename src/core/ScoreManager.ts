@@ -1,5 +1,4 @@
-import { BuildingType, type GridCell } from './Types';
-import { BUILDING_REGISTRY } from './Buildings';
+import { BuildingType, type GridCell, type Building } from './Types';
 
 export interface ScoreResult {
     total: number;
@@ -8,97 +7,132 @@ export interface ScoreResult {
 }
 
 export class ScoreManager {
-    static calculateScore(grid: GridCell[][], metadata: Map<string, any>, registry: any[]): ScoreResult {
+    // We expect 'registry' to be passed in from Game.ts (the active deck for this game)
+    static calculateScore(grid: GridCell[][], metadata: Map<string, any>, registry: Building[]): ScoreResult {
         const rows = 4;
         const cols = 4;
         const breakdown: Record<string, number> = {};
-        const validBuildingNames = registry.map(b => b.name);
         
+        // Helper: Find definition in the ACTIVE registry
+        const getDef = (name: string) => registry.find(b => b.name.toUpperCase() === name.toUpperCase());
+
         const counts: Record<string, number> = {};
-        let totalFood = 0;
-        let hungryBuildings: { r: number, c: number, cost: number, id: string, priority: number }[] = [];
         let emptySpaceCount = 0;
 
-        // --- PASS 1: Scan Board & Food ---
+        // --- PASS 1: Scan Board & Generate Food ---
+        let globalFoodPool = 0;
+        const positionalFoodMap = new Set<string>(); // Set of "r,c" coordinates that HAVE food access
+
         for (let r = 0; r < rows; r++) {
             for (let c = 0; c < cols; c++) {
                 const cell = grid[r][c];
                 
                 if (!this.isBuilding(cell)) {
-                    // Resources and 'NONE' count as empty spaces for penalty purposes
                     emptySpaceCount++;
                     continue;
                 }
 
+                // Count for later strategies
                 counts[cell] = (counts[cell] || 0) + 1;
-                const def = BUILDING_REGISTRY.find(b => b.name.toUpperCase() === cell);
-                if (!def) continue;
 
-                if (def.feeds) totalFood += def.feeds;
-                if (def.feedCost) {
-                    const priority = def.name === 'Barrett' ? 10 : 1;
-                    hungryBuildings.push({ r, c, cost: def.feedCost, id: `${r},${c}`, priority });
+                // Check for Feeders (Farm, Granary, etc.)
+                const def = getDef(cell);
+                
+                if (def && def.feeder) {
+                    const fedCoords = def.feeder.getFedPositions(r, c, grid);
+                    
+                    // Check for special Global Flag ({-1, -1})
+                    if (fedCoords.length > 0 && fedCoords[0].r === -1) {
+                         // It's a Farm (or similar global feeder)
+                         // The length of the array determines how much food it gives
+                         globalFoodPool += fedCoords.length;
+                    } else {
+                        // It's a Granary (positional)
+                        // Mark these specific spots as having food
+                        fedCoords.forEach(p => positionalFoodMap.add(`${p.r},${p.c}`));
+                    }
                 }
             }
         }
 
-        // --- PASS 1.5: Global Monument Checks ---
-        // Check if Cathedral exists on the board
-        const hasCathedral = (counts['CATHEDRAL'] || 0) > 0;
-
         // --- PASS 2: Feed Buildings ---
-        hungryBuildings.sort((a, b) => b.priority - a.priority);
-        const fedMap = new Set<string>();
-        let fedCottageCount = 0; // For Chapels
+        const finalFedState = new Set<string>(); // "r,c" of buildings that successfully ate
+        let fedCottageCount = 0;
 
-        for (const b of hungryBuildings) {
-            if (totalFood >= b.cost) {
-                totalFood -= b.cost;
-                fedMap.add(b.id);
-                
-                const cell = grid[b.r][b.c];
-                if (cell === BuildingType.COTTAGE) fedCottageCount += 1;
-                else if (cell === BuildingType.BARRETT_CASTLE) fedCottageCount += 2;
-            }
-        }
-
-        // --- PASS 3: Calculate Scores ---
         for (let r = 0; r < rows; r++) {
             for (let c = 0; c < cols; c++) {
                 const cell = grid[r][c];
                 if (!this.isBuilding(cell)) continue;
 
-                const def = BUILDING_REGISTRY.find(b => b.name.toUpperCase() === cell);
+                const def = getDef(cell);
+                
+                // If a building has a feedCost, it needs to eat
+                if (def && def.feedCost) { 
+                    const key = `${r},${c}`;
+                    let isFed = false;
+
+                    // 1. Try Positional Food (Granary) - It's specific to this spot
+                    if (positionalFoodMap.has(key)) {
+                        isFed = true;
+                    } 
+                    // 2. Try Global Food (Farm) - Takes from the pool
+                    else if (globalFoodPool >= def.feedCost) {
+                        globalFoodPool -= def.feedCost;
+                        isFed = true;
+                    }
+
+                    if (isFed) {
+                        finalFedState.add(key);
+                        
+                        // Track stats for Chapel
+                        if (cell === BuildingType.COTTAGE) fedCottageCount++;
+                        if (cell === BuildingType.BARRETT_CASTLE) fedCottageCount += 2; // Barrett counts as 2 for Chapel
+                    }
+                }
+            }
+        }
+
+        // --- PASS 3: Calculate Scores ---
+        const validBuildingNames = registry.map(b => b.name);
+
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                const cell = grid[r][c];
+                if (!this.isBuilding(cell)) continue;
+
+                const def = getDef(cell);
                 if (!def) continue;
 
-                // A. Use Strategy if available
+                // A. Use Strategy
                 if (def.scorer) {
                     const ctx = {
                         grid, 
                         row: r, 
                         col: c, 
                         counts,
-                        fedState: fedMap.has(`${r},${c}`),
+                        fedState: finalFedState.has(`${r},${c}`), // Pass the calculated state
                         metadata: metadata,
                         validBuildingNames: validBuildingNames,
-                        allFedPositions: fedMap
+                        allFedPositions: finalFedState
                     };
                     const pts = def.scorer.score(ctx);
                     breakdown[cell] = (breakdown[cell] || 0) + pts;
                 }
                 
-                // B. Special Hardcoded Cases
-                else if (cell === BuildingType.CHAPEL) {
+                // B. Special Hardcoded Cases (Chapel)
+                // We check the category 'ORANGE' to keep it generic
+                else if (def.type === 'ORANGE') {
                     breakdown[cell] = (breakdown[cell] || 0) + fedCottageCount;
                 }
             }
         }
 
-        // --- PASS 4: Global Sets ---
-        // Tavern
+        // --- PASS 4: Global Sets (Tavern) ---
+        // Taverns score based on the total count, not position
         if (counts[BuildingType.TAVERN]) {
             const scores = [0, 2, 5, 9, 14, 20];
             const tCount = Math.min(counts[BuildingType.TAVERN], 5);
+            // Overwrite whatever the scorer loop might have done
             breakdown[BuildingType.TAVERN] = scores[tCount];
         }
 
@@ -107,8 +141,7 @@ export class ScoreManager {
         Object.values(breakdown).forEach(p => positiveTotal += p);
         
         // Calculate Final Penalty
-        // Standard Rule: -1 per empty space.
-        // Cathedral Rule: 0 per empty space.
+        const hasCathedral = (counts['CATHEDRAL'] || 0) > 0;
         const activePenalty = hasCathedral ? 0 : emptySpaceCount;
 
         return {

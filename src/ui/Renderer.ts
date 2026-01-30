@@ -294,7 +294,7 @@ export class Renderer {
             // Description Text
             const text = document.createElement('div');
             text.className = 'card-text';
-            text.textContent = this.getDescription(building.name);
+            text.textContent = building.description || "Unique scoring rules.";
 
             body.appendChild(grid);
             body.appendChild(text);
@@ -304,24 +304,4 @@ export class Renderer {
         });
     }
 
-    private getDescription(name: string): string {
-        const desc: Record<string, string> = {
-            'Cottage': "3 pts if fed.",
-            'Farm': "Feeds 4 Cottages.",
-            'Well': "1 pt per adjacent Cottage.",
-            'Theater': "1 pt per unique building in row/col.",
-            'Chapel': "1 pt per fed Cottage.",
-            'Tavern': "Score: 2, 5, 9, 14, 20 pts.",
-            'Archive of the Second Age': "1pt per unique building type.",
-            'Barrett Castle': "Feeds 2. Worth 5 pts.",
-            'Mandras': "2pts per unique neighbor.",
-            'Shrine of the Elder Tree': "Score rises as town fills (1-8pts).",
-            'Cathedral': "2pts. No empty penalty.",
-            'Baths': "2pts per missing building type.",
-            'Forum': "Score based on largest group.",
-            'Grand Mausoleum': "Unfed Cottages score 3pts.",
-            'Obelisk of the Crescent': "Place buildings anywhere."
-        };
-        return desc[name] || "Unique scoring rules.";
-    }
 }

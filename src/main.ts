@@ -1,4 +1,13 @@
-import { BUILDING_REGISTRY } from './core/Buildings';
+import { 
+    COTTAGE, // Blue is usually fixed (or you can pick from BLUE_BUILDINGS)
+    RED_BUILDINGS,
+    GRAY_BUILDINGS,
+    YELLOW_BUILDINGS,
+    GREEN_BUILDINGS,
+    BLACK_BUILDINGS,
+    ORANGE_BUILDINGS,
+    BUILDING_REGISTRY 
+} from './core/Buildings';
 import { Game } from './core/Game';
 import { Renderer } from './ui/Renderer';
 
@@ -26,7 +35,6 @@ const elements = {
 
 // --- 2. EVENT HANDLERS ---
 
-// A. Game Interaction (via Renderer)
 renderer.onResourceSelect = (res) => {
     if (!activeConstruction) {
         game.currentResource = res as any;
@@ -57,19 +65,47 @@ renderer.onCancelClick = () => {
     renderAll();
 };
 
-// B. Button Listeners
 elements.undoBtn.onclick = () => {
     game.undo();
     renderAll();
 };
 
+// --- UPDATED START LOGIC ---
 elements.startBtn.onclick = () => {
-    const REGULAR_BUILDINGS = BUILDING_REGISTRY.filter(b => !b.isMonument);
-    game.gameRegistry = [...REGULAR_BUILDINGS, game.activeMonument];
+    // 1. Create the Deck
+    const deck = [];
+
+    // Always add the Cottage (Blue)
+    deck.push(COTTAGE);
+
+    // Pick 1 Random Building for each other color
+    // (Helper function defined at bottom)
+    deck.push(pickRandom(RED_BUILDINGS));     // Farm OR Granary
+    deck.push(pickRandom(GRAY_BUILDINGS));    // Well (or others later)
+    deck.push(pickRandom(YELLOW_BUILDINGS));  // Theater (or others later)
+    deck.push(pickRandom(GREEN_BUILDINGS));   // Tavern
+    deck.push(pickRandom(BLACK_BUILDINGS));   // Factory
+    deck.push(pickRandom(ORANGE_BUILDINGS));  // Chapel
+
+    // Add the selected Monument
+    if (game.activeMonument) {
+        deck.push(game.activeMonument);
+    } else {
+        // Fallback if something went wrong
+        console.warn("No monument selected, picking random.");
+        const monuments = BUILDING_REGISTRY.filter(b => b.isMonument);
+        deck.push(monuments[0]);
+    }
+
+    // 2. Assign to Game
+    game.gameRegistry = deck;
     
+    // 3. Start
     game.start();
     elements.startModal.classList.add('hidden');
     renderAll();
+    
+    // 4. Update Sidebar with specific cards
     renderer.renderDeck(game.gameRegistry);
 };
 
@@ -118,6 +154,11 @@ function getPatternCoords(match: any) {
     return coords;
 }
 
+function pickRandom(list: any[]) {
+    if (!list || list.length === 0) throw new Error("Empty building list!");
+    return list[Math.floor(Math.random() * list.length)];
+}
+
 
 // --- 4. UI HELPERS ---
 
@@ -128,7 +169,6 @@ function renderAll() {
 function initLobby() {
     const MONUMENTS = BUILDING_REGISTRY.filter(b => b.isMonument);
     
-    // Populate Dropdown
     elements.monumentSelect.innerHTML = '';
     MONUMENTS.forEach((m, index) => {
         const option = document.createElement('option');
@@ -137,17 +177,16 @@ function initLobby() {
         elements.monumentSelect.appendChild(option);
     });
 
-    // Handle Change
     elements.monumentSelect.onchange = () => {
         const selected = MONUMENTS[parseInt(elements.monumentSelect.value)];
         game.activeMonument = selected;
         updateMonumentPreview(selected);
     };
 
-    // Initialize Randomly
+    // Pick random initial monument
     const initialIndex = Math.floor(Math.random() * MONUMENTS.length);
     elements.monumentSelect.value = initialIndex.toString();
-    elements.monumentSelect.onchange(null as any); // Trigger update
+    elements.monumentSelect.onchange(null as any); 
 
     elements.startModal.classList.remove('hidden');
 }
@@ -155,17 +194,15 @@ function initLobby() {
 function updateMonumentPreview(monument: any) {
     elements.monumentSelect.className = `monument-select ${monument.name.toUpperCase()}`; // Color coding
     
-    // Simple description mapping
     const descriptions: Record<string, string> = {
         'Archive': "1pt for every unique building type.",
         'Barrett Castle': "Feeds 2 cottages. Worth 5pts.",
         'Mandras': "2pts per unique adjacent neighbor.",
-        'Caterina': "Empty spaces are worth +1 instead of -1.",
         'Obelisk of the Crescent': "ABILITY: Can place buildings anywhere.",
         'Shrine of the Elder Tree': "Score depends on when you build it (1-8pts).",
         'Baths': "2pts for every building type NOT in your town.",
         'Forum': "1pt + size of largest group of identical buildings.",
-        'Grand Mausoleum': "Unfed cottages score 3pts.",
+        'Mausoleum': "Unfed cottages score 3pts.",
         'Cathedral': "2pts. Empty spaces are worth 0."
     };
     
@@ -191,32 +228,27 @@ function checkAndShowGameOver() {
     if (game.checkGameOver() && !activeConstruction) {
         const result = game.getScore();
         
-        // Populate Modal Data
         elements.finalScore.textContent = result.total.toString();
         elements.scoreList.innerHTML = '';
 
-        // Add Breakdown
         for (const [name, score] of Object.entries(result.breakdown)) {
             if (score === 0) continue;
             addScoreListItem(name, score);
         }
 
-        // Add Penalty
         if (result.penaltyCount > 0) {
             addScoreListItem('Empty Spaces', -result.penaltyCount, true);
         }
 
-        // Show Modal
         elements.gameOverModal.classList.remove('hidden');
     }
 }
 
 function addScoreListItem(label: string, score: number, isPenalty: boolean = false) {
     const li = document.createElement('li');
-    li.className = 'score-item'; // You can style this class in CSS for flex layout
+    li.className = 'score-item';
     if (isPenalty) li.classList.add('penalty-text');
     
-    // Basic inline styles fallback if class not present
     li.style.display = 'flex';
     li.style.justifyContent = 'space-between';
     li.style.marginBottom = '5px';
@@ -235,32 +267,6 @@ function addScoreListItem(label: string, score: number, isPenalty: boolean = fal
 }
 
 // --- 5. START ---
-if (import.meta.env.DEV) {
-    // DEV MODE: Lobby
-    initLobby();
-} else {
-    // PROD MODE: Instant Random Start
-    
-    // 1. Setup Data
-    const MONUMENTS = BUILDING_REGISTRY.filter(b => b.isMonument);
-    const REGULAR = BUILDING_REGISTRY.filter(b => !b.isMonument);
-    const randomMonument = MONUMENTS[Math.floor(Math.random() * MONUMENTS.length)];
-    
-    game.activeMonument = randomMonument;
-    game.gameRegistry = [...REGULAR, randomMonument];
-    
-    // 2. Start Logic
-    game.start();
-    
-    // 3. RENDER EVERYTHING
-    renderAll(); // Draws the board
-    
-    if (typeof renderer.renderDeck === 'function') {
-        renderer.renderDeck(game.gameRegistry);
-    } else {
-        console.warn("Could not find renderDeck method. Sidebar might be empty.");
-    }
-
-    // 4. Hide Modal (just in case)
-    elements.startModal.classList.add('hidden');
-}
+// PROD MODE: Logic moved inside startBtn.onclick, 
+// so we just init the lobby here.
+initLobby();

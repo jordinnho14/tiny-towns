@@ -10,15 +10,22 @@ export const Resource = {
 } as const;
 
 export type ResourceType = typeof Resource[keyof typeof Resource];
+export interface FeederStrategy {
+    getFedPositions(bRow: number, bCol: number, grid: GridCell[][]): {r: number, c: number}[];
+}
+export type BuildingCategory = 'BLUE' | 'RED' | 'GRAY' | 'ORANGE' | 'GREEN' | 'YELLOW' | 'BLACK' | 'PURPLE';
 
 export const BuildingType = {
     COTTAGE: 'COTTAGE',
     WELL: 'WELL',
     FACTORY: 'FACTORY',
     FARM: 'FARM',
+    GRANARY: 'GRANARY',
+    GREENHOUSE: 'GREENHOUSE',
     TAVERN: 'TAVERN',
     THEATER: 'THEATER',
     CHAPEL: 'CHAPEL',
+    // Monuments
     ARCHIVE: 'ARCHIVE',
     BARRETT_CASTLE: 'BARRETT_CASTLE',
     OBELISK: 'OBELISK',
@@ -37,9 +44,10 @@ export interface Building {
     name: string;
     pattern: ResourceType[][];
     isMonument?: boolean;
-
+    type: BuildingCategory
+    feeder?: FeederStrategy;
     scorer?: ScoringStrategy; 
-    feeds?: number; 
     feedCost?: number;
     countsAs?: BuildingName[];
+    description?: string;
 }
