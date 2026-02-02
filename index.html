@@ -4,48 +4,56 @@
     <meta charset="UTF-8" />
     <title>Tiny Towns</title>
     <link rel="stylesheet" href="./src/style.css">
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
   </head>
   <body>
     <div id="start-screen-modal" class="modal-overlay">
-        <div class="modal-content" style="max-width: 500px;">
-            <h1 style="margin-top:0">Tiny Towns</h1>
-            <p>Build the most prosperous town in the forest!</p>
+        <div class="modal-content" style="max-width: 600px; width: 90%;">
+            <h1 style="margin-top:0; color:#2e7d32;">Tiny Towns</h1>
+            <p style="color:#666;">Configure your Town Charter</p>
             
-            <div class="setup-section">
-                <h3>Choose Your Monument</h3>
-                
-                <div id="monument-card" class="monument-card">
-                    <select id="monument-selector" class="monument-select"></select>
-                    
-                    <p id="monument-desc" style="font-size: 14px; margin-bottom: 15px;">Feeds 2 Cottages</p>
-                    <div id="monument-pattern-grid" class="mini-grid"></div>
+            <div id="setup-container" style="text-align: left; margin: 20px 0;">
                 </div>
+
+            <div style="background:#f9f9f9; padding:10px; border-radius:8px; margin-bottom:20px; min-height:80px; display:flex; flex-direction:column; align-items:center;">
+                <p id="monument-desc" style="font-size: 0.9rem; color:#555; margin: 0 0 10px 0; font-style:italic;">Customize your town or leave as Random.</p>
+                <div id="monument-pattern-grid" class="mini-grid" style="justify-content: center;"></div>
             </div>
 
             <button id="start-game-btn" class="primary-btn">Start Game</button>
         </div>
     </div>
-    <div id="app">
-      <h1>Tiny Towns</h1>
-      
-    <div class="controls">
-      <div id="score-display" style="font-size: 20px; font-weight: bold; margin-bottom: 10px;">
-        Score: 0
-      </div>
-        <p>Current Resource:</p>
-        <div id="resource-palette" class="resource-palette"></div>
-        <button id="undo-btn" class="secondary-btn" disabled>Undo Placement</button>
-    </div>
-      <div id="board" class="board"></div>
-      <div id="message" class="message"></div>
-    </div>
-    <div id="sidebar">
-      <h3>Available Builds</h3>
-      <div id="build-menu"></div>
 
-      <h3>Building Reference</h3>
-      <div id="deck-display"></div>
+    <div class="game-container">
+        
+        <div class="main-area">
+            <h1>Tiny Towns</h1>
+            
+            <div class="controls" style="width: 100%; max-width: 400px; display:flex; justify-content:space-between; align-items:center;">
+                <div id="score-display" style="font-size: 18px; font-weight: bold;">Score: 0</div>
+                <button id="undo-btn" class="secondary-btn" style="margin:0; padding: 5px 12px;" disabled>Undo</button>
+            </div>
+
+            <div class="controls">
+                <p style="margin:0 0 5px 0; font-size:14px; color:#666;">Current Resource:</p>
+                <div id="resource-palette" class="resource-palette"></div>
+            </div>
+
+            <div id="board" class="board"></div>
+            
+            <div id="message" class="message"></div>
+        </div>
+
+        <div id="sidebar">
+            <h3>Available Builds</h3>
+            <div id="build-menu"></div>
+
+            <h3 style="margin-top: 30px;">Building Reference</h3>
+            <div id="deck-display"></div>
+        </div>
+
     </div>
+
     <div id="game-over-modal" class="modal-overlay hidden">
       <div class="modal-content">
           <h2>Town Complete!</h2>
@@ -60,6 +68,7 @@
           </div>
       </div>
     </div>
+
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

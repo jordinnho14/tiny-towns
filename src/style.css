@@ -35,6 +35,60 @@ h1 { margin-bottom: 20px; color: #2c3e50; }
     flex: 1; 
 }
 
+/* SETUP MENU GRID */
+.setup-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Two columns */
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.setup-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.setup-label {
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #555;
+    margin-left: 2px;
+}
+
+/* The Dropdowns */
+.setup-select {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: white;
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+    width: 100%;
+    transition: border-color 0.2s;
+}
+
+.setup-select:hover {
+    border-color: #888;
+}
+
+.setup-select:focus {
+    border-color: #2c3e50;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(44, 62, 80, 0.1);
+}
+
+/* Color-coded borders for the dropdowns to help quick scanning */
+.setup-select.RED { border-left: 5px solid #e53935; }
+.setup-select.GRAY { border-left: 5px solid #546e7a; }
+.setup-select.YELLOW { border-left: 5px solid #fdd835; }
+.setup-select.GREEN { border-left: 5px solid #43a047; }
+.setup-select.ORANGE { border-left: 5px solid #fb8c00; }
+.setup-select.BLACK { border-left: 5px solid #424242; }
+.setup-select.PURPLE { border-left: 5px solid #7b1fa2; }
+
 /* =========================================
    2. RESOURCE CONTROLS
    ========================================= */

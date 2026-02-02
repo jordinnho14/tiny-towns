@@ -26,12 +26,23 @@ const elements = {
     restartBtn: document.getElementById('restart-btn')!,
     undoBtn: document.getElementById('undo-btn')!,
     monumentGrid: document.getElementById('monument-pattern-grid')!,
-    monumentSelect: document.getElementById('monument-selector') as HTMLSelectElement,
     monumentDesc: document.getElementById('monument-desc')!,
     gameOverModal: document.getElementById('game-over-modal')!,
     finalScore: document.getElementById('final-score')!,
     scoreList: document.getElementById('score-breakdown-list')!
 };
+
+// --- CONFIGURATION FOR SETUP MENU ---
+const BUILDING_CATEGORIES = [
+    { id: 'RED', label: 'Farm (Red)', options: RED_BUILDINGS },
+    { id: 'GRAY', label: 'Well (Gray)', options: GRAY_BUILDINGS },
+    { id: 'YELLOW', label: 'Theater (Yellow)', options: YELLOW_BUILDINGS },
+    { id: 'GREEN', label: 'Tavern (Green)', options: GREEN_BUILDINGS },
+    { id: 'ORANGE', label: 'Chapel (Orange)', options: ORANGE_BUILDINGS },
+    { id: 'BLACK', label: 'Factory (Black)', options: BLACK_BUILDINGS },
+    { id: 'PURPLE', label: 'Monument', options: BUILDING_REGISTRY.filter(b => b.isMonument) }
+];
+
 
 // --- 2. EVENT HANDLERS ---
 
@@ -70,29 +81,38 @@ elements.undoBtn.onclick = () => {
     renderAll();
 };
 
-// --- START LOGIC ---
-elements.startBtn.onclick = () => {
-    const deck = [];
+// --- 3. START GAME LOGIC (UPDATED) ---
 
-    // Always Cottage
+elements.startBtn.onclick = () => {
+    const deck: any[] = [];
+
+    // 1. Always Cottage
     deck.push(COTTAGE);
 
-    // One Random of each category
-    deck.push(pickRandom(RED_BUILDINGS));
-    deck.push(pickRandom(GRAY_BUILDINGS));
-    deck.push(pickRandom(YELLOW_BUILDINGS));
-    deck.push(pickRandom(GREEN_BUILDINGS));
-    deck.push(pickRandom(BLACK_BUILDINGS)); // Includes Trading Post / Bank / Warehouse
-    deck.push(pickRandom(ORANGE_BUILDINGS));
+    // 2. Read selections from the DOM
+    const selects = document.querySelectorAll('.setup-select') as NodeListOf<HTMLSelectElement>;
+    
+    selects.forEach(select => {
+        const catId = select.dataset.category;
+        const config = BUILDING_CATEGORIES.find(c => c.id === catId);
+        if (!config) return;
 
-    // Monument
-    if (game.activeMonument) {
-        deck.push(game.activeMonument);
-    } else {
-        console.warn("No monument selected, picking random.");
-        const monuments = BUILDING_REGISTRY.filter(b => b.isMonument);
-        deck.push(monuments[0]);
-    }
+        let selectedBuilding;
+
+        if (select.value === 'RANDOM') {
+            selectedBuilding = pickRandom(config.options);
+        } else {
+            selectedBuilding = config.options.find(b => b.name === select.value);
+        }
+
+        if (selectedBuilding) {
+            deck.push(selectedBuilding);
+            // If it is the monument, inform the game
+            if (config.id === 'PURPLE') {
+                game.activeMonument = selectedBuilding;
+            }
+        }
+    });
 
     game.gameRegistry = deck;
     
@@ -108,7 +128,76 @@ elements.restartBtn.onclick = () => {
 };
 
 
-// --- 3. GAME LOGIC HELPERS ---
+// --- 4. INIT LOBBY (UPDATED) ---
+
+function initLobby() {
+    const container = document.getElementById('setup-container')!;
+    if (!container) return; // Safety check
+    
+    container.innerHTML = ''; 
+
+    const grid = document.createElement('div');
+    grid.className = 'setup-grid';
+
+    BUILDING_CATEGORIES.forEach(cat => {
+        // Container
+        const group = document.createElement('div');
+        group.className = 'setup-group';
+
+        // Label
+        const label = document.createElement('label');
+        label.className = 'setup-label';
+        label.textContent = cat.label;
+        group.appendChild(label);
+
+        // Select
+        const select = document.createElement('select');
+        select.className = `setup-select ${cat.id}`;
+        select.dataset.category = cat.id;
+
+        // "Random" Option
+        const randOpt = document.createElement('option');
+        randOpt.value = 'RANDOM';
+        randOpt.textContent = `Random ${cat.label.split(' ')[0]}`;
+        select.appendChild(randOpt);
+
+        // Specific Options
+        cat.options.forEach(b => {
+            const opt = document.createElement('option');
+            opt.value = b.name;
+            opt.textContent = b.name;
+            select.appendChild(opt);
+        });
+
+        // Special logic for Monument Preview
+        if (cat.id === 'PURPLE') {
+            select.onchange = () => {
+                const val = select.value;
+                if (val === 'RANDOM') {
+                    elements.monumentDesc.textContent = "A random monument will be chosen.";
+                    elements.monumentGrid.innerHTML = '';
+                } else {
+                    const mon = cat.options.find(b => b.name === val);
+                    if (mon) updateMonumentPreview(mon);
+                }
+            };
+        }
+
+        group.appendChild(select);
+        grid.appendChild(group);
+    });
+
+    container.appendChild(grid);
+    
+    // Reset Texts
+    elements.monumentDesc.textContent = "Customize your town or leave as Random.";
+    elements.monumentGrid.innerHTML = '';
+
+    elements.startModal.classList.remove('hidden');
+}
+
+
+// --- 5. GAME LOGIC HELPERS ---
 
 function handleConstructionClick(r: number, c: number) {
     const grid = game.board.getGrid();
@@ -117,9 +206,12 @@ function handleConstructionClick(r: number, c: number) {
     // 1. Define Valid Targets
     const isPatternSpot = activePatternCoords.some(p => p.row === r && p.col === c);
     
-    // Check for "Global Placement" abilities (Obelisk or Shed)
+    // Normalize name
+    const buildName = activeConstruction ? activeConstruction.buildingName.toUpperCase() : '';
+    
+    // Ability Checks
     const isObelisk = game.hasObeliskAbility();
-    const isShed = activeConstruction && activeConstruction.buildingName === 'SHED';
+    const isShed = buildName === 'SHED';
     
     // Valid if it's a global ability AND the target is empty
     const isGlobalTarget = (isObelisk || isShed) && cellContent === 'NONE';
@@ -128,7 +220,6 @@ function handleConstructionClick(r: number, c: number) {
     if (isPatternSpot || isGlobalTarget) {
         
         // --- TRADING POST PROTECTION ---
-        // (Keep your existing check here)
         if (cellContent && (cellContent as string).toUpperCase().replace('_', ' ') === 'TRADING POST') {
             alert("You cannot build directly on top of a Trading Post. Please select one of the consumable resource squares or an empty square.");
             return;
@@ -173,38 +264,14 @@ function pickRandom(list: any[]) {
 }
 
 
-// --- 4. UI HELPERS ---
+// --- 6. UI HELPERS ---
 
 function renderAll() {
     renderer.render(game, activeConstruction, activePatternCoords);
 }
 
-function initLobby() {
-    const MONUMENTS = BUILDING_REGISTRY.filter(b => b.isMonument);
-    
-    elements.monumentSelect.innerHTML = '';
-    MONUMENTS.forEach((m, index) => {
-        const option = document.createElement('option');
-        option.value = index.toString();
-        option.textContent = m.name;
-        elements.monumentSelect.appendChild(option);
-    });
-
-    elements.monumentSelect.onchange = () => {
-        const selected = MONUMENTS[parseInt(elements.monumentSelect.value)];
-        game.activeMonument = selected;
-        updateMonumentPreview(selected);
-    };
-
-    const initialIndex = Math.floor(Math.random() * MONUMENTS.length);
-    elements.monumentSelect.value = initialIndex.toString();
-    elements.monumentSelect.onchange(null as any); 
-
-    elements.startModal.classList.remove('hidden');
-}
-
 function updateMonumentPreview(monument: any) {
-    elements.monumentSelect.className = `monument-select ${monument.name.toUpperCase()}`;
+    // Note: We don't change the select class anymore as it has its own fixed border style
     
     const descriptions: Record<string, string> = {
         'Archive': "1pt for every unique building type.",
@@ -218,7 +285,6 @@ function updateMonumentPreview(monument: any) {
         'Cathedral': "2pts. Empty spaces are worth 0."
     };
     
-    // Fallback to internal description if available
     elements.monumentDesc.textContent = monument.description || descriptions[monument.name] || "A unique monument.";
     renderMonumentPattern(monument);
 }
@@ -279,5 +345,5 @@ function addScoreListItem(label: string, score: number, isPenalty: boolean = fal
     elements.scoreList.appendChild(li);
 }
 
-// --- 5. START ---
+// --- 7. START ---
 initLobby();
