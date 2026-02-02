@@ -2,26 +2,27 @@
    1. GLOBAL & LAYOUT
    ========================================= */
 body {
-    font-family: 'Nunito', 'Segoe UI', sans-serif;
-    background-color: #f4f1ea;
-    color: #4a4a4a;
+    font-family: 'Nunito', 'Segoe UI', sans-serif; /* Friendly rounded font */
+    background-color: #f4f1ea; /* Warmer Parchment background */
+    color: #4a4a4a; /* Softer black */
     margin: 0;
     padding: 0;
     display: flex;
     justify-content: center;
     
-    /* --- THE FIX --- */
-    align-items: flex-start; /* Anchor to top instead of center */
-    padding-top: 40px;       /* Add breathing room at the top */
-    padding-bottom: 40px;    /* Add breathing room at the bottom */
+    /* Anchor to top so the board doesn't jump when sidebar grows */
+    align-items: flex-start; 
+    padding-top: 40px;      
+    padding-bottom: 40px;   
     
     min-height: 100vh;
-    box-sizing: border-box; /* Ensures padding doesn't break min-height calculation */
+    box-sizing: border-box; 
 }
+
 h1, h2, h3 { 
     margin-bottom: 20px; 
     color: #2c3e50; 
-    font-weight: 800; /* Extra bold headings */
+    font-weight: 800; /* Extra bold headers */
 }
 
 .game-container {
@@ -32,7 +33,6 @@ h1, h2, h3 {
     width: 100%;
     max-width: 960px; 
     padding: 20px;
-    /* No background on container, let body color shine through */
     flex-wrap: wrap; 
 }
 
@@ -44,7 +44,7 @@ h1, h2, h3 {
     min-width: 320px;
 }
 
-/* --- SETUP MENU GRID --- */
+/* --- SETUP MENU GRID (Start Screen) --- */
 .setup-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -97,15 +97,15 @@ h1, h2, h3 {
    2. PLAYER DASHBOARD & CONTROLS
    ========================================= */
 
-/* The Container for Score, Resources, Undo */
-.controls, .dashboard-panel {
+/* The Unified Container for Score & Resources */
+.dashboard-panel, .controls {
     margin: 0 auto 20px auto;
     background: white;
     padding: 15px 25px;
     border-radius: 16px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.06); /* Soft floaty shadow */
+    box-shadow: 0 8px 20px rgba(0,0,0,0.06);
     width: 100%;
-    max-width: 400px; /* Match board width roughly */
+    max-width: 400px;
     text-align: center;
     display: flex;
     flex-direction: column;
@@ -132,26 +132,23 @@ h1, h2, h3 {
 .res-btn:hover { transform: translateY(-3px); }
 
 .res-btn.selected {
-    transform: scale(1.15) translateY(-5px); /* Lift it up a bit more */
+    transform: scale(1.15) translateY(-5px); /* Lift it up */
     z-index: 10;
     box-shadow: 0 0 0 3px #2c3e50, 0 10px 20px rgba(0,0,0,0.2);
-    position: relative; /* Needed for the arrow */
+    position: relative;
 }
 
-/* The Little Arrow */
+/* The Little Arrow pointing down to the board */
 .res-btn.selected::after {
     content: '';
     position: absolute;
-    bottom: -10px; /* Position below the button */
+    bottom: -10px;
     left: 50%;
     transform: translateX(-50%);
-    
-    /* CSS Triangle */
-    width: 0; 
-    height: 0; 
+    width: 0; height: 0; 
     border-left: 8px solid transparent;
     border-right: 8px solid transparent;
-    border-top: 8px solid #2c3e50; /* Matches the border color */
+    border-top: 8px solid #2c3e50;
 }
 
 
@@ -167,7 +164,7 @@ h1, h2, h3 {
     width: fit-content; 
     justify-content: center;
 
-    /* Grassy Look */
+    /* Grassy Green Background */
     background-color: #43a047; 
     background-image: 
         linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
@@ -181,6 +178,7 @@ h1, h2, h3 {
     
     border: 6px solid #2e7d32;
 }
+
 
 /* =========================================
    CELLS & RESOURCES (The 3D Bits)
@@ -205,7 +203,6 @@ h1, h2, h3 {
     box-shadow: inset 2px 2px 5px rgba(0,0,0,0.15);
     border: 1px solid #81c784;
 }
-
 .cell.empty:hover {
     background-color: #e8f5e9; 
     box-shadow: inset 1px 1px 3px rgba(0,0,0,0.1);
@@ -219,8 +216,6 @@ h1, h2, h3 {
 }
 
 /* --- SHARED RESOURCE STYLING (3D Cubes) --- */
-/* Applies to both Board Cells and Palette Buttons */
-
 .cell.WOOD, .res-btn.WOOD,
 .cell.WHEAT, .res-btn.WHEAT,
 .cell.BRICK, .res-btn.BRICK,
@@ -232,18 +227,18 @@ h1, h2, h3 {
     
     /* 3D Bevel Lighting */
     box-shadow: 
-        inset 3px 3px 6px rgba(255,255,255,0.35), /* Highlight Top-Left */
-        inset -3px -3px 6px rgba(0,0,0,0.15);     /* Shadow Bottom-Right */
+        inset 3px 3px 6px rgba(255,255,255,0.35), 
+        inset -3px -3px 6px rgba(0,0,0,0.15);     
 }
 
 /* Resource Colors */
-.cell.WOOD, .res-btn.WOOD   { background-color: #8d6e63; } /* Wood Brown */
-.cell.WHEAT, .res-btn.WHEAT { background-color: #fdd835; } /* Wheat Gold */
-.cell.BRICK, .res-btn.BRICK { background-color: #ef5350; } /* Brick Red */
-.cell.GLASS, .res-btn.GLASS { background-color: #29b6f6; } /* Glass Blue */
-.cell.STONE, .res-btn.STONE { background-color: #757575; } /* Stone Grey */
+.cell.WOOD, .res-btn.WOOD   { background-color: #5d4037; } /* Brown */
+.cell.WHEAT, .res-btn.WHEAT { background-color: #fdd835; } /* Gold */
+.cell.BRICK, .res-btn.BRICK { background-color: #ef5350; } /* Red */
+.cell.GLASS, .res-btn.GLASS { background-color: #29b6f6; } /* Blue */
+.cell.STONE, .res-btn.STONE { background-color: #757575; } /* Neutral Grey */
 
-/* Optional: Add shadow to cells that have these resources (overriding the shared generic shadow) */
+/* Deeper shadow for resources on the board */
 .cell.WOOD, .cell.WHEAT, .cell.BRICK, .cell.GLASS, .cell.STONE {
     box-shadow: 
         inset 3px 3px 6px rgba(255,255,255,0.35), 
@@ -252,10 +247,85 @@ h1, h2, h3 {
 }
 
 
-/* Building Base Tiles (White) */
+/* --- BUILDING BASE TILES (The Foundation) --- */
+/* Target any cell that is NOT empty and NOT a resource */
 .cell:not(.empty):not(.WOOD):not(.WHEAT):not(.BRICK):not(.GLASS):not(.STONE) {
-    background-color: #ffffff !important; 
-    border: 1px solid rgba(0,0,0,0.1);
+    /* Base color (cream) - NO !important, so pastels can override */
+    background-color: #fcfbf9; 
+    border-radius: 8px;
+    
+    /* Default border */
+    border: 3px solid #ccc; 
+    
+    /* 3D Tile Shadow */
+    box-shadow: 
+        0 4px 0 rgba(0,0,0,0.1), 
+        0 8px 10px rgba(0,0,0,0.2);
+        
+    /* Icon Sizing */
+    background-size: 70%; 
+    background-position: center;
+    background-repeat: no-repeat;
+    
+    transform: translateY(-4px); 
+}
+
+/* Hover effect for buildings */
+.cell:not(.empty):not(.WOOD):not(.WHEAT):not(.BRICK):not(.GLASS):not(.STONE):hover {
+    transform: translateY(-6px);
+    box-shadow: 0 6px 0 rgba(0,0,0,0.1), 0 12px 15px rgba(0,0,0,0.2);
+}
+
+
+/* --- PASTEL TINTED TILES (The Fix) --- */
+/* These use !important to override the base foundation color */
+
+/* BLUE (Cottage) */
+.cell.COTTAGE { 
+    border-color: #00acc1 !important; 
+    background-color: #e0f7fa !important; /* Pale Cyan */
+}
+
+/* RED (Farm Group) */
+.cell.FARM, .cell.GRANARY, .cell.GREENHOUSE, .cell.ORCHARD { 
+    border-color: #e53935 !important; 
+    background-color: #ffebee !important; /* Pale Red */
+}
+
+/* GRAY (Well Group) */
+.cell.WELL, .cell.FOUNTAIN, .cell.MILLSTONE, .cell.SHED { 
+    border-color: #78909c !important; 
+    background-color: #eceff1 !important; /* Pale Grey */
+}
+
+/* ORANGE (Chapel Group) */
+.cell.CHAPEL, .cell.ABBEY, .cell.CLOISTER, .cell.TEMPLE { 
+    border-color: #fb8c00 !important; 
+    background-color: #fff3e0 !important; /* Pale Orange */
+}
+
+/* GREEN (Tavern Group) */
+.cell.TAVERN, .cell.ALMSHOUSE, .cell.INN, .cell.FEAST-HALL { 
+    border-color: #2e7d32 !important; 
+    background-color: #e8f5e9 !important; /* Pale Green */
+}
+
+/* YELLOW (Theater Group) */
+.cell.THEATER, .cell.BAKERY, .cell.TAILOR, .cell.MARKET { 
+    border-color: #fdd835 !important; 
+    background-color: #fffde7 !important; /* Pale Yellow */
+}
+
+/* BLACK (Factory Group) */
+.cell.FACTORY, .cell.BANK, .cell.WAREHOUSE, .cell.TRADING-POST { 
+    border-color: #424242 !important; 
+    background-color: #f5f5f5 !important; /* Off-White */
+}
+
+/* PURPLE (Monument) */
+.cell.MONUMENT, .cell.BARRETT, .cell.ARCHIVE, .cell.MANDRAS { 
+    border-color: #8e24aa !important; 
+    background-color: #f3e5f5 !important; /* Pale Lavender */
 }
 
 
@@ -293,13 +363,12 @@ h1, h2, h3 {
     background-color: #2e7d32;
     font-size: 15px;
 }
-
 .build-btn:hover { 
     transform: translateY(-2px); 
     filter: brightness(1.1); 
 }
 
-/* Icon Container (Solid White Tile) */
+/* Icon Container (Solid White Tile inside Button) */
 .build-btn::after {
     content: '';
     position: absolute;
@@ -333,12 +402,10 @@ h1, h2, h3 {
 .build-btn.TAVERN, .build-btn.ALMSHOUSE, .build-btn.INN, .build-btn.FEAST-HALL { background-color: #43a047; }
 .build-btn.TAVERN::after, .build-btn.ALMSHOUSE::after, .build-btn.INN::after, .build-btn.FEAST-HALL::after { background-image: url('/buildings/tavern.png'); }
 
-.build-btn.THEATER, .build-btn.BAKERY, .build-btn.TAILOR, .build-btn.MARKET { 
-    background-color: #fdd835; color: #4e342e; text-shadow: none; 
-}
+.build-btn.THEATER, .build-btn.BAKERY, .build-btn.TAILOR, .build-btn.MARKET { background-color: #fdd835; color: #4e342e; text-shadow: none; }
 .build-btn.THEATER::after, .build-btn.BAKERY::after, .build-btn.TAILOR::after, .build-btn.MARKET::after { 
     background-image: url('/buildings/theater.png');
-    border-color: rgba(0,0,0,0.15); /* Slightly darker border for contrast on yellow */
+    border-color: rgba(0,0,0,0.15); 
 }
 
 .build-btn.FACTORY, .build-btn.BANK, .build-btn.WAREHOUSE, .build-btn.TRADING-POST { background-color: #424242; }
@@ -354,25 +421,16 @@ h1, h2, h3 {
     flex-direction: column;
     gap: 12px;
     margin-top: 20px;
-    padding-right: 8px; /* Space for scrollbar */
+    padding-right: 8px;
     max-height: 60vh; 
     overflow-y: auto; 
 }
 
 /* Custom Scrollbar */
-#deck-display::-webkit-scrollbar {
-    width: 6px;
-}
-#deck-display::-webkit-scrollbar-track {
-    background: transparent; 
-}
-#deck-display::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
-}
-#deck-display::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(0, 0, 0, 0.2);
-}
+#deck-display::-webkit-scrollbar { width: 6px; }
+#deck-display::-webkit-scrollbar-track { background: transparent; }
+#deck-display::-webkit-scrollbar-thumb { background-color: rgba(0, 0, 0, 0.1); border-radius: 10px; }
+#deck-display::-webkit-scrollbar-thumb:hover { background-color: rgba(0, 0, 0, 0.2); }
 
 .building-card {
     background: #fff;
@@ -383,6 +441,14 @@ h1, h2, h3 {
     display: flex;
     flex-direction: column;
     gap: 8px;
+}
+
+/* Legendary Monument Styling */
+.building-card.MONUMENT {
+    border: 2px solid #ffd700;
+    background: linear-gradient(to bottom right, #fff, #fdf8e4);
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+    position: relative;
 }
 
 .card-header {
@@ -402,6 +468,8 @@ h1, h2, h3 {
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
+    flex-shrink: 0; 
+    margin-left: 8px;
 }
 
 .card-body {
@@ -413,8 +481,8 @@ h1, h2, h3 {
 .mini-pattern { display: grid; gap: 3px; }
 .pattern-cell { width: 14px; height: 14px; border-radius: 3px; background-color: #f0f0f0; }
 
-/* Pattern Colors (matching 3D bits) */
-.pattern-cell.WOOD  { background-color: #8d6e63; }
+/* Pattern Colors (matching the new 3D bits) */
+.pattern-cell.WOOD  { background-color: #5d4037; }
 .pattern-cell.WHEAT { background-color: #fdd835; }
 .pattern-cell.BRICK { background-color: #ef5350; }
 .pattern-cell.GLASS { background-color: #29b6f6; }
@@ -428,8 +496,6 @@ h1, h2, h3 {
 /* =========================================
    5. BUILDING IMAGES
    ========================================= */
-
-/* Specific Images */
 .cell.COTTAGE, .card-icon.COTTAGE { background-image: url('/buildings/cottage.png'); }
 .cell.FARM, .card-icon.FARM, .cell.GRANARY, .card-icon.GRANARY, .cell.GREENHOUSE, .card-icon.GREENHOUSE, .cell.ORCHARD, .card-icon.ORCHARD { background-image: url('/buildings/farm.png'); }
 .cell.CHAPEL, .card-icon.CHAPEL, .cell.ABBEY, .card-icon.ABBEY, .cell.CLOISTER, .card-icon.CLOISTER, .cell.TEMPLE, .card-icon.TEMPLE { background-image: url('/buildings/chapel.png'); }
@@ -439,6 +505,7 @@ h1, h2, h3 {
 .cell.FACTORY, .card-icon.FACTORY, .cell.BANK, .card-icon.BANK, .cell.WAREHOUSE, .card-icon.WAREHOUSE, .cell.TRADING-POST, .card-icon.TRADING-POST { background-image: url('/buildings/factory.png'); }
 .cell.MONUMENT, .building-card.MONUMENT .card-icon { background-image: url('/buildings/monument.png'); background-size: 60%; }
 .building-card.MONUMENT .card-icon { background-size: contain; }
+
 
 /* =========================================
    6. UI MODALS & HELPERS
@@ -455,8 +522,8 @@ h1, h2, h3 {
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    background: rgba(44, 62, 80, 0.7); /* Darker, slightly blue tint */
-    backdrop-filter: blur(2px); /* Modern blur effect */
+    background: rgba(44, 62, 80, 0.7);
+    backdrop-filter: blur(2px);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -511,6 +578,20 @@ h1, h2, h3 {
 
 
 /* --- ANIMATIONS & HIGHLIGHTS --- */
+
+/* 1. Placement "Pop" Animation */
+@keyframes popIn {
+    0% { transform: scale(0); opacity: 0; }
+    70% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); }
+}
+
+/* Apply to any cell that IS NOT empty (Resources & Buildings) */
+.cell:not(.empty) {
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* 2. Highlights for Construction */
 .cell.match-highlight {
     box-shadow: 0 0 0 5px #ffeb3b, 0 0 15px rgba(255, 235, 59, 0.6) !important;
     border-color: #fbc02d !important;
@@ -532,17 +613,5 @@ h1, h2, h3 {
 }
 
 .monument-pattern-grid .mini-cell {
-    /* Updates for the start screen grid to match */
     border-radius: 3px;
-}
-
-@keyframes popIn {
-    0% { transform: scale(0); opacity: 0; }
-    70% { transform: scale(1.1); opacity: 1; }
-    100% { transform: scale(1); }
-}
-
-/* Apply to any cell that IS NOT empty (Resources & Buildings) */
-.cell:not(.empty) {
-    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
