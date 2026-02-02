@@ -11,17 +11,48 @@
     <div id="start-screen-modal" class="modal-overlay">
         <div class="modal-content" style="max-width: 600px; width: 90%;">
             <h1 style="margin-top:0; color:#2e7d32;">Tiny Towns</h1>
-            <p style="color:#666;">Configure your Town Charter</p>
             
-            <div id="setup-container" style="text-align: left; margin: 20px 0;">
+            <div id="landing-ui">
+                <input type="text" id="player-name-input" placeholder="Enter Your Name" class="setup-select" style="margin-bottom: 15px; text-align:center; font-weight:bold;">
+                
+                <div style="display:flex; gap:10px; margin-bottom: 20px;">
+                    <button id="create-game-ui-btn" class="primary-btn">Create New Game</button>
                 </div>
 
-            <div style="background:#f9f9f9; padding:10px; border-radius:8px; margin-bottom:20px; min-height:80px; display:flex; flex-direction:column; align-items:center;">
-                <p id="monument-desc" style="font-size: 0.9rem; color:#555; margin: 0 0 10px 0; font-style:italic;">Customize your town or leave as Random.</p>
-                <div id="monument-pattern-grid" class="mini-grid" style="justify-content: center;"></div>
+                <div style="border-top: 1px solid #eee; padding-top: 20px; margin-top: 20px;">
+                    <p style="margin:0 0 10px 0; color:#666;">Or join a friend:</p>
+                    <div style="display:flex; gap:10px;">
+                        <input type="text" id="game-id-input" placeholder="Paste Game Code" class="setup-select">
+                        <button id="join-game-btn" class="secondary-btn" style="white-space: nowrap;">Join Game</button>
+                    </div>
+                </div>
             </div>
 
-            <button id="start-game-btn" class="primary-btn">Start Game</button>
+            <div id="lobby-ui" class="hidden">
+                <h3 style="color:#555;">Lobby</h3>
+                <div style="background:#f0f4c3; padding:10px; border-radius:8px; margin-bottom:15px; user-select: text; cursor: pointer;" id="share-code-display" title="Click to copy">
+                    Loading Code...
+                </div>
+                
+                <div id="lobby-player-list" style="margin-bottom:20px; text-align:left;">
+                    </div>
+
+                <div id="host-settings" class="hidden">
+                    <p style="color:#666; font-size: 0.9rem;">Town Charter Configuration</p>
+                    <div id="setup-container" style="text-align: left; margin: 10px 0;"></div>
+                    
+                    <div style="background:#f9f9f9; padding:10px; border-radius:8px; margin-bottom:20px; min-height:80px; display:flex; flex-direction:column; align-items:center;">
+                        <p id="monument-desc" style="font-size: 0.9rem; color:#555; margin: 0 0 10px 0; font-style:italic;">Customize your town or leave as Random.</p>
+                        <div id="monument-pattern-grid" class="mini-grid" style="justify-content: center;"></div>
+                    </div>
+
+                    <button id="start-game-btn" class="primary-btn">Start Game</button>
+                </div>
+                
+                <div id="guest-waiting-msg" class="hidden" style="font-style:italic; color:#777;">
+                    Waiting for host to configure the deck...
+                </div>
+            </div>
         </div>
     </div>
 

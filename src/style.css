@@ -44,6 +44,11 @@ h1, h2, h3 {
     min-width: 320px;
 }
 
+/* Utility to hide elements */
+.hidden {
+    display: none !important;
+}
+
 /* --- SETUP MENU GRID (Start Screen) --- */
 .setup-grid {
     display: grid;

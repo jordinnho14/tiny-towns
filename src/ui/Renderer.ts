@@ -18,9 +18,9 @@ export class Renderer {
 
     constructor() {}
 
-    render(game: Game, activeConstruction: any | null, highlightCoords: any[]) {
+render(game: Game, activeConstruction: any | null, highlightCoords: any[], customMessage?: string) {
         this.renderHeader(game);
-        this.renderBoard(game, activeConstruction, highlightCoords);
+        this.renderBoard(game, activeConstruction, highlightCoords, customMessage); // Pass it down
         this.renderSidebar(game, activeConstruction);
         this.renderControls(game, activeConstruction);
     }
@@ -33,7 +33,7 @@ export class Renderer {
     }
 
     // --- 2. BOARD (The Smart Version) ---
-   private renderBoard(game: Game, activeConstruction: any | null, highlightCoords: any[]) {
+  private renderBoard(game: Game, activeConstruction: any | null, highlightCoords: any[], customMessage?: string) {
         const grid = game.board.getGrid();
         
         // Define resources locally
@@ -91,7 +91,7 @@ export class Renderer {
                         div.classList.add(safeName);
                     }
                     
-                    div.style.backgroundColor = def.color;
+                    if (def.color) div.style.backgroundColor = def.color;
                 }
             }
             
@@ -129,11 +129,25 @@ export class Renderer {
             }
         });
 
-        // Message Logic (Bottom Label)
+        // ============================================
+        //  NEW MESSAGE LOGIC (This is the changed part)
+        // ============================================
         if (activeConstruction) {
             this.msgLabel.textContent = `Select a highlighted square to build your ${activeConstruction.buildingName}!`;
             this.msgLabel.style.color = "#d32f2f"; 
-        } else if (game.availableMatches.length > 0) {
+        } 
+        // 1. Check Custom Message (from MultiplayerGame) first!
+        else if (customMessage) {
+            this.msgLabel.textContent = customMessage;
+            if (customMessage.includes("Waiting")) {
+                this.msgLabel.style.color = "#d32f2f"; // Red for waiting
+            } else if (customMessage.includes("YOU")) {
+                this.msgLabel.style.color = "#2e7d32"; // Green for your turn
+            } else {
+                this.msgLabel.style.color = "#333";
+            }
+        }
+        else if (game.availableMatches.length > 0) {
             this.msgLabel.textContent = "Matches available!";
             this.msgLabel.style.color = "#333";
         } else if (!game.currentResource) {
