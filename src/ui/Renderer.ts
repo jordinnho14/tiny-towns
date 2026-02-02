@@ -34,7 +34,6 @@ export class Renderer {
 
     // --- 2. BOARD (The Smart Version) ---
    private renderBoard(game: Game, activeConstruction: any | null, highlightCoords: any[]) {
-        const hasObelisk = game.hasObeliskAbility();
         const grid = game.board.getGrid();
         
         // Define resources locally
@@ -99,19 +98,19 @@ export class Renderer {
             // 3. Highlight Logic (UPDATED FOR TRADING POST)
             if (activeConstruction) {
                 const isPatternPart = highlightCoords.some(p => p.row === r && p.col === c);
-                const isObeliskTarget = hasObelisk && cell === 'NONE';
+                
+                // Ability Checks
+                const hasObelisk = game.hasObeliskAbility();
+                const isShed = activeConstruction.buildingName.toUpperCase() === 'SHED';
+                
+                // It is a valid "Build Anywhere" target if it's empty AND we have the ability
+                const isGlobalTarget = (hasObelisk || isShed) && cell === 'NONE';
 
-                // Check if this cell is a Trading Post
+                // Check for Trading Post (to prevent highlighting it)
                 const isTradingPost = cell && cell.toUpperCase().replace('_', ' ') === 'TRADING POST';
 
-                // ONLY highlight if it is a pattern spot AND NOT a Trading Post.
-                // (Trading Posts persist, so you cannot build ON TOP of them).
-                if (isPatternPart && !isTradingPost) {
-                    div.classList.add('match-highlight');
-                }
-
-                // Obelisk allows building on empty squares
-                if (isObeliskTarget) {
+                // LOGIC: Highlight if it's a pattern part (that isn't a TP) OR a valid global target
+                if ((isPatternPart && !isTradingPost) || isGlobalTarget) {
                     div.classList.add('match-highlight');
                 }
             }

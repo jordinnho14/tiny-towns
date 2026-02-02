@@ -111,17 +111,30 @@ elements.restartBtn.onclick = () => {
 // --- 3. GAME LOGIC HELPERS ---
 
 function handleConstructionClick(r: number, c: number) {
+    const grid = game.board.getGrid();
+    const cellContent = grid[r][c];
+    
+    // 1. Define Valid Targets
     const isPatternSpot = activePatternCoords.some(p => p.row === r && p.col === c);
-    const isObeliskSpot = game.hasObeliskAbility() && game.board.getGrid()[r][c] === 'NONE';
+    
+    // Check for "Global Placement" abilities (Obelisk or Shed)
+    const isObelisk = game.hasObeliskAbility();
+    const isShed = activeConstruction && activeConstruction.buildingName === 'SHED';
+    
+    // Valid if it's a global ability AND the target is empty
+    const isGlobalTarget = (isObelisk || isShed) && cellContent === 'NONE';
 
-    if (isPatternSpot || isObeliskSpot) {
-        // --- NEW CHECK: PREVENT BUILDING ON TRADING POST ---
-        const targetCell = game.board.getGrid()[r][c];
-        if (targetCell && (targetCell as string).toUpperCase().replace('_', ' ') === 'TRADING POST') {
-            alert("You cannot build directly on top of a Trading Post (it is permanent). Please select one of the consumable resource squares.");
+    // 2. The Interaction Logic
+    if (isPatternSpot || isGlobalTarget) {
+        
+        // --- TRADING POST PROTECTION ---
+        // (Keep your existing check here)
+        if (cellContent && (cellContent as string).toUpperCase().replace('_', ' ') === 'TRADING POST') {
+            alert("You cannot build directly on top of a Trading Post. Please select one of the consumable resource squares or an empty square.");
             return;
         }
 
+        // 3. Build it
         game.constructBuilding(activeConstruction, r, c);
         resetConstructionState();
         renderAll();
