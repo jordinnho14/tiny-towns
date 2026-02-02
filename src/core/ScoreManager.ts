@@ -114,16 +114,11 @@ export class ScoreManager {
                         metadata: metadata,
                         validBuildingNames: validBuildingNames,
                         allFedPositions: finalFedState,
-                        registry: registry
+                        registry: registry,
+                        fedCottageCount: fedCottageCount
                     };
                     const pts = def.scorer.score(ctx);
                     breakdown[cell] = (breakdown[cell] || 0) + pts;
-                }
-                
-                // B. Special Hardcoded Cases (Chapel)
-                // We check the category 'ORANGE' to keep it generic
-                else if (def.type === 'ORANGE') {
-                    breakdown[cell] = (breakdown[cell] || 0) + fedCottageCount;
                 }
             }
         }

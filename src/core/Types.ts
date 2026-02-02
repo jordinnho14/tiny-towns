@@ -39,7 +39,11 @@ export const BuildingType = {
     TAILOR: 'TAILOR',
     BAKERY: 'BAKERY',
     THEATER: 'THEATER',
+    // --- ORANGE BUILDINGS ---
     CHAPEL: 'CHAPEL',
+    ABBEY: 'ABBEY',
+    CLOISTER: 'CLOISTER',
+    TEMPLE: 'TEMPLE',
     // Monuments
     ARCHIVE: 'ARCHIVE',
     BARRETT_CASTLE: 'BARRETT_CASTLE',

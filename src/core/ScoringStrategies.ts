@@ -11,6 +11,7 @@ export interface ScoringContext {
     allFedPositions: Set<string>; // Positions of all fed buildings
     metadata: Map<string, any>; // Additional metadata if needed
     registry: Building[];
+    fedCottageCount: number;
 }
 
 // 2. The Interface
@@ -427,5 +428,100 @@ export class IsolatedStrategy implements ScoringStrategy {
 
         // 3. If we survived both checks, it is strictly isolated
         return 3;
+    }
+}
+
+export class FedCottageCountStrategy implements ScoringStrategy {
+    score(ctx: ScoringContext): number {
+        return ctx.fedCottageCount;
+    }
+}
+
+export class AdjacentFedStrategy implements ScoringStrategy {
+    private requiredNeighbors: number;
+    private scoreAmount: number;
+
+    constructor(requiredNeighbors: number, scoreAmount: number) {
+        this.requiredNeighbors = requiredNeighbors;
+        this.scoreAmount = scoreAmount;
+    }
+
+    score(ctx: ScoringContext): number {
+        let fedNeighbors = 0;
+        const deltas = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+
+        for (const [dr, dc] of deltas) {
+            const nr = ctx.row + dr;
+            const nc = ctx.col + dc;
+            // Bounds check
+            if (nr >= 0 && nr < 4 && nc >= 0 && nc < 4) {
+                // Check if this neighbor is in the 'allFedPositions' set
+                // (This set includes Fed Cottages and Fed Barrett Castles)
+                if (ctx.allFedPositions.has(`${nr},${nc}`)) {
+                    fedNeighbors++;
+                }
+            }
+        }
+
+        return (fedNeighbors >= this.requiredNeighbors) ? this.scoreAmount : 0;
+    }
+}
+
+export class CornerBuildingCountStrategy implements ScoringStrategy {
+    private targetName: string;
+
+    constructor(targetName: string) {
+        this.targetName = targetName;
+    }
+
+    score(ctx: ScoringContext): number {
+        const corners = [
+            {r: 0, c: 0}, {r: 0, c: 3}, 
+            {r: 3, c: 0}, {r: 3, c: 3}
+        ];
+        
+        let count = 0;
+        corners.forEach(pos => {
+            // Check if the corner contains the target building
+            if (ctx.grid[pos.r][pos.c] === this.targetName) {
+                count++;
+            }
+        });
+
+        return count;
+    }
+}
+
+export class RestrictedNeighborStrategy implements ScoringStrategy {
+    private restrictedCategories: string[];
+    private scoreAmount: number;
+
+    constructor(restrictedCategories: string[], scoreAmount: number) {
+        this.restrictedCategories = restrictedCategories;
+        this.scoreAmount = scoreAmount;
+    }
+
+    score(ctx: ScoringContext): number {
+        const deltas = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+        
+        for (const [dr, dc] of deltas) {
+            const nr = ctx.row + dr;
+            const nc = ctx.col + dc;
+
+            if (nr >= 0 && nr < 4 && nc >= 0 && nc < 4) {
+                const neighborName = ctx.grid[nr][nc];
+                
+                // Find neighbor definition to check its Category (Color)
+                const def = ctx.registry.find(b => b.name.toUpperCase() === neighborName.toUpperCase());
+                
+                // If neighbor exists and is one of the hated colors, score is 0
+                if (def && this.restrictedCategories.includes(def.type)) {
+                    return 0;
+                }
+            }
+        }
+
+        // If we survived all checks, return the score
+        return this.scoreAmount;
     }
 }
