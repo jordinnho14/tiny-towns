@@ -214,7 +214,32 @@ export const TRADING_POST: Building = {
     ],
     scorer: new FixedScoreStrategy(1)
 };
-export const BLACK_BUILDINGS = [FACTORY, TRADING_POST];
+
+export const BANK: Building = {
+    name: 'Bank',
+    type: 'BLACK',
+    description: "4 points. Place a resource on this building - you can no longer select this resource as master builder.",
+    pattern: [
+        [Resource.STONE, Resource.STONE, Resource.NONE],
+        [Resource.WOOD, Resource.WOOD, Resource.BRICK]
+    ],
+    scorer: new FixedScoreStrategy(4)
+    //TODO: IMPLEMENT BANK MECHANICS
+};
+
+export const WAREHOUSE: Building = {
+    name: 'Warehouse',
+    type: 'BLACK',
+    description: "-1 for each resource on this building. YADA YADA YADA",
+    pattern: [
+        [Resource.STONE, Resource.STONE, Resource.NONE],
+        [Resource.WOOD, Resource.WOOD, Resource.BRICK]
+    ],
+    scorer: new FixedScoreStrategy(1)
+    // TODO: IMPLEMENT WAREHOUSE MECHANICS
+};
+
+export const BLACK_BUILDINGS = [FACTORY, TRADING_POST, BANK, WAREHOUSE];
 
 
 // --- ORANGE (Religious) ---

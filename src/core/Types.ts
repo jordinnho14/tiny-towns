@@ -25,6 +25,8 @@ export const BuildingType = {
     // --- BLACK BUILDINGS ---
     FACTORY: 'FACTORY',
     TRADING_POST: 'TRADING_POST',
+    WAREHOUSE: 'WAREHOUSE',
+    BANK: 'BANK',
     // --- RED BUILDINGS ---
     FARM: 'FARM',
     GRANARY: 'GRANARY',
