@@ -203,7 +203,18 @@ export const FACTORY: Building = {
     description: 'Place 1 resource on the factory, whenever another player chooses that resource, play a different one instead.'
 };
 //TODO: IMPLEMENT FACTORY MECHANICS
-export const BLACK_BUILDINGS = [FACTORY];
+
+export const TRADING_POST: Building = {
+    name: 'Trading Post',
+    type: 'BLACK',
+    description: "1 point. Counts as a WILD (any) resource for future buildings.",
+    pattern: [
+        [Resource.STONE, Resource.STONE, Resource.NONE],
+        [Resource.WOOD, Resource.WOOD, Resource.BRICK]
+    ],
+    scorer: new FixedScoreStrategy(1)
+};
+export const BLACK_BUILDINGS = [FACTORY, TRADING_POST];
 
 
 // --- ORANGE (Religious) ---

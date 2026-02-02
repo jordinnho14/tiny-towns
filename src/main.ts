@@ -1,5 +1,5 @@
 import { 
-    COTTAGE, // Blue is usually fixed (or you can pick from BLUE_BUILDINGS)
+    COTTAGE, 
     RED_BUILDINGS,
     GRAY_BUILDINGS,
     YELLOW_BUILDINGS,
@@ -70,42 +70,35 @@ elements.undoBtn.onclick = () => {
     renderAll();
 };
 
-// --- UPDATED START LOGIC ---
+// --- START LOGIC ---
 elements.startBtn.onclick = () => {
-    // 1. Create the Deck
     const deck = [];
 
-    // Always add the Cottage (Blue)
+    // Always Cottage
     deck.push(COTTAGE);
 
-    // Pick 1 Random Building for each other color
-    // (Helper function defined at bottom)
-    deck.push(pickRandom(RED_BUILDINGS));     // Farm OR Granary
-    deck.push(pickRandom(GRAY_BUILDINGS));    // Well (or others later)
-    deck.push(pickRandom(YELLOW_BUILDINGS));  // Theater (or others later)
-    deck.push(pickRandom(GREEN_BUILDINGS));   // Tavern
-    deck.push(pickRandom(BLACK_BUILDINGS));   // Factory
-    deck.push(pickRandom(ORANGE_BUILDINGS));  // Chapel
+    // One Random of each category
+    deck.push(pickRandom(RED_BUILDINGS));
+    deck.push(pickRandom(GRAY_BUILDINGS));
+    deck.push(pickRandom(YELLOW_BUILDINGS));
+    deck.push(pickRandom(GREEN_BUILDINGS));
+    deck.push(pickRandom(BLACK_BUILDINGS)); // Includes Trading Post / Bank / Warehouse
+    deck.push(pickRandom(ORANGE_BUILDINGS));
 
-    // Add the selected Monument
+    // Monument
     if (game.activeMonument) {
         deck.push(game.activeMonument);
     } else {
-        // Fallback if something went wrong
         console.warn("No monument selected, picking random.");
         const monuments = BUILDING_REGISTRY.filter(b => b.isMonument);
         deck.push(monuments[0]);
     }
 
-    // 2. Assign to Game
     game.gameRegistry = deck;
     
-    // 3. Start
     game.start();
     elements.startModal.classList.add('hidden');
     renderAll();
-    
-    // 4. Update Sidebar with specific cards
     renderer.renderDeck(game.gameRegistry);
 };
 
@@ -122,6 +115,13 @@ function handleConstructionClick(r: number, c: number) {
     const isObeliskSpot = game.hasObeliskAbility() && game.board.getGrid()[r][c] === 'NONE';
 
     if (isPatternSpot || isObeliskSpot) {
+        // --- NEW CHECK: PREVENT BUILDING ON TRADING POST ---
+        const targetCell = game.board.getGrid()[r][c];
+        if (targetCell && (targetCell as string).toUpperCase().replace('_', ' ') === 'TRADING POST') {
+            alert("You cannot build directly on top of a Trading Post (it is permanent). Please select one of the consumable resource squares.");
+            return;
+        }
+
         game.constructBuilding(activeConstruction, r, c);
         resetConstructionState();
         renderAll();
@@ -183,7 +183,6 @@ function initLobby() {
         updateMonumentPreview(selected);
     };
 
-    // Pick random initial monument
     const initialIndex = Math.floor(Math.random() * MONUMENTS.length);
     elements.monumentSelect.value = initialIndex.toString();
     elements.monumentSelect.onchange(null as any); 
@@ -192,7 +191,7 @@ function initLobby() {
 }
 
 function updateMonumentPreview(monument: any) {
-    elements.monumentSelect.className = `monument-select ${monument.name.toUpperCase()}`; // Color coding
+    elements.monumentSelect.className = `monument-select ${monument.name.toUpperCase()}`;
     
     const descriptions: Record<string, string> = {
         'Archive': "1pt for every unique building type.",
@@ -206,7 +205,8 @@ function updateMonumentPreview(monument: any) {
         'Cathedral': "2pts. Empty spaces are worth 0."
     };
     
-    elements.monumentDesc.textContent = descriptions[monument.name] || "A unique monument.";
+    // Fallback to internal description if available
+    elements.monumentDesc.textContent = monument.description || descriptions[monument.name] || "A unique monument.";
     renderMonumentPattern(monument);
 }
 
@@ -267,6 +267,4 @@ function addScoreListItem(label: string, score: number, isPenalty: boolean = fal
 }
 
 // --- 5. START ---
-// PROD MODE: Logic moved inside startBtn.onclick, 
-// so we just init the lobby here.
 initLobby();

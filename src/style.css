@@ -362,7 +362,7 @@ h1 { margin-bottom: 20px; color: #2c3e50; }
     background-image: url('/buildings/well.png');
 }
 
-.cell.FACTORY, .card-icon.FACTORY, .cell.BANK, .card-icon.BANK, .cell.WAREHOUSE, .card-icon.WAREHOUSE, .cell.TRADING_POST, .card-icon.TRADING_POST {
+.cell.FACTORY, .card-icon.FACTORY, .cell.BANK, .card-icon.BANK, .cell.WAREHOUSE, .card-icon.WAREHOUSE, .cell.TRADING-POST, .card-icon.TRADING-POST {
     background-image: url('/buildings/factory.png');
 }
 

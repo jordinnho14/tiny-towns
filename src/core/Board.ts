@@ -23,6 +23,12 @@ export class Board {
         this.grid[row][col] = resource;
     }
 
+    public placeBuilding(row: number, col: number, buildingName: string): void {
+        if (this.isValid(row, col)) {
+            this.grid[row][col] = buildingName as GridCell;
+        }
+    }
+
     // NEW: Remove resources and place the building
     public constructBuilding(
         patternCoords: {row: number, col: number}[], 

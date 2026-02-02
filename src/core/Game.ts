@@ -2,7 +2,6 @@ import { Board } from './Board';
 import { Matcher } from './Matcher';
 import { ScoreManager } from './ScoreManager';
 import { type ResourceType } from './Types';
-// 1. Add this import so we can access the data for fallback logic
 import { BUILDING_REGISTRY } from './Buildings';
 
 export class Game {
@@ -25,14 +24,10 @@ export class Game {
         this.lastMove = null;
         this.availableMatches = [];
 
-        // --- NEW: FALLBACK LOGIC ---
-        // If main.ts didn't set the registry (e.g. during testing), 
-        // we pick a random monument so the game still works.
+        // Fallback Logic
         if (this.gameRegistry.length === 0) {
             const monuments = BUILDING_REGISTRY.filter(b => b.isMonument);
             const regular = BUILDING_REGISTRY.filter(b => !b.isMonument);
-            
-            // Randomly pick one
             this.activeMonument = monuments[Math.floor(Math.random() * monuments.length)];
             this.gameRegistry = [...regular, this.activeMonument];
         }
@@ -49,14 +44,13 @@ export class Game {
     }
 
     constructBuilding(match: any, targetR: number, targetC: number) {
-        // 1. Calculate the exact coordinates the pattern occupies
+        // 1. Identify coordinates involved in the match
         const coords: { row: number, col: number }[] = [];
         let shrinePoints = 0;
         let isShrine = false;
         
         match.pattern.forEach((row: any[], r: number) => {
             row.forEach((cell: string, c: number) => {
-                // Ignore 'NONE' squares in pattern logic
                 if (cell && cell !== 'NONE') {
                     coords.push({ row: match.row + r, col: match.col + c });
                 }
@@ -69,19 +63,31 @@ export class Game {
              const buildingCount = this.countBuildingsOnBoard();
              // Add 1 because we are about to place the Shrine itself
              const total = buildingCount + 1;
-             
              if (total < 6) shrinePoints = total; 
              else shrinePoints = 8;
         }
 
-        // 3. Tell the board to execute the swap
-        this.board.constructBuilding(coords, targetR, targetC, match.buildingName);
+        // 3. Clear Resources (SMART CLEARING for Trading Post)
+        coords.forEach(pos => {
+            const item = this.board.getGrid()[pos.row][pos.col];
+            // Normalize checking for Trading Post
+            const isTradingPost = item && (item as string).toUpperCase().replace('_', ' ') === 'TRADING POST';
+
+            // If it's a Trading Post, DO NOT clear it (it stays).
+            // If it's a normal resource, clear it.
+            if (!isTradingPost) {
+                this.board.remove(pos.row, pos.col);
+            }
+        });
+
+        // 4. Place the Building
+        this.board.placeBuilding(targetR, targetC, match.buildingName);
 
         if (isShrine) {
             this.board.setMetadata(targetR, targetC, { savedScore: shrinePoints });
         }
  
-        // 4. Clear Undo & Rescan
+        // 5. Clear Undo & Rescan
         this.lastMove = null;
         this.scanForMatches();
     }
@@ -102,7 +108,6 @@ export class Game {
         this.availableMatches = [];
         const grid = this.board.getGrid();
         
-        // Monument check
         const hasMonument = grid.some(row => row.some(cell => {
              const def = this.gameRegistry.find(b => b.name.toUpperCase() === cell.toUpperCase());
              return def?.isMonument;
@@ -136,7 +141,6 @@ export class Game {
         
         grid.forEach(row => {
             row.forEach(cell => {
-                // If it's not empty and not a resource, it's a building
                 if (!resources.includes(cell)) {
                     count++;
                 }
