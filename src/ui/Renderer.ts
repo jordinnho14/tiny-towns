@@ -8,7 +8,7 @@ export class Renderer {
     private paletteEl = document.getElementById('resource-palette')!;
     private scoreEl = document.getElementById('score-display')!;
     private undoBtn = document.getElementById('undo-btn') as HTMLButtonElement;
-    private deckDisplayEl = document.getElementById('deck-display'); // For the sidebar cards
+    private deckDisplayEl = document.getElementById('deck-display');
 
     // Callbacks for interaction
     public onCellClick: (r: number, c: number) => void = () => {};
@@ -84,26 +84,34 @@ export class Renderer {
                 if (def) {
                     div.classList.add('constructed');
                     
-                    // --- YOUR FIX IS HERE ---
                     if (def.isMonument) {
                         div.classList.add('MONUMENT');
                     } else {
-                        // Regular building (Cottage, Farm, etc.)
+                        // Regular building
                         const safeName = cell.replace(/ /g, '-').replace(/'/g, '').toUpperCase();
                         div.classList.add(safeName);
                     }
-                    // ------------------------
                     
                     div.style.backgroundColor = def.color;
                 }
             }
             
-            // 3. Highlight Logic
+            // 3. Highlight Logic (UPDATED FOR TRADING POST)
             if (activeConstruction) {
                 const isPatternPart = highlightCoords.some(p => p.row === r && p.col === c);
                 const isObeliskTarget = hasObelisk && cell === 'NONE';
 
-                if (isPatternPart || isObeliskTarget) {
+                // Check if this cell is a Trading Post
+                const isTradingPost = cell && cell.toUpperCase().replace('_', ' ') === 'TRADING POST';
+
+                // ONLY highlight if it is a pattern spot AND NOT a Trading Post.
+                // (Trading Posts persist, so you cannot build ON TOP of them).
+                if (isPatternPart && !isTradingPost) {
+                    div.classList.add('match-highlight');
+                }
+
+                // Obelisk allows building on empty squares
+                if (isObeliskTarget) {
                     div.classList.add('match-highlight');
                 }
             }
@@ -160,14 +168,12 @@ export class Renderer {
                 // Click to Build
                 btn.onclick = () => this.onBuildClick(match);
 
-                // --- CHANGED: Calculate the specific grid points from the Pattern ---
-                // The 'match' gives us the Top-Left (row, col) and the shape (pattern)
+                // Calculate grid points
                 const highlightPoints: {row: number, col: number}[] = [];
 
                 if (match.pattern && Array.isArray(match.pattern)) {
                     match.pattern.forEach((patternRow: any[], rIndex: number) => {
                         patternRow.forEach((val: any, cIndex: number) => {
-                            // If there is a resource here (not null/undefined), it's part of the building
                             if (val && val !== 'NONE') {
                                 highlightPoints.push({
                                     row: match.row + rIndex,
@@ -177,7 +183,6 @@ export class Renderer {
                         });
                     });
                 } else {
-                    // Fallback if pattern is missing (shouldn't happen)
                     highlightPoints.push({ row: match.row, col: match.col });
                 }
 
@@ -239,22 +244,19 @@ export class Renderer {
         }
     }
 
-    // --- 5. DECK DISPLAY (New Feature) ---
+    // --- 5. DECK DISPLAY ---
     public renderDeck(registry: any[]) {
         if (!this.deckDisplayEl) return;
         this.deckDisplayEl.innerHTML = '';
 
         registry.forEach(building => {
-            // Card Container
             const card = document.createElement('div');
             if (building.isMonument) {
-                // All monuments share this single class
                 card.className = `building-card MONUMENT`;
             } else {
-                // Regular buildings keep their specific class (COTTAGE, FARM, etc.)
                 card.className = `building-card ${building.name.toUpperCase()}`;
             }
-            // Header
+
             const header = document.createElement('header');
             header.className = 'card-header';
             
@@ -269,29 +271,24 @@ export class Renderer {
             header.appendChild(icon);
             card.appendChild(header);
 
-            // Body
             const body = document.createElement('div');
             body.className = 'card-body';
 
-            // Pattern Grid
             const grid = document.createElement('div');
             grid.className = 'mini-pattern';
             
             const cols = building.pattern[0].length;
             grid.style.gridTemplateColumns = `repeat(${cols}, 15px)`;
             
-            // Render pattern cells
             building.pattern.forEach((r: any[]) => {
                 r.forEach((cell: string) => {
                     const cellDiv = document.createElement('div');
-                    // 'NONE' cells in pattern are usually invisible or light grey
                     const cellClass = cell === 'NONE' ? 'pattern-empty' : cell;
                     cellDiv.className = `pattern-cell ${cellClass}`;
                     grid.appendChild(cellDiv);
                 });
             });
 
-            // Description Text
             const text = document.createElement('div');
             text.className = 'card-text';
             text.textContent = building.description || "Unique scoring rules.";
@@ -303,5 +300,4 @@ export class Renderer {
             this.deckDisplayEl!.appendChild(card);
         });
     }
-
 }
