@@ -223,6 +223,7 @@ h1 { margin-bottom: 20px; color: #2c3e50; }
 
 /* Base Build Button Style */
 .build-btn {
+    position: relative; /* Needed for absolute positioning of the icon */
     width: 100%;
     padding: 12px;
     margin-bottom: 10px;
@@ -230,36 +231,149 @@ h1 { margin-bottom: 20px; color: #2c3e50; }
     border-radius: 8px;
     cursor: pointer;
     font-weight: bold;
-    text-align: left; /* Align text left */
+    text-align: left;
     color: white; 
     text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-    transition: transform 0.1s, background-color 0.2s;
+    transition: transform 0.1s, filter 0.2s;
     
-    /* Icon Support on Button (Right side) */
-    background-position: right 10px center;
-    background-repeat: no-repeat;
-    background-size: 24px 24px;
-    padding-right: 40px; 
+    /* Ensure text doesn't overlap the icon area */
+    padding-right: 50px; 
     
-    /* Default Color (Green) */
+    /* Default Color */
     background-color: #2e7d32;
 }
 
-.build-btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+.build-btn:hover { 
+    transform: translateY(-2px); 
+    filter: brightness(1.1); 
+}
+
+.build-btn::after {
+    content: '';
+    position: absolute;
+    right: 12px;        /* Align with the button padding */
+    top: 50%;
+    transform: translateY(-50%); /* Vertically centered */
+    
+    /* Slightly smaller size so it fits INSIDE the button */
+    width: 30px; 
+    height: 30px;
+    
+    /* SOLID White Background */
+    background-color: #ffffff; 
+    
+    /* Rounded corners matching the button's theme */
+    border-radius: 6px;
+    border: 1px solid rgba(0,0,0,0.1); 
+    
+    /* Subtle shadow (inset looks cleaner for a "slot" feel, or drop for a tile) */
+    /* Let's stick to a very small drop shadow so it doesn't pop "out" too much */
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15); 
+    
+    /* The Icon Image itself */
+    background-size: 20px 20px; 
+    background-repeat: no-repeat;
+    background-position: center;
+    
+    z-index: 2; 
+}
+
+/* Optional: Subtle interaction on hover */
+.build-btn:hover::after {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    /* No scale transform, so it stays neatly inside */
+}
 
 /* --- Colorful Build Buttons --- */
-.build-btn.COTTAGE { background-color: #00acc1; background-image: url('/buildings/cottage.png'); }
-.build-btn.FARM    { background-color: #e53935; background-image: url('/buildings/farm.png'); }
-.build-btn.GRANARY { background-color: #e53935; background-image: url('/buildings/farm.png'); }
-.build-btn.WELL    { background-color: #546e7a; background-image: url('/buildings/well.png'); }
-.build-btn.CHAPEL  { background-color: #fb8c00; background-image: url('/buildings/chapel.png'); }
-.build-btn.TAVERN  { background-color: #43a047; background-image: url('/buildings/tavern.png'); }
-.build-btn.THEATER { background-color: #fdd835; color: #333; text-shadow: none; background-image: url('/buildings/theater.png'); }
-.build-btn.FACTORY { background-color: #424242; background-image: url('/buildings/factory.png'); }
-/* Generic Monument Button Color */
-.build-btn:not(.COTTAGE):not(.FARM):not(.WELL):not(.CHAPEL):not(.TAVERN):not(.THEATER):not(.FACTORY) {
-    background-color: #7b1fa2; 
+
+/* 1. BLUE (Cottage) */
+.build-btn.COTTAGE { background-color: #00acc1; }
+.build-btn.COTTAGE::after { background-image: url('/buildings/cottage.png'); }
+
+/* 2. RED (Farm & Variants) */
+.build-btn.FARM, 
+.build-btn.GRANARY, 
+.build-btn.GREENHOUSE, 
+.build-btn.ORCHARD { background-color: #e53935; }
+
+.build-btn.FARM::after, 
+.build-btn.GRANARY::after, 
+.build-btn.GREENHOUSE::after, 
+.build-btn.ORCHARD::after { background-image: url('/buildings/farm.png'); }
+
+
+/* 3. GRAY (Well & Variants) */
+.build-btn.WELL, 
+.build-btn.FOUNTAIN, 
+.build-btn.MILLSTONE, 
+.build-btn.SHED { background-color: #546e7a; }
+
+.build-btn.WELL::after, 
+.build-btn.FOUNTAIN::after, 
+.build-btn.MILLSTONE::after, 
+.build-btn.SHED::after { background-image: url('/buildings/well.png'); }
+
+
+/* 4. ORANGE (Chapel & Variants) */
+.build-btn.CHAPEL, 
+.build-btn.ABBEY, 
+.build-btn.CLOISTER, 
+.build-btn.TEMPLE { background-color: #fb8c00; }
+
+.build-btn.CHAPEL::after, 
+.build-btn.ABBEY::after, 
+.build-btn.CLOISTER::after, 
+.build-btn.TEMPLE::after { background-image: url('/buildings/chapel.png'); }
+
+
+/* 5. GREEN (Tavern & Variants) */
+.build-btn.TAVERN, 
+.build-btn.ALMSHOUSE, 
+.build-btn.INN, 
+.build-btn.FEAST-HALL { background-color: #43a047; }
+
+.build-btn.TAVERN::after, 
+.build-btn.ALMSHOUSE::after, 
+.build-btn.INN::after, 
+.build-btn.FEAST-HALL::after { background-image: url('/buildings/tavern.png'); }
+
+
+/* 6. YELLOW (Theater & Variants) */
+.build-btn.THEATER, 
+.build-btn.BAKERY, 
+.build-btn.TAILOR, 
+.build-btn.MARKET { 
+    background-color: #fdd835; 
+    color: #333; 
+    text-shadow: none; 
 }
+/* For yellow buttons, the white box might be too hard to see, 
+   so we make the icon container darker for contrast */
+.build-btn.THEATER::after, 
+.build-btn.BAKERY::after, 
+.build-btn.TAILOR::after, 
+.build-btn.MARKET::after { 
+    background-image: url('/buildings/theater.png');
+    background-color: rgba(0,0,0,0.1); /* Darker box for yellow button */
+    border-color: rgba(0,0,0,0.1);
+}
+
+
+/* 7. BLACK (Economy) */
+.build-btn.FACTORY, 
+.build-btn.BANK, 
+.build-btn.WAREHOUSE, 
+.build-btn.TRADING-POST { background-color: #424242; }
+
+.build-btn.FACTORY::after, 
+.build-btn.BANK::after, 
+.build-btn.WAREHOUSE::after, 
+.build-btn.TRADING-POST::after { background-image: url('/buildings/factory.png'); }
+
+
+/* 8. PURPLE (Monuments - Fallback) */
+.build-btn { background-color: #7b1fa2; }
+.build-btn::after { background-image: url('/buildings/monument.png'); }
 
 
 /* Deck / Reference Display */
