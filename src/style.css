@@ -2,18 +2,27 @@
    1. GLOBAL & LAYOUT
    ========================================= */
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f0f2f5;
-    color: #333;
+    font-family: 'Nunito', 'Segoe UI', sans-serif;
+    background-color: #f4f1ea;
+    color: #4a4a4a;
     margin: 0;
     padding: 0;
     display: flex;
     justify-content: center;
-    align-items: center; 
+    
+    /* --- THE FIX --- */
+    align-items: flex-start; /* Anchor to top instead of center */
+    padding-top: 40px;       /* Add breathing room at the top */
+    padding-bottom: 40px;    /* Add breathing room at the bottom */
+    
     min-height: 100vh;
+    box-sizing: border-box; /* Ensures padding doesn't break min-height calculation */
 }
-
-h1 { margin-bottom: 20px; color: #2c3e50; }
+h1, h2, h3 { 
+    margin-bottom: 20px; 
+    color: #2c3e50; 
+    font-weight: 800; /* Extra bold headings */
+}
 
 .game-container {
     display: flex;
@@ -21,10 +30,9 @@ h1 { margin-bottom: 20px; color: #2c3e50; }
     align-items: flex-start;
     gap: 40px;
     width: 100%;
-    max-width: 900px; 
+    max-width: 960px; 
     padding: 20px;
-    background-color: #f0f2f5;
-    /* Wrap for mobile responsiveness */
+    /* No background on container, let body color shine through */
     flex-wrap: wrap; 
 }
 
@@ -33,12 +41,13 @@ h1 { margin-bottom: 20px; color: #2c3e50; }
     flex-direction: column;
     align-items: center; 
     flex: 1; 
+    min-width: 320px;
 }
 
-/* SETUP MENU GRID */
+/* --- SETUP MENU GRID --- */
 .setup-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* Two columns */
+    grid-template-columns: 1fr 1fr;
     gap: 15px;
     margin-bottom: 20px;
 }
@@ -51,36 +60,30 @@ h1 { margin-bottom: 20px; color: #2c3e50; }
 
 .setup-label {
     font-size: 12px;
-    font-weight: bold;
+    font-weight: 800;
     text-transform: uppercase;
-    color: #555;
+    color: #7f8c8d;
     margin-left: 2px;
 }
 
-/* The Dropdowns */
 .setup-select {
-    padding: 8px 12px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
+    padding: 10px 12px;
+    border: 1px solid #dcdcdc;
+    border-radius: 8px;
     background-color: white;
     font-size: 14px;
+    font-family: 'Nunito', sans-serif;
     color: #333;
     cursor: pointer;
     width: 100%;
-    transition: border-color 0.2s;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.03);
 }
 
-.setup-select:hover {
-    border-color: #888;
-}
+.setup-select:hover { border-color: #bbb; }
+.setup-select:focus { border-color: #2c3e50; outline: none; }
 
-.setup-select:focus {
-    border-color: #2c3e50;
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(44, 62, 80, 0.1);
-}
-
-/* Color-coded borders for the dropdowns to help quick scanning */
+/* Dropdown Border Colors */
 .setup-select.RED { border-left: 5px solid #e53935; }
 .setup-select.GRAY { border-left: 5px solid #546e7a; }
 .setup-select.YELLOW { border-left: 5px solid #fdd835; }
@@ -89,99 +92,98 @@ h1 { margin-bottom: 20px; color: #2c3e50; }
 .setup-select.BLACK { border-left: 5px solid #424242; }
 .setup-select.PURPLE { border-left: 5px solid #7b1fa2; }
 
+
 /* =========================================
-   2. RESOURCE CONTROLS
+   2. PLAYER DASHBOARD & CONTROLS
    ========================================= */
-.controls {
+
+/* The Container for Score, Resources, Undo */
+.controls, .dashboard-panel {
     margin: 0 auto 20px auto;
     background: white;
     padding: 15px 25px;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-    width: fit-content;
-    min-width: 300px;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.06); /* Soft floaty shadow */
+    width: 100%;
+    max-width: 400px; /* Match board width roughly */
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .resource-palette {
     display: flex;
     gap: 12px;
     justify-content: center;
-    margin-top: 10px;
+    margin-top: 5px;
 }
 
 .res-btn {
-    width: 45px; height: 45px;
-    border-radius: 8px;
+    width: 48px; height: 48px;
     cursor: pointer;
     display: flex;
     align-items: center; 
     justify-content: center;
-    font-weight: bold;
-    font-size: 18px;
     padding: 0;
-    color: rgba(255,255,255,0.9); 
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    transition: all 0.2s ease;
-    border: 3px solid transparent; 
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .res-btn:hover { transform: translateY(-3px); }
 
 .res-btn.selected {
-    border-color: #2c3e50;
-    transform: scale(1.1);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-    z-index: 2;
+    transform: scale(1.15) translateY(-5px); /* Lift it up a bit more */
+    z-index: 10;
+    box-shadow: 0 0 0 3px #2c3e50, 0 10px 20px rgba(0,0,0,0.2);
+    position: relative; /* Needed for the arrow */
 }
 
-/* Resource Colors */
-.WOOD { background: #795548; color: white !important; }
-.WHEAT { background: #fdd835; color: black !important; }
-.BRICK { background: #d32f2f; color: white !important; }
-.GLASS { background: #039be5; color: white !important; }
-.STONE { background: #616161; color: white !important; }
+/* The Little Arrow */
+.res-btn.selected::after {
+    content: '';
+    position: absolute;
+    bottom: -10px; /* Position below the button */
+    left: 50%;
+    transform: translateX(-50%);
+    
+    /* CSS Triangle */
+    width: 0; 
+    height: 0; 
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid #2c3e50; /* Matches the border color */
+}
+
 
 /* =========================================
-   3. THE BOARD (Grassy Lawn Look)
+   3. THE BOARD
    ========================================= */
 .board {
     display: grid;
     grid-template-columns: repeat(4, 80px);
-    gap: 10px; /* The gaps act as the grid lines */
+    gap: 12px;
     padding: 20px;
-    
     margin: 0 auto;
     width: fit-content; 
     justify-content: center;
 
-    /* Grassy Green Background */
+    /* Grassy Look */
     background-color: #43a047; 
-    
-    /* Optional: Subtle texture using gradients to look like grass turf */
-    background-image: linear-gradient(
-        rgba(255,255,255,0.1) 1px, 
-        transparent 1px
-    ),
-    linear-gradient(
-        90deg, 
-        rgba(255,255,255,0.1) 1px, 
-        transparent 1px
-    );
-    background-size: 20px 20px; /* Subtle grid pattern on the grass itself */
+    background-image: 
+        linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
 
-    border-radius: 12px;
-    
-    /* Deep shadow to make the board look like a physical object */
+    border-radius: 16px;
     box-shadow: 
-        0 10px 20px rgba(0,0,0,0.2),    /* Drop shadow */
-        inset 0 -5px 0 rgba(0,0,0,0.2); /* Thickness at bottom */
+        0 20px 40px rgba(0,0,0,0.3),    
+        inset 0 -6px 0 rgba(0,0,0,0.2); 
     
-    border: 5px solid #2e7d32; /* Dark Green Border */
+    border: 6px solid #2e7d32;
 }
 
 /* =========================================
-   CELLS (The Slots)
+   CELLS & RESOURCES (The 3D Bits)
    ========================================= */
 .cell {
     width: 80px; height: 80px;
@@ -190,111 +192,106 @@ h1 { margin-bottom: 20px; color: #2c3e50; }
     align-items: center; justify-content: center;
     font-size: 14px; 
     cursor: pointer;
-    transition: 
-        transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275),
-        box-shadow 0.2s ease,
-        background-color 0.2s ease,
-        border-color 0.2s ease,
-        /* Wait 0.2s before dropping z-index so the shrink animation finishes on top */
-        z-index 0s linear 0.2s;
-    
+    transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
     background-position: center;
     background-size: 85%;
     background-repeat: no-repeat;
 }
 
-/* --- STATE 1: EMPTY (Lawn/Grass Plot) --- */
+/* --- STATE 1: EMPTY PLOT --- */
 .cell.empty {
-    /* A nice light lawn green (Material Green 100) */
     background-color: #c8e6c9; 
-    color: #1b5e20; /* Dark green text for coords so it's readable */
-    
-    /* Inner shadow for depth */
-    box-shadow: 
-        inset 3px 3px 6px rgba(0,0,0,0.15), 
-        inset -2px -2px 4px rgba(255,255,255,0.4);
-        
-    border: 1px solid #81c784; /* Medium green border */
+    color: #1b5e20;
+    box-shadow: inset 2px 2px 5px rgba(0,0,0,0.15);
+    border: 1px solid #81c784;
 }
 
 .cell.empty:hover {
-    /* Lighter green on hover (Material Green 50) */
     background-color: #e8f5e9; 
     box-shadow: inset 1px 1px 3px rgba(0,0,0,0.1);
 }
 
-.cell.empty:hover {
-    /* On hover, lighten the dirt slightly, but don't go pure white */
-    background-color: #efebe9; 
-    box-shadow: inset 1px 1px 3px rgba(0,0,0,0.1);
-}
-
-.cell.empty:hover {
-    background-color: #ffffff; 
-    box-shadow: inset 1px 1px 3px rgba(0,0,0,0.1);
-}
-
-/* --- STATE 2: OCCUPIED (Pop-up Tiles) --- */
+/* --- STATE 2: OCCUPIED (Pop Up) --- */
 .cell:not(.empty) {
-    /* Lift it UP */
     transform: translateY(-4px); 
     z-index: 2;
+    box-shadow: 0 6px 0 rgba(0,0,0,0.15), 0 10px 15px rgba(0,0,0,0.2); 
+}
+
+/* --- SHARED RESOURCE STYLING (3D Cubes) --- */
+/* Applies to both Board Cells and Palette Buttons */
+
+.cell.WOOD, .res-btn.WOOD,
+.cell.WHEAT, .res-btn.WHEAT,
+.cell.BRICK, .res-btn.BRICK,
+.cell.GLASS, .res-btn.GLASS,
+.cell.STONE, .res-btn.STONE {
+    color: transparent !important; /* Hide text */
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 6px; 
     
-    /* Drop shadow makes it look like a token sitting on the grass */
+    /* 3D Bevel Lighting */
     box-shadow: 
-        0 5px 0 rgba(0,0,0,0.15), /* The "side" of the token */
-        0 8px 15px rgba(0,0,0,0.2); /* The cast shadow on the grass */
-        
-    border: 1px solid rgba(255,255,255,0.6); 
+        inset 3px 3px 6px rgba(255,255,255,0.35), /* Highlight Top-Left */
+        inset -3px -3px 6px rgba(0,0,0,0.15);     /* Shadow Bottom-Right */
 }
 
-/* Resource Colors (Cubes) */
-.cell.WOOD  { background-color: #795548; }
-.cell.WHEAT { background-color: #fdd835; color: rgba(0,0,0,0.6) !important; }
-.cell.BRICK { background-color: #d32f2f; }
-.cell.GLASS { background-color: #039be5; }
-.cell.STONE { background-color: #616161; }
+/* Resource Colors */
+.cell.WOOD, .res-btn.WOOD   { background-color: #8d6e63; } /* Wood Brown */
+.cell.WHEAT, .res-btn.WHEAT { background-color: #fdd835; } /* Wheat Gold */
+.cell.BRICK, .res-btn.BRICK { background-color: #ef5350; } /* Brick Red */
+.cell.GLASS, .res-btn.GLASS { background-color: #29b6f6; } /* Glass Blue */
+.cell.STONE, .res-btn.STONE { background-color: #757575; } /* Stone Grey */
 
-/* Building Base Tiles */
-/* A clean white/cream tile looks great on green grass */
+/* Optional: Add shadow to cells that have these resources (overriding the shared generic shadow) */
+.cell.WOOD, .cell.WHEAT, .cell.BRICK, .cell.GLASS, .cell.STONE {
+    box-shadow: 
+        inset 3px 3px 6px rgba(255,255,255,0.35), 
+        inset -3px -3px 6px rgba(0,0,0,0.15),
+        0 6px 0 rgba(0,0,0,0.15), 0 10px 15px rgba(0,0,0,0.2); 
+}
+
+
+/* Building Base Tiles (White) */
 .cell:not(.empty):not(.WOOD):not(.WHEAT):not(.BRICK):not(.GLASS):not(.STONE) {
-    background-color: #fff; 
-    /* Or use #fcfbf0 for a warmer, creamy look */
+    background-color: #ffffff !important; 
+    border: 1px solid rgba(0,0,0,0.1);
 }
+
 
 /* =========================================
    4. SIDEBAR & BUILD MENU
    ========================================= */
 #sidebar {
-    width: 260px;
+    width: 300px;
     background: white;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
     text-align: left;
-    min-height: 200px; 
+    min-height: 400px; 
+    display: flex;
+    flex-direction: column;
 }
 
-/* Base Build Button Style */
+/* Build Button */
 .build-btn {
-    position: relative; /* Needed for absolute positioning of the icon */
+    position: relative;
     width: 100%;
-    padding: 12px;
-    margin-bottom: 10px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
-    font-weight: bold;
+    font-weight: 800;
+    font-family: 'Nunito', sans-serif;
     text-align: left;
     color: white; 
-    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
     transition: transform 0.1s, filter 0.2s;
-    
-    /* Ensure text doesn't overlap the icon area */
     padding-right: 50px; 
-    
-    /* Default Color */
     background-color: #2e7d32;
+    font-size: 15px;
 }
 
 .build-btn:hover { 
@@ -302,170 +299,106 @@ h1 { margin-bottom: 20px; color: #2c3e50; }
     filter: brightness(1.1); 
 }
 
+/* Icon Container (Solid White Tile) */
 .build-btn::after {
     content: '';
     position: absolute;
-    right: 12px;        /* Align with the button padding */
+    right: 12px;
     top: 50%;
-    transform: translateY(-50%); /* Vertically centered */
-    
-    /* Slightly smaller size so it fits INSIDE the button */
-    width: 30px; 
-    height: 30px;
-    
-    /* SOLID White Background */
+    transform: translateY(-50%);
+    width: 32px; height: 32px;
     background-color: #ffffff; 
-    
-    /* Rounded corners matching the button's theme */
     border-radius: 6px;
     border: 1px solid rgba(0,0,0,0.1); 
-    
-    /* Subtle shadow (inset looks cleaner for a "slot" feel, or drop for a tile) */
-    /* Let's stick to a very small drop shadow so it doesn't pop "out" too much */
-    box-shadow: 0 1px 2px rgba(0,0,0,0.15); 
-    
-    /* The Icon Image itself */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15); 
     background-size: 20px 20px; 
     background-repeat: no-repeat;
     background-position: center;
-    
     z-index: 2; 
 }
 
-/* Optional: Subtle interaction on hover */
-.build-btn:hover::after {
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    /* No scale transform, so it stays neatly inside */
-}
-
-/* --- Colorful Build Buttons --- */
-
-/* 1. BLUE (Cottage) */
+/* --- Build Button Colors --- */
 .build-btn.COTTAGE { background-color: #00acc1; }
 .build-btn.COTTAGE::after { background-image: url('/buildings/cottage.png'); }
 
-/* 2. RED (Farm & Variants) */
-.build-btn.FARM, 
-.build-btn.GRANARY, 
-.build-btn.GREENHOUSE, 
-.build-btn.ORCHARD { background-color: #e53935; }
+.build-btn.FARM, .build-btn.GRANARY, .build-btn.GREENHOUSE, .build-btn.ORCHARD { background-color: #e53935; }
+.build-btn.FARM::after, .build-btn.GRANARY::after, .build-btn.GREENHOUSE::after, .build-btn.ORCHARD::after { background-image: url('/buildings/farm.png'); }
 
-.build-btn.FARM::after, 
-.build-btn.GRANARY::after, 
-.build-btn.GREENHOUSE::after, 
-.build-btn.ORCHARD::after { background-image: url('/buildings/farm.png'); }
+.build-btn.WELL, .build-btn.FOUNTAIN, .build-btn.MILLSTONE, .build-btn.SHED { background-color: #546e7a; }
+.build-btn.WELL::after, .build-btn.FOUNTAIN::after, .build-btn.MILLSTONE::after, .build-btn.SHED::after { background-image: url('/buildings/well.png'); }
 
+.build-btn.CHAPEL, .build-btn.ABBEY, .build-btn.CLOISTER, .build-btn.TEMPLE { background-color: #fb8c00; }
+.build-btn.CHAPEL::after, .build-btn.ABBEY::after, .build-btn.CLOISTER::after, .build-btn.TEMPLE::after { background-image: url('/buildings/chapel.png'); }
 
-/* 3. GRAY (Well & Variants) */
-.build-btn.WELL, 
-.build-btn.FOUNTAIN, 
-.build-btn.MILLSTONE, 
-.build-btn.SHED { background-color: #546e7a; }
+.build-btn.TAVERN, .build-btn.ALMSHOUSE, .build-btn.INN, .build-btn.FEAST-HALL { background-color: #43a047; }
+.build-btn.TAVERN::after, .build-btn.ALMSHOUSE::after, .build-btn.INN::after, .build-btn.FEAST-HALL::after { background-image: url('/buildings/tavern.png'); }
 
-.build-btn.WELL::after, 
-.build-btn.FOUNTAIN::after, 
-.build-btn.MILLSTONE::after, 
-.build-btn.SHED::after { background-image: url('/buildings/well.png'); }
-
-
-/* 4. ORANGE (Chapel & Variants) */
-.build-btn.CHAPEL, 
-.build-btn.ABBEY, 
-.build-btn.CLOISTER, 
-.build-btn.TEMPLE { background-color: #fb8c00; }
-
-.build-btn.CHAPEL::after, 
-.build-btn.ABBEY::after, 
-.build-btn.CLOISTER::after, 
-.build-btn.TEMPLE::after { background-image: url('/buildings/chapel.png'); }
-
-
-/* 5. GREEN (Tavern & Variants) */
-.build-btn.TAVERN, 
-.build-btn.ALMSHOUSE, 
-.build-btn.INN, 
-.build-btn.FEAST-HALL { background-color: #43a047; }
-
-.build-btn.TAVERN::after, 
-.build-btn.ALMSHOUSE::after, 
-.build-btn.INN::after, 
-.build-btn.FEAST-HALL::after { background-image: url('/buildings/tavern.png'); }
-
-
-/* 6. YELLOW (Theater & Variants) */
-.build-btn.THEATER, 
-.build-btn.BAKERY, 
-.build-btn.TAILOR, 
-.build-btn.MARKET { 
-    background-color: #fdd835; 
-    color: #333; 
-    text-shadow: none; 
+.build-btn.THEATER, .build-btn.BAKERY, .build-btn.TAILOR, .build-btn.MARKET { 
+    background-color: #fdd835; color: #4e342e; text-shadow: none; 
 }
-/* For yellow buttons, the white box might be too hard to see, 
-   so we make the icon container darker for contrast */
-.build-btn.THEATER::after, 
-.build-btn.BAKERY::after, 
-.build-btn.TAILOR::after, 
-.build-btn.MARKET::after { 
+.build-btn.THEATER::after, .build-btn.BAKERY::after, .build-btn.TAILOR::after, .build-btn.MARKET::after { 
     background-image: url('/buildings/theater.png');
-    background-color: rgba(0,0,0,0.1); /* Darker box for yellow button */
-    border-color: rgba(0,0,0,0.1);
+    border-color: rgba(0,0,0,0.15); /* Slightly darker border for contrast on yellow */
 }
 
+.build-btn.FACTORY, .build-btn.BANK, .build-btn.WAREHOUSE, .build-btn.TRADING-POST { background-color: #424242; }
+.build-btn.FACTORY::after, .build-btn.BANK::after, .build-btn.WAREHOUSE::after, .build-btn.TRADING-POST::after { background-image: url('/buildings/factory.png'); }
 
-/* 7. BLACK (Economy) */
-.build-btn.FACTORY, 
-.build-btn.BANK, 
-.build-btn.WAREHOUSE, 
-.build-btn.TRADING-POST { background-color: #424242; }
-
-.build-btn.FACTORY::after, 
-.build-btn.BANK::after, 
-.build-btn.WAREHOUSE::after, 
-.build-btn.TRADING-POST::after { background-image: url('/buildings/factory.png'); }
-
-
-/* 8. PURPLE (Monuments - Fallback) */
 .build-btn { background-color: #7b1fa2; }
 .build-btn::after { background-image: url('/buildings/monument.png'); }
 
 
-/* Deck / Reference Display */
+/* --- Sidebar Deck Display --- */
 #deck-display {
     display: flex;
     flex-direction: column;
     gap: 12px;
     margin-top: 20px;
-    padding-right: 5px;
+    padding-right: 8px; /* Space for scrollbar */
     max-height: 60vh; 
     overflow-y: auto; 
 }
 
+/* Custom Scrollbar */
+#deck-display::-webkit-scrollbar {
+    width: 6px;
+}
+#deck-display::-webkit-scrollbar-track {
+    background: transparent; 
+}
+#deck-display::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+#deck-display::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
 .building-card {
     background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 10px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    border: 1px solid #eee;
+    border-radius: 10px;
+    padding: 12px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.04);
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 
 .card-header {
-    font-weight: bold;
-    font-size: 14px;
+    font-weight: 800;
+    font-size: 15px;
+    color: #333;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 5px;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 8px;
 }
 
 .card-icon {
-    width: 30px;
-    height: 30px;
-    border-radius: 4px;
+    width: 28px; height: 28px;
+    border-radius: 5px;
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
@@ -473,99 +406,57 @@ h1 { margin-bottom: 20px; color: #2c3e50; }
 
 .card-body {
     display: flex;
-    gap: 10px;
+    gap: 12px;
     align-items: flex-start;
 }
 
-.mini-pattern { display: grid; gap: 2px; }
-.pattern-cell { width: 12px; height: 12px; border-radius: 2px; background-color: #eee; }
-.cell.WOOD, .res-btn.WOOD   { background-color: #795548; color: white !important; }
-.cell.WHEAT, .res-btn.WHEAT { background-color: #fdd835; color: black !important; }
-.cell.BRICK, .res-btn.BRICK { background-color: #d32f2f; color: white !important; }
-.cell.GLASS, .res-btn.GLASS { background-color: #039be5; color: white !important; }
-.cell.STONE, .res-btn.STONE { background-color: #616161; color: white !important; }
+.mini-pattern { display: grid; gap: 3px; }
+.pattern-cell { width: 14px; height: 14px; border-radius: 3px; background-color: #f0f0f0; }
+
+/* Pattern Colors (matching 3D bits) */
+.pattern-cell.WOOD  { background-color: #8d6e63; }
+.pattern-cell.WHEAT { background-color: #fdd835; }
+.pattern-cell.BRICK { background-color: #ef5350; }
+.pattern-cell.GLASS { background-color: #29b6f6; }
+.pattern-cell.STONE { background-color: #757575; }
 
 .card-text {
-    flex: 1; font-size: 11px; color: #666; font-style: italic; line-height: 1.3;
+    flex: 1; font-size: 12px; color: #666; line-height: 1.4;
 }
 
 
 /* =========================================
-   5. BUILDING IMAGES & STYLES
+   5. BUILDING IMAGES
    ========================================= */
 
-/* Shared style for ALL buildings on the grid */
-/* This adds the "Tile" look back so you can see the grid */
-.cell:not(.empty):not(.WOOD):not(.WHEAT):not(.BRICK):not(.GLASS):not(.STONE) {
-    background-color: rgba(255, 255, 255, 0.6) !important; /* Glassy white tile */
-    border: 1px solid rgba(255, 255, 255, 0.8) !important; /* Subtle highlight border */
-    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.5); /* Inner glow */
-}
-
-/* Specific Selectors (Just apply the Image now) */
-/* We removed 'background-color: transparent' so the rule above applies! */
-
-.cell.COTTAGE, .card-icon.COTTAGE {
-    background-image: url('/buildings/cottage.png');
-}
-
-.cell.FARM, .card-icon.FARM, .cell.GRANARY, .card-icon.GRANARY, .cell.GREENHOUSE, .card-icon.GREENHOUSE, .cell.ORCHARD, .card-icon.ORCHARD {
-    background-image: url('/buildings/farm.png');
-}
-
-
-.cell.CHAPEL, .card-icon.CHAPEL, .cell.ABBEY, .card-icon.ABBEY, .cell.CLOISTER, .card-icon.CLOISTER, .cell.TEMPLE, .card-icon.TEMPLE {
-    background-image: url('/buildings/chapel.png');
-}
-
-.cell.TAVERN, .card-icon.TAVERN, .cell.ALMSHOUSE, .card-icon.ALMSHOUSE, .cell.INN, .card-icon.INN, .cell.FEAST-HALL, .card-icon.FEAST-HALL {
-    background-image: url('/buildings/tavern.png');
-}
-
-.cell.THEATER, .card-icon.THEATER, .cell.BAKERY, .card-icon.BAKERY, .cell.TAILOR, .card-icon.TAILOR, .cell.MARKET, .card-icon.MARKET {
-    background-image: url('/buildings/theater.png');
-}
-
-.cell.WELL, .card-icon.WELL, .cell.FOUNTAIN, .card-icon.FOUNTAIN, .cell.SHED, .card-icon.SHED, .cell.MILLSTONE, .card-icon.MILLSTONE {
-    background-image: url('/buildings/well.png');
-}
-
-.cell.FACTORY, .card-icon.FACTORY, .cell.BANK, .card-icon.BANK, .cell.WAREHOUSE, .card-icon.WAREHOUSE, .cell.TRADING-POST, .card-icon.TRADING-POST {
-    background-image: url('/buildings/factory.png');
-}
-
-
-.cell.MONUMENT {
-    background-image: url('/buildings/monument.png');
-    /* 85% is too big for some icons, 60% fits nicely inside the white tile */
-    background-size: 60%; 
-    background-repeat: no-repeat;
-    background-position: center;
-}
-
-.building-card.MONUMENT .card-icon {
-    background-image: url('/buildings/monument.png');
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-}
-
+/* Specific Images */
+.cell.COTTAGE, .card-icon.COTTAGE { background-image: url('/buildings/cottage.png'); }
+.cell.FARM, .card-icon.FARM, .cell.GRANARY, .card-icon.GRANARY, .cell.GREENHOUSE, .card-icon.GREENHOUSE, .cell.ORCHARD, .card-icon.ORCHARD { background-image: url('/buildings/farm.png'); }
+.cell.CHAPEL, .card-icon.CHAPEL, .cell.ABBEY, .card-icon.ABBEY, .cell.CLOISTER, .card-icon.CLOISTER, .cell.TEMPLE, .card-icon.TEMPLE { background-image: url('/buildings/chapel.png'); }
+.cell.TAVERN, .card-icon.TAVERN, .cell.ALMSHOUSE, .card-icon.ALMSHOUSE, .cell.INN, .card-icon.INN, .cell.FEAST-HALL, .card-icon.FEAST-HALL { background-image: url('/buildings/tavern.png'); }
+.cell.THEATER, .card-icon.THEATER, .cell.BAKERY, .card-icon.BAKERY, .cell.TAILOR, .card-icon.TAILOR, .cell.MARKET, .card-icon.MARKET { background-image: url('/buildings/theater.png'); }
+.cell.WELL, .card-icon.WELL, .cell.FOUNTAIN, .card-icon.FOUNTAIN, .cell.SHED, .card-icon.SHED, .cell.MILLSTONE, .card-icon.MILLSTONE { background-image: url('/buildings/well.png'); }
+.cell.FACTORY, .card-icon.FACTORY, .cell.BANK, .card-icon.BANK, .cell.WAREHOUSE, .card-icon.WAREHOUSE, .cell.TRADING-POST, .card-icon.TRADING-POST { background-image: url('/buildings/factory.png'); }
+.cell.MONUMENT, .building-card.MONUMENT .card-icon { background-image: url('/buildings/monument.png'); background-size: 60%; }
+.building-card.MONUMENT .card-icon { background-size: contain; }
 
 /* =========================================
-   6. UI HELPERS & MODALS
+   6. UI MODALS & HELPERS
    ========================================= */
 .message {
     height: 30px; 
     margin-top: 15px;
-    font-weight: bold;
+    font-weight: 800;
     text-align: center;
+    color: #555;
 }
 
 .modal-overlay {
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(44, 62, 80, 0.7); /* Darker, slightly blue tint */
+    backdrop-filter: blur(2px); /* Modern blur effect */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -577,115 +468,81 @@ h1 { margin-bottom: 20px; color: #2c3e50; }
 
 .modal-content {
     background: white;
-    padding: 30px;
-    border-radius: 16px;
-    width: 350px;
+    padding: 35px;
+    border-radius: 20px;
+    width: 400px;
     text-align: center;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.25);
 }
 
-.big-score { font-size: 64px; font-weight: 800; color: #2c3e50; margin: 10px 0; }
+.big-score { font-size: 72px; font-weight: 800; color: #2c3e50; margin: 10px 0; }
 
 .score-details {
     margin: 20px 0; text-align: left;
     background: #f8f9fa; padding: 15px;
-    border-radius: 8px;
+    border-radius: 12px;
 }
 #score-breakdown-list { list-style: none; padding: 0; margin: 0; }
-.score-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #eee; font-size: 14px; }
+.score-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #eee; font-size: 15px; }
 .score-row:last-child { border-bottom: none; }
-.score-row.penalty { color: #d32f2f; font-weight: bold; }
+.score-row.penalty { color: #e53935; font-weight: 800; }
 
 .primary-btn {
     background: #2c3e50;
     color: white; border: none;
-    padding: 12px 30px; border-radius: 8px;
-    font-size: 16px; cursor: pointer; font-weight: bold;
+    padding: 14px 30px; border-radius: 10px;
+    font-size: 16px; cursor: pointer; font-weight: 800;
     width: 100%;
+    transition: background 0.2s;
+    font-family: 'Nunito', sans-serif;
 }
 .primary-btn:hover { background: #34495e; }
 
 .secondary-btn {
-    background-color: #f0f0f0;
-    border: 1px solid #ccc; color: #333;
-    padding: 8px 16px; border-radius: 6px;
-    cursor: pointer; font-size: 14px;
-    margin-top: 10px; transition: all 0.2s;
+    background-color: #eceff1;
+    border: none; color: #546e7a;
+    padding: 8px 16px; border-radius: 8px;
+    cursor: pointer; font-size: 14px; font-weight: 700;
+    transition: all 0.2s;
+    font-family: 'Nunito', sans-serif;
 }
-.secondary-btn:hover:not(:disabled) { background-color: #e0e0e0; transform: translateY(-1px); }
+.secondary-btn:hover:not(:disabled) { background-color: #cfd8dc; color: #37474f; }
 .secondary-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* Start Screen Extras */
-.monument-card {
-    background: #f3e5f5;
-    border: 3px solid #8e24aa;
-    color: #4a148c;
-    padding: 20px;
-    border-radius: 12px;
-    margin: 20px auto;
-    width: 80%;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    display: flex; flex-direction: column; align-items: center;
-}
-.monument-select {
-    font-size: 1.5rem; font-weight: bold; color: #4a148c;
-    background: transparent; border: none;
-    border-bottom: 2px solid #8e24aa;
-    padding: 5px; margin-bottom: 10px; text-align: center;
-    width: 100%; cursor: pointer; outline: none;
-}
-.mini-grid {
-    display: grid; gap: 4px; margin-top: 10px;
-    background-color: rgba(0,0,0,0.1); padding: 4px; border-radius: 4px;
-}
-.mini-cell {
-    width: 30px; height: 30px; border-radius: 4px;
-    border: 1px solid rgba(0,0,0,0.2);
-}
-.mini-cell.WOOD { background: #795548; }
-.mini-cell.WHEAT { background: #fdd835; }
-.mini-cell.BRICK { background: #d32f2f; }
-.mini-cell.GLASS { background: #039be5; }
-.mini-cell.STONE { background: #616161; }
-.mini-cell.NONE  { background: transparent; border: none; }
 
-.pattern-cell.WOOD  { background-color: #795548; }
-.pattern-cell.WHEAT { background-color: #fdd835; }
-.pattern-cell.BRICK { background-color: #d32f2f; }
-.pattern-cell.GLASS { background-color: #039be5; }
-.pattern-cell.STONE { background-color: #616161; }
-
-/* --- MATCH HIGHLIGHT FIX --- */
-
-/* We use .cell.match-highlight to tie specificity, and !important to force the shadow */
+/* --- ANIMATIONS & HIGHLIGHTS --- */
 .cell.match-highlight {
-    /* Thick Yellow Glow - !important overrides the "inset" shadow of the empty cell */
-    box-shadow: 0 0 0 5px #ffeb3b, 0 0 15px #ffeb3b !important;
-    
-    /* Make the border yellow too */
-    border-color: #ffeb3b !important;
-    
-    /* Bring it to the very top so it doesn't get covered by neighbors */
+    box-shadow: 0 0 0 5px #ffeb3b, 0 0 15px rgba(255, 235, 59, 0.6) !important;
+    border-color: #fbc02d !important;
     z-index: 100 !important;
-    
-    /* Optional: Add a pulse animation */
     animation: highlightPulse 0.8s infinite alternate;
 }
 
 @keyframes highlightPulse {
-    from { transform: scale(0.92); }
-    to { transform: scale(1.0); }
+    from { transform: scale(0.95); }
+    to { transform: scale(1.02); }
 }
 
 .cell.preview-target {
-    /* Bright Teal/Cyan Border to show where the building will go */
-    border-color: #00e5ff !important;
-    box-shadow: 0 0 15px #00e5ff, inset 0 0 10px rgba(0, 229, 255, 0.4) !important;
+    border-color: #00bcd4 !important;
+    box-shadow: 0 0 0 3px #00bcd4, inset 0 0 10px rgba(0, 188, 212, 0.3) !important;
     z-index: 100 !important;
-    
-    /* Smooth transition */
-    transition: all 0.2s ease;
-    
-    /* Optional: Scale up slightly */
     transform: scale(1.05) translateY(-6px) !important; 
+    transition: all 0.2s ease;
+}
+
+.monument-pattern-grid .mini-cell {
+    /* Updates for the start screen grid to match */
+    border-radius: 3px;
+}
+
+@keyframes popIn {
+    0% { transform: scale(0); opacity: 0; }
+    70% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); }
+}
+
+/* Apply to any cell that IS NOT empty (Resources & Buildings) */
+.cell:not(.empty) {
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }

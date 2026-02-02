@@ -5,6 +5,7 @@
     <title>Tiny Towns</title>
     <link rel="stylesheet" href="./src/style.css">
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
   </head>
   <body>
     <div id="start-screen-modal" class="modal-overlay">
@@ -26,17 +27,21 @@
 
     <div class="game-container">
         
-        <div class="main-area">
+    <div class="main-area">
             <h1>Tiny Towns</h1>
             
-            <div class="controls" style="width: 100%; max-width: 400px; display:flex; justify-content:space-between; align-items:center;">
-                <div id="score-display" style="font-size: 18px; font-weight: bold;">Score: 0</div>
-                <button id="undo-btn" class="secondary-btn" style="margin:0; padding: 5px 12px;" disabled>Undo</button>
-            </div>
+            <div class="dashboard-panel">
+                
+                <div style="width: 100%; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding-bottom:10px; margin-bottom:10px;">
+                    <div id="score-display" style="font-size: 18px; font-weight: 800; color:#2c3e50;">Score: 0</div>
+                    <button id="undo-btn" class="secondary-btn" style="margin:0;" disabled>Undo</button>
+                </div>
 
-            <div class="controls">
-                <p style="margin:0 0 5px 0; font-size:14px; color:#666;">Current Resource:</p>
-                <div id="resource-palette" class="resource-palette"></div>
+                <div>
+                    <p style="margin:0 0 8px 0; font-size:13px; font-weight:700; color:#7f8c8d; text-transform:uppercase;">Current Resource</p>
+                    <div id="resource-palette" class="resource-palette"></div>
+                </div>
+
             </div>
 
             <div id="board" class="board"></div>
