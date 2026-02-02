@@ -1,5 +1,5 @@
 import { AdjacentFeederStrategy, ContiguousFeederStrategy, GlobalFeederStrategy, RowColFeederStrategy } from './FeederStrategies';
-import { AdjacencyRequirementStrategy, AdjacencyStrategy, CategoryAdjacencyStrategy, CenterCountStrategy, FixedScoreStrategy, GlobalUniqueStrategy, LargestGroupStrategy, LineCountStrategy, MausoleumStrategy, MissingTypeStrategy, SavedScoreStrategy, UniqueLineStrategy, UniqueNeighborStrategy } from './ScoringStrategies';
+import { AdjacencyRequirementStrategy, AdjacencyStrategy, AlmshouseStrategy, CategoryAdjacencyStrategy, CenterCountStrategy, FixedScoreStrategy, GlobalUniqueStrategy, IsolatedStrategy, LargestGroupStrategy, LineCountStrategy, MausoleumStrategy, MissingTypeStrategy, SavedScoreStrategy, UniqueLineStrategy, UniqueNeighborStrategy } from './ScoringStrategies';
 import { type Building, BuildingType, Resource } from './Types';
 
 // --- BLUE (Cottages) ---
@@ -102,6 +102,37 @@ export const GRAY_BUILDINGS = [WELL, FOUNTAIN, MILLSTONE, SHED];
 
 
 // --- GREEN (Taverns) ---
+export const ALMSHOUSE: Building = {
+    name: 'Almshouse',
+    type: 'GREEN',
+    pattern: [
+        [Resource.STONE, Resource.STONE, Resource.GLASS]
+    ],
+    description: 'Score increasing points for each Almshouse you have built.',
+    scorer: new AlmshouseStrategy()
+};
+
+export const INN: Building = {
+    name: 'Inn',
+    type: 'GREEN',
+    pattern: [
+        [Resource.WHEAT, Resource.STONE, Resource.GLASS]
+    ],
+    description: 'Get 3 points if not in a row or column with another Inn.',
+    scorer: new IsolatedStrategy()
+};
+
+export const FEAST_HALL: Building = {
+    name: 'Feast Hall',
+    type: 'GREEN',
+    pattern: [
+        [Resource.WOOD, Resource.WOOD, Resource.GLASS]
+    ],
+    description: 'Get 2 points, and an extra 1 if you have more Feast Halls than the player on your right.',
+    scorer: new FixedScoreStrategy(2)
+    //TODO: IMPLEMENT SCORING WHEN MULTIPLAYER IS ADDED
+};
+
 export const TAVERN: Building = {
     name: 'Tavern',
     type: 'GREEN',
@@ -110,7 +141,7 @@ export const TAVERN: Building = {
     ],
     description: 'Score increasing points for each Tavern you have built.',
 };
-export const GREEN_BUILDINGS = [TAVERN];
+export const GREEN_BUILDINGS = [TAVERN, INN, ALMSHOUSE, FEAST_HALL];
 
 
 // --- YELLOW (Theaters/Commercial) ---
@@ -133,7 +164,6 @@ export const BAKERY: Building = {
         [Resource.NONE, Resource.WHEAT, Resource.NONE],
         [Resource.BRICK, Resource.GLASS, Resource.BRICK]
     ],
-    // Reusing the strategy from Millstone!
     scorer: new CategoryAdjacencyStrategy(['RED'], 3)
 };
 

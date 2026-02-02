@@ -29,7 +29,11 @@ export const BuildingType = {
     GRANARY: 'GRANARY',
     ORCHARD: 'ORCHARD',
     GREENHOUSE: 'GREENHOUSE',
+    // --- GREEN BUILDINGS ---
     TAVERN: 'TAVERN',
+    INN: 'INN',
+    ALMSHOUSE: 'ALMSHOUSE',
+    FEAST_HALL: 'FEAST_HALL',
     // --- YELLOW BUILDINGS ---
     MARKET: 'MARKET',
     TAILOR: 'TAILOR',

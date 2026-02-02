@@ -350,7 +350,7 @@ h1 { margin-bottom: 20px; color: #2c3e50; }
     background-image: url('/buildings/chapel.png');
 }
 
-.cell.TAVERN, .card-icon.TAVERN, .cell.ALMSHOUSE, .card-icon.ALMSHOUSE, .cell.INN, .card-icon.INN, .cell.FEAST_HALL, .card-icon.FEAST_HALL {
+.cell.TAVERN, .card-icon.TAVERN, .cell.ALMSHOUSE, .card-icon.ALMSHOUSE, .cell.INN, .card-icon.INN, .cell.FEAST-HALL, .card-icon.FEAST-HALL {
     background-image: url('/buildings/tavern.png');
 }
 

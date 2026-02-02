@@ -367,3 +367,65 @@ export class CenterCountStrategy implements ScoringStrategy {
         return score;
     }
 }
+
+export class AlmshouseStrategy implements ScoringStrategy {
+    score(ctx: ScoringContext): number {
+        const myName = ctx.grid[ctx.row][ctx.col];
+        // Handle case-insensitivity safely
+        const count = ctx.counts[myName] || ctx.counts[myName.toUpperCase()] || 0;
+
+        if (count === 0) return 0;
+
+        // 1. Odd Counts: Always -1 per building
+        // Total score = -1 * count.
+        // Score per building = -1.
+        if (count % 2 !== 0) {
+            return -1;
+        }
+
+        // 2. Even Counts: Specific Set Totals
+        // We define the TOTAL score for the whole set here
+        const evenTotals: Record<number, number> = {
+            2: 5,
+            4: 15,
+            6: 26,
+            8: 40,  // Extrapolated: +10, +11, +14? Or just linear? 
+                    // Let's stick to your list. If > 6, we'll assume a good fallback 
+                    // or just cap it. Let's extrapolate +15 per step for now or 
+                    // keep it safe:
+        };
+
+        // Fallback for > 6 (just in case they build 8): 
+        // 2->5 (2.5 avg), 4->15 (3.75 avg), 6->26 (4.33 avg).
+        // Let's treat anything > 6 as roughly 5 points per building to reward the effort.
+        const totalSetScore = evenTotals[count] ?? (count * 5);
+
+        // We return the score *per building* so the ScoreManager sum equals the total
+        return totalSetScore / count;
+    }
+}
+
+export class IsolatedStrategy implements ScoringStrategy {
+    score(ctx: ScoringContext): number {
+        const myName = ctx.grid[ctx.row][ctx.col];
+        
+        // 1. Check Row for duplicates
+        for (let c = 0; c < 4; c++) {
+            // If we find another Inn in this row (ignoring self), we fail instantly.
+            if (c !== ctx.col && ctx.grid[ctx.row][c] === myName) {
+                return 0;
+            }
+        }
+
+        // 2. Check Column for duplicates
+        for (let r = 0; r < 4; r++) {
+            // If we find another Inn in this column (ignoring self), we fail instantly.
+            if (r !== ctx.row && ctx.grid[r][ctx.col] === myName) {
+                return 0;
+            }
+        }
+
+        // 3. If we survived both checks, it is strictly isolated
+        return 3;
+    }
+}
