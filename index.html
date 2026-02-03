@@ -1,110 +1,136 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Tiny Towns</title>
-    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
-    <script type="module" crossorigin src="/tiny-towns/assets/index-O4fDvaPw.js"></script>
-    <link rel="stylesheet" crossorigin href="/tiny-towns/assets/index-xDs1NSEy.css">
-  </head>
-  <body>
-    <div id="start-screen-modal" class="modal-overlay">
-        <div class="modal-content" style="max-width: 600px; width: 90%;">
-            <h1 style="margin-top:0; color:#2e7d32;">Tiny Towns</h1>
-            
-            <div id="landing-ui">
-                <input type="text" id="player-name-input" placeholder="Enter Your Name" class="setup-select" style="margin-bottom: 15px; text-align:center; font-weight:bold;">
-                
-                <div style="display:flex; gap:10px; margin-bottom: 20px;">
-                    <button id="create-game-ui-btn" class="primary-btn">Create New Game</button>
-                </div>
 
-                <div style="border-top: 1px solid #eee; padding-top: 20px; margin-top: 20px;">
-                    <p style="margin:0 0 10px 0; color:#666;">Or join a friend:</p>
-                    <div style="display:flex; gap:10px;">
-                        <input type="text" id="game-id-input" placeholder="Paste Game Code" class="setup-select">
-                        <button id="join-game-btn" class="secondary-btn" style="white-space: nowrap;">Join Game</button>
-                    </div>
-                </div>
-            </div>
+<head>
+  <meta charset="UTF-8" />
+  <title>Tiny Towns</title>
+  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+  <script type="module" crossorigin src="/tiny-towns/assets/index-BjNcsvbs.js"></script>
+  <link rel="stylesheet" crossorigin href="/tiny-towns/assets/index-BNG7mr9T.css">
+</head>
 
-            <div id="lobby-ui" class="hidden">
-                <h3 style="color:#555;">Lobby</h3>
-                <div style="background:#f0f4c3; padding:10px; border-radius:8px; margin-bottom:15px; user-select: text; cursor: pointer;" id="share-code-display" title="Click to copy">
-                    Loading Code...
-                </div>
-                
-                <div id="lobby-player-list" style="margin-bottom:20px; text-align:left;">
-                    </div>
+<body>
+  <div id="start-screen-modal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 600px; width: 90%;">
+      <h1 style="margin-top:0; color:#2e7d32;">Tiny Towns</h1>
 
-                <div id="host-settings" class="hidden">
-                    <p style="color:#666; font-size: 0.9rem;">Town Charter Configuration</p>
-                    <div id="setup-container" style="text-align: left; margin: 10px 0;"></div>
-                    
-                    <div style="background:#f9f9f9; padding:10px; border-radius:8px; margin-bottom:20px; min-height:80px; display:flex; flex-direction:column; align-items:center;">
-                        <p id="monument-desc" style="font-size: 0.9rem; color:#555; margin: 0 0 10px 0; font-style:italic;">Customize your town or leave as Random.</p>
-                        <div id="monument-pattern-grid" class="mini-grid" style="justify-content: center;"></div>
-                    </div>
+      <div id="landing-ui">
+        <input type="text" id="player-name-input" placeholder="Enter Your Name" class="setup-select"
+          style="margin-bottom: 15px; text-align:center; font-weight:bold;">
 
-                    <button id="start-game-btn" class="primary-btn">Start Game</button>
-                </div>
-                
-                <div id="guest-waiting-msg" class="hidden" style="font-style:italic; color:#777;">
-                    Waiting for host to configure the deck...
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="game-container">
-        
-    <div class="main-area">
-            <h1>Tiny Towns</h1>
-            
-            <div class="dashboard-panel">
-                
-                <div style="width: 100%; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding-bottom:10px; margin-bottom:10px;">
-                    <div id="score-display" style="font-size: 18px; font-weight: 800; color:#2c3e50;">Score: 0</div>
-                    <button id="undo-btn" class="secondary-btn" style="margin:0;" disabled>Undo</button>
-                </div>
-
-                <div>
-                    <p style="margin:0 0 8px 0; font-size:13px; font-weight:700; color:#7f8c8d; text-transform:uppercase;">Current Resource</p>
-                    <div id="resource-palette" class="resource-palette"></div>
-                </div>
-
-            </div>
-
-            <div id="board" class="board"></div>
-            
-            <div id="message" class="message"></div>
+        <div style="display:flex; gap:10px; margin-bottom: 20px;">
+          <button id="create-game-ui-btn" class="primary-btn">Create New Game</button>
         </div>
 
-        <div id="sidebar">
-            <h3>Available Builds</h3>
-            <div id="build-menu"></div>
+        <div style="border-top: 1px solid #eee; padding-top: 20px; margin-top: 20px;">
+          <p style="margin:0 0 10px 0; color:#666;">Or join a friend:</p>
+          <div style="display:flex; gap:10px;">
+            <input type="text" id="game-id-input" placeholder="Paste Game Code" class="setup-select">
+            <button id="join-game-btn" class="secondary-btn" style="white-space: nowrap;">Join Game</button>
+          </div>
+        </div>
+      </div>
 
-            <h3 style="margin-top: 30px;">Building Reference</h3>
-            <div id="deck-display"></div>
+      <div id="lobby-ui" class="hidden">
+        <h3 style="color:#555;">Lobby</h3>
+        <div
+          style="background:#f0f4c3; padding:10px; border-radius:8px; margin-bottom:15px; user-select: text; cursor: pointer;"
+          id="share-code-display" title="Click to copy">
+          Loading Code...
         </div>
 
-    </div>
+        <div id="lobby-player-list" style="margin-bottom:20px; text-align:left;">
+        </div>
 
-    <div id="game-over-modal" class="modal-overlay hidden">
-      <div class="modal-content">
-          <h2>Town Complete!</h2>
-          <div id="final-score" class="big-score">0</div>
-          
-          <div class="score-details">
-              <ul id="score-breakdown-list"></ul>
+        <div id="host-settings" class="hidden">
+          <p style="color:#666; font-size: 0.9rem;">Town Charter Configuration</p>
+          <div id="setup-container" style="text-align: left; margin: 10px 0;"></div>
+
+          <div
+            style="background:#f9f9f9; padding:10px; border-radius:8px; margin-bottom:20px; min-height:80px; display:flex; flex-direction:column; align-items:center;">
+            <p id="monument-desc" style="font-size: 0.9rem; color:#555; margin: 0 0 10px 0; font-style:italic;">
+              Customize your town or leave as Random.</p>
+            <div id="monument-pattern-grid" class="mini-grid" style="justify-content: center;"></div>
           </div>
 
-          <div class="modal-actions">
-              <button id="restart-btn" class="primary-btn">Play Again</button>
-          </div>
+          <button id="start-game-btn" class="primary-btn">Start Game</button>
+        </div>
+
+        <div id="guest-waiting-msg" class="hidden" style="font-style:italic; color:#777;">
+          Waiting for host to configure the deck...
+        </div>
       </div>
     </div>
+  </div>
 
-  </body>
+  <div class="game-container">
+    <div id="opponents-sidebar" class="sidebar-panel hidden">
+      <h3>Opponents</h3>
+      <div id="opponents-list"></div>
+    </div>
+
+    <div class="main-area">
+      <h1>Tiny Towns</h1>
+
+      <div class="dashboard-panel">
+
+        <div
+          style="width: 100%; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding-bottom:10px; margin-bottom:10px;">
+          <div id="score-display" style="font-size: 18px; font-weight: 800; color:#2c3e50;">Score: 0</div>
+          <button id="undo-btn" class="secondary-btn" style="margin:0;" disabled>Undo</button>
+        </div>
+
+        <div>
+          <p style="margin:0 0 8px 0; font-size:13px; font-weight:700; color:#7f8c8d; text-transform:uppercase;">Current
+            Resource</p>
+          <div id="resource-palette" class="resource-palette"></div>
+        </div>
+
+      </div>
+
+      <div id="board" class="board"></div>
+
+      <div id="message" class="message"></div>
+    </div>
+
+    <div id="sidebar">
+      <h3>Available Builds</h3>
+      <div id="build-menu"></div>
+
+      <h3 style="margin-top: 30px;">Building Reference</h3>
+      <div id="deck-display"></div>
+    </div>
+
+  </div>
+
+  <div id="game-over-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <h2>Town Complete!</h2>
+      <div id="final-score" class="big-score">0</div>
+
+      <div class="score-details">
+        <ul id="score-breakdown-list"></ul>
+      </div>
+
+      <div class="modal-actions">
+        <button id="restart-btn" class="primary-btn">Play Again</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="multiplayer-results-modal" class="modal-overlay hidden">
+    <div class="modal-content" style="width: 450px;">
+      <h2>🏆 Final Standings 🏆</h2>
+      <div class="leaderboard-container">
+        <ul id="leaderboard-list">
+        </ul>
+      </div>
+      <button id="mp-restart-btn" class="primary-btn" style="margin-top: 20px;">Play Again</button>
+    </div>
+  </div>
+  <div id="toast-container"></div>
+
+</body>
+
 </html>
