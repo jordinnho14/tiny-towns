@@ -41,6 +41,8 @@ const elements = {
     multiplayerResultsModal: document.getElementById('multiplayer-results-modal')!,
     leaderboardList: document.getElementById('leaderboard-list')!,
     mpRestartBtn: document.getElementById('mp-restart-btn')!,
+    opponentsSidebar: document.getElementById('opponents-sidebar')!,
+    opponentsList: document.getElementById('opponents-list')!,
 
     // Existing helpers
     monumentGrid: document.getElementById('monument-pattern-grid')!,
@@ -80,6 +82,10 @@ multiplayer.onStateChange = (data) => {
                 elements.startModal.classList.add('hidden');
                 renderAll();
                 renderer.renderDeck(game.gameRegistry);
+            }
+            if (data.players) {
+                // Pass the players AND the current round number (for status dots)
+                renderOpponents(data.players, data.roundNumber || 1);
             }
 
             // --- A. Identify Master Builder ---
@@ -541,4 +547,85 @@ function showToast(message: string, type: 'info' | 'error' | 'success' = 'info')
     setTimeout(() => {
         div.remove();
     }, 4000);
+}
+
+function renderOpponents(players: any, currentRound: number) {
+    // 1. Reveal Sidebar
+    elements.opponentsSidebar.classList.remove('hidden');
+    elements.opponentsList.innerHTML = ''; 
+
+    // 2. Loop through all players
+    Object.keys(players).forEach(key => {
+        // Skip myself
+        if (key === multiplayer.playerId) return;
+
+        const p = players[key];
+        
+        // Determine Status (Green dot if they are done with this round)
+        const isDone = (p.placedRound === currentRound) || p.isGameOver;
+        const statusClass = isDone ? "done" : "thinking";
+
+        // Create Card HTML
+        const card = document.createElement('div');
+        card.className = 'opponent-card';
+        
+        // Header
+        const header = document.createElement('div');
+        header.className = 'opponent-name';
+        header.innerHTML = `
+            ${p.name}
+            <span class="status-dot ${statusClass}" title="${isDone ? 'Waiting' : 'Thinking'}"></span>
+        `;
+        card.appendChild(header);
+
+        // Grid Container
+        const gridDiv = document.createElement('div');
+        gridDiv.className = 'mini-board';
+
+        // 3. Render 4x4 Grid
+        // Firebase stores board as: [['NONE','WOOD',...],['NONE',...]]
+        if (p.board && Array.isArray(p.board)) {
+            p.board.forEach((row: string[]) => {
+                row.forEach((cell: string) => {
+                    const div = document.createElement('div');
+                    div.className = 'mini-cell';
+                    
+                    if (cell !== 'NONE') {
+                        // Check if it is a Resource
+                        if (['WOOD','WHEAT','BRICK','GLASS','STONE'].includes(cell)) {
+                            div.classList.add(cell);
+                        } else {
+                            // IT IS A BUILDING
+                            
+                            // 1. Add the specific name (e.g., "COTTAGE", "FARM")
+                            // This allows the CSS to find the right icon/color
+                            div.classList.add(cell); 
+                            
+                            // 2. Add tooltip for hovering
+                            div.title = cell;
+
+                            // 3. Handle Monument Styling (Optional but good)
+                            // If it's not a standard resource or standard building, assume it's a monument
+                            const standard = [
+                                'COTTAGE','FARM','GRANARY','GREENHOUSE','ORCHARD',
+                                'WELL','FOUNTAIN','MILLSTONE','SHED',
+                                'CHAPEL','ABBEY','CLOISTER','TEMPLE',
+                                'TAVERN','ALMSHOUSE','INN','FEAST-HALL',
+                                'THEATER','BAKERY','TAILOR','MARKET',
+                                'FACTORY','BANK','WAREHOUSE','TRADING-POST'
+                            ];
+                            
+                            if (!standard.includes(cell)) {
+                                div.classList.add('MONUMENT');
+                            }
+                        }
+                    }
+                    gridDiv.appendChild(div);
+                });
+            });
+        }
+
+        card.appendChild(gridDiv);
+        elements.opponentsList.appendChild(card);
+    });
 }

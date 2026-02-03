@@ -29,9 +29,9 @@ h1, h2, h3 {
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    gap: 40px;
+    gap: 20px; /* Reduced gap slightly to fit 3 columns */
     width: 100%;
-    max-width: 960px; 
+    max-width: 1400px; /* Increased width for 3 columns */
     padding: 20px;
     flex-wrap: wrap; 
 }
@@ -501,14 +501,14 @@ h1, h2, h3 {
 /* =========================================
    5. BUILDING IMAGES
    ========================================= */
-.cell.COTTAGE, .card-icon.COTTAGE { background-image: url('/buildings/cottage.png'); }
-.cell.FARM, .card-icon.FARM, .cell.GRANARY, .card-icon.GRANARY, .cell.GREENHOUSE, .card-icon.GREENHOUSE, .cell.ORCHARD, .card-icon.ORCHARD { background-image: url('/buildings/farm.png'); }
-.cell.CHAPEL, .card-icon.CHAPEL, .cell.ABBEY, .card-icon.ABBEY, .cell.CLOISTER, .card-icon.CLOISTER, .cell.TEMPLE, .card-icon.TEMPLE { background-image: url('/buildings/chapel.png'); }
-.cell.TAVERN, .card-icon.TAVERN, .cell.ALMSHOUSE, .card-icon.ALMSHOUSE, .cell.INN, .card-icon.INN, .cell.FEAST-HALL, .card-icon.FEAST-HALL { background-image: url('/buildings/tavern.png'); }
-.cell.THEATER, .card-icon.THEATER, .cell.BAKERY, .card-icon.BAKERY, .cell.TAILOR, .card-icon.TAILOR, .cell.MARKET, .card-icon.MARKET { background-image: url('/buildings/theater.png'); }
-.cell.WELL, .card-icon.WELL, .cell.FOUNTAIN, .card-icon.FOUNTAIN, .cell.SHED, .card-icon.SHED, .cell.MILLSTONE, .card-icon.MILLSTONE { background-image: url('/buildings/well.png'); }
-.cell.FACTORY, .card-icon.FACTORY, .cell.BANK, .card-icon.BANK, .cell.WAREHOUSE, .card-icon.WAREHOUSE, .cell.TRADING-POST, .card-icon.TRADING-POST { background-image: url('/buildings/factory.png'); }
-.cell.MONUMENT, .building-card.MONUMENT .card-icon { background-image: url('/buildings/monument.png'); background-size: 60%; }
+.cell.COTTAGE, .card-icon.COTTAGE, .mini-cell.COTTAGE { background-image: url('/buildings/cottage.png'); }
+.cell.FARM, .card-icon.FARM, .mini-cell.FARM, .cell.GRANARY, .card-icon.GRANARY, .mini-cell.GRANARY, .cell.GREENHOUSE, .card-icon.GREENHOUSE, .mini-cell.GREENHOUSE, .cell.ORCHARD, .card-icon.ORCHARD, .mini-cell.ORCHARD { background-image: url('/buildings/farm.png'); }
+.cell.CHAPEL, .card-icon.CHAPEL, .mini-cell.CHAPEL, .cell.ABBEY, .card-icon.ABBEY, .mini-cell.ABBEY, .cell.CLOISTER, .card-icon.CLOISTER, .mini-cell.CLOISTER, .cell.TEMPLE, .card-icon.TEMPLE, .mini-cell.TEMPLE { background-image: url('/buildings/chapel.png'); }
+.cell.TAVERN, .card-icon.TAVERN, .mini-cell.TAVERN, .cell.ALMSHOUSE, .card-icon.ALMSHOUSE, .mini-cell.ALMSHOUSE, .cell.INN, .card-icon.INN, .mini-cell.INN, .cell.FEAST-HALL, .card-icon.FEAST-HALL, .mini-cell.FEAST-HALL { background-image: url('/buildings/tavern.png'); }
+.cell.THEATER, .card-icon.THEATER, .mini-cell.THEATER, .cell.BAKERY, .card-icon.BAKERY, .mini-cell.BAKERY, .cell.TAILOR, .card-icon.TAILOR, .mini-cell.TAILOR, .cell.MARKET, .card-icon.MARKET, .mini-cell.MARKET { background-image: url('/buildings/theater.png'); }
+.cell.WELL, .card-icon.WELL, .mini-cell.WELL, .cell.FOUNTAIN, .card-icon.FOUNTAIN, .mini-cell.FOUNTAIN, .cell.SHED, .card-icon.SHED, .mini-cell.SHED, .cell.MILLSTONE, .card-icon.MILLSTONE, .mini-cell.MILLSTONE { background-image: url('/buildings/well.png'); }
+.cell.FACTORY, .card-icon.FACTORY, .mini-cell.FACTORY, .cell.BANK, .card-icon.BANK, .mini-cell.BANK, .cell.WAREHOUSE, .card-icon.WAREHOUSE, .mini-cell.WAREHOUSE, .cell.TRADING-POST, .card-icon.TRADING-POST, .mini-cell.TRADING-POST { background-image: url('/buildings/factory.png'); }
+.cell.MONUMENT, .building-card.MONUMENT .card-icon, .mini-cell.MONUMENT { background-image: url('/buildings/monument.png'); background-size: 60%; }
 .building-card.MONUMENT .card-icon { background-size: contain; }
 
 
@@ -744,4 +744,125 @@ h1, h2, h3 {
 
 @keyframes fadeOut {
     to { opacity: 0; transform: translateY(-10px); }
+}
+
+/* =========================================
+   10. OPPONENT MINI-BOARDS
+   ========================================= */
+.sidebar-panel {
+    /* Adjust width if needed to fit your screen */
+    width: 200px; 
+    background: white;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    height: fit-content;
+}
+
+.opponent-card {
+    background: #f8f9fa;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 10px;
+    text-align: center;
+}
+
+.opponent-name {
+    font-weight: 800;
+    font-size: 13px;
+    color: #333;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Status dots */
+.status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background-color: #ccc;
+    display: inline-block;
+}
+.status-dot.done { background-color: #43a047; box-shadow: 0 0 5px #43a047; }
+.status-dot.thinking { background-color: #fb8c00; }
+
+/* The Mini Grid (4x4) */
+.mini-board {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    margin: 0 auto;
+    width: 120px; /* Small size */
+    height: 120px;
+    background-color: #ccc; /* Border color */
+    border: 2px solid #ccc;
+    border-radius: 4px;
+}
+
+.mini-cell {
+    width: 100%; height: 100%;
+    background-color: #fff; 
+    
+    /* Icon setup */
+    background-size: 75%; 
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* Mini Resource Colors */
+.mini-cell.WOOD { background-color: #5d4037; }
+.mini-cell.WHEAT { background-color: #fdd835; }
+.mini-cell.BRICK { background-color: #ef5350; }
+.mini-cell.GLASS { background-color: #29b6f6; }
+.mini-cell.STONE { background-color: #757575; }
+
+/* Mini Building Colors (Pale Backgrounds + Borders for readability) */
+
+/* Blue / Cottage */
+.mini-cell.COTTAGE { background-color: #e0f7fa; border: 1px solid #00acc1; }
+
+/* Red Group */
+.mini-cell.FARM, .mini-cell.GRANARY, .mini-cell.GREENHOUSE, .mini-cell.ORCHARD { 
+    background-color: #ffebee; border: 1px solid #e53935; 
+}
+
+/* Gray Group */
+.mini-cell.WELL, .mini-cell.FOUNTAIN, .mini-cell.MILLSTONE, .mini-cell.SHED { 
+    background-color: #eceff1; border: 1px solid #546e7a; 
+}
+
+/* Orange Group */
+.mini-cell.CHAPEL, .mini-cell.ABBEY, .mini-cell.CLOISTER, .mini-cell.TEMPLE { 
+    background-color: #fff3e0; border: 1px solid #fb8c00; 
+}
+
+/* Green Group */
+.mini-cell.TAVERN, .mini-cell.ALMSHOUSE, .mini-cell.INN, .mini-cell.FEAST-HALL { 
+    background-color: #e8f5e9; border: 1px solid #2e7d32; 
+}
+
+/* Yellow Group */
+.mini-cell.THEATER, .mini-cell.BAKERY, .mini-cell.TAILOR, .mini-cell.MARKET { 
+    background-color: #fffde7; border: 1px solid #fdd835; 
+}
+
+/* Black Group */
+.mini-cell.FACTORY, .mini-cell.BANK, .mini-cell.WAREHOUSE, .mini-cell.TRADING-POST { 
+    background-color: #f5f5f5; border: 1px solid #424242; 
+}
+
+/* Monument */
+.mini-cell.MONUMENT { 
+    background-color: #f3e5f5; border: 1px solid #8e24aa; 
+}
+
+/* Fallback for generic buildings if needed */
+.mini-cell.constructed { 
+    background-color: #2c3e50; 
+    border: 1px solid #fff;
+    box-shadow: inset 0 0 4px rgba(0,0,0,0.5);
 }
