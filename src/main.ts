@@ -24,6 +24,7 @@ let activePatternCoords: { row: number, col: number }[] = [];
 let multiplayerStatusMessage = '';
 let hasActedThisTurn = false;
 let hasDeclaredGameOver = false;
+let activeGameId = "";
 
 // DOM Elements
 const elements = {
@@ -44,6 +45,7 @@ const elements = {
     mpRestartBtn: document.getElementById('mp-restart-btn')!,
     opponentsSidebar: document.getElementById('opponents-sidebar')!,
     opponentsList: document.getElementById('opponents-list')!,
+    copyLinkBtn: document.getElementById('copy-link-btn')!,
 
     // Existing helpers
     monumentGrid: document.getElementById('monument-pattern-grid')!,
@@ -294,10 +296,21 @@ elements.restartBtn.onclick = () => {
     location.reload(); 
 };
 
+elements.copyLinkBtn.onclick = () => {
+    if (!activeGameId) return;
+
+    const url = `${window.location.origin}${window.location.pathname}?gameId=${activeGameId}`;
+
+    navigator.clipboard.writeText(url).then(() => {
+        showToast("Invite Link copied!", "success");
+    });
+};
+
 
 // --- 5. HELPERS ---
 
 function enterLobbyMode(gameId: string, isHost: boolean) {
+    activeGameId = gameId;
     elements.landingUI.classList.add('hidden');
     elements.lobbyUI.classList.remove('hidden');
     elements.shareCodeDisplay.innerText = `Code: ${gameId}`;
@@ -709,3 +722,28 @@ function showResourcePicker(
 
     modal.classList.remove('hidden');
 }
+
+// --- 6. AUTO-JOIN VIA URL ---
+(function checkUrlForInvite() {
+    const params = new URLSearchParams(window.location.search);
+    const inviteCode = params.get('gameId');
+
+    if (inviteCode) {
+        console.log("Invite code detected:", inviteCode);
+        
+        // 1. Pre-fill the Join Input
+        elements.gameIdInput.value = inviteCode;
+
+        // 2. Visually expand the "Join Game" section (if you had a toggle)
+        // Since your UI seems to show both inputs on the landing page, 
+        // we just focus the Name input so they can type immediately.
+        elements.playerNameInput.focus();
+
+        // 3. Optional: Add a visual cue
+        showToast(`Invite code ${inviteCode} detected! Enter your name to join.`, "success");
+        
+        // If you wanted to get fancy, you could hide the "Create Game" button here
+        // so it looks like a dedicated join screen.
+        elements.createGameBtn.parentElement?.classList.add('hidden'); // Hides the create/host container if they are separate
+    }
+})();
