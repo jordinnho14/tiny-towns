@@ -180,20 +180,20 @@ renderer.onCellClick = (r, c) => {
             handleResourceClick(r, c);
         }
     } catch (e) {
-        alert((e as Error).message);
+        showToast((e as Error).message, "error");
     }
 };
 
 async function handleResourceClick(r: number, c: number) {
     if (hasActedThisTurn) {
-        alert("You have already placed a resource this turn! Wait for others.");
+        showToast("You have already placed a resource this turn! Wait for others.", "error");
         return;
     }
 
 
     if (!game.currentResource) {
         // Should be blocked by UI, but good safety check
-        alert("Waiting for Master Builder...");
+        showToast("Waiting for Master Builder...", "info");
         return;
     }
     
@@ -201,7 +201,7 @@ async function handleResourceClick(r: number, c: number) {
     try {
         game.placeResource(r, c);
     } catch (e) {
-        alert((e as Error).message);
+        showToast((e as Error).message, "error");
         return;
     }
     
@@ -228,7 +228,7 @@ elements.undoBtn.onclick = () => {
     // Undo is tricky in multiplayer. 
     // For now, let's disable it or make it local-only BEFORE commit.
     // If you already committed, you can't undo.
-    alert("Undo not yet supported in Multiplayer!");
+    showToast("Undo not yet supported in Multiplayer!", "info");
 };
 
 elements.mpRestartBtn.onclick = () => {
@@ -251,20 +251,23 @@ elements.createGameBtn.onclick = async () => {
         enterLobbyMode(gameId, true);
     } catch (err) {
         console.error("Firebase Error:", err);
-        alert("Error creating game. Check console for details.");
+        showToast("Error creating game. Check console for details.", "error");
     }
 };
 
 elements.joinGameBtn.onclick = async () => {
     const name = elements.playerNameInput.value || "Guest";
     const gameId = elements.gameIdInput.value.trim();
-    if (!gameId) return alert("Please enter a code!");
+    if (!gameId) {
+        showToast("Please enter a code!", "error");
+        return;
+    }
 
     try {
         await multiplayer.joinGame(gameId, name);
         enterLobbyMode(gameId, false);
     } catch (e) {
-        alert("Could not join game: " + e);
+        showToast("Could not join game: " + e, "error");
     }
 };
 
@@ -283,7 +286,7 @@ elements.startGameBtn.onclick = async () => {
 elements.shareCodeDisplay.onclick = () => {
     const code = elements.shareCodeDisplay.innerText.replace('Code: ', '');
     navigator.clipboard.writeText(code);
-    alert("Code copied!");
+    showToast("Code copied!", "success");
 };
 
 elements.restartBtn.onclick = () => {
@@ -365,7 +368,7 @@ function handleConstructionClick(r: number, c: number) {
 
     if (isPatternSpot || isGlobalTarget) {
         if (cellContent && (cellContent as string).toUpperCase().replace('_', ' ') === 'TRADING POST') {
-            alert("Cannot build on Trading Post.");
+            showToast("Cannot build on Trading Post.", "error");
             return;
         }
         
@@ -522,4 +525,20 @@ function renderLeaderboard(players: any) {
         
         elements.leaderboardList.appendChild(li);
     });
+}
+
+function showToast(message: string, type: 'info' | 'error' | 'success' = 'info') {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const div = document.createElement('div');
+    div.className = `toast ${type}`;
+    div.textContent = message;
+
+    container.appendChild(div);
+
+    // Remove from DOM after animation finishes (4s total)
+    setTimeout(() => {
+        div.remove();
+    }, 4000);
 }
