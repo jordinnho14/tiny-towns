@@ -72,6 +72,12 @@
     <div class="main-area">
       <h1>Tiny Towns</h1>
 
+      <div id="factory-action-bar" class="action-bar hidden">
+          <div class="action-text">Factory Active!</div>
+          <button id="factory-swap-btn" class="action-btn">
+              Swap <span id="swap-res-name">WOOD</span>
+          </button>
+      </div>
       <div class="dashboard-panel">
 
         <div
@@ -120,12 +126,13 @@
 
   <div id="resource-picker-modal" class="modal-overlay hidden">
     <div class="modal-content">
-        <h3>Store a Resource</h3>
-        <p>Choose a resource to place on your Factory:</p>
+        <h3 id="picker-title">Store a Resource</h3>
+        <p id="picker-message">Choose a resource to place on your Factory:</p>
+        
         <div id="picker-options" class="resource-palette" style="margin-top: 15px;">
             </div>
     </div>
-</div>
+  </div>  
 
   <div id="multiplayer-results-modal" class="modal-overlay hidden">
     <div class="modal-content" style="width: 450px;">

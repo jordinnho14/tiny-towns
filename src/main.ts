@@ -191,6 +191,8 @@ renderer.onCellClick = (r, c) => {
     }
 };
 
+renderer.onSwapClick = handleSwapClick;
+
 async function handleResourceClick(r: number, c: number) {
     if (hasActedThisTurn) {
         showToast("You have already placed a resource this turn!", "error");
@@ -202,42 +204,11 @@ async function handleResourceClick(r: number, c: number) {
         return;
     }
 
-    // --- NEW: FACTORY LOGIC ---
-    // 1. Check if it is currently MY turn as Master Builder
-    const isMyTurn = multiplayer.masterBuilderId === multiplayer.playerId;
-
-    // 2. Only allow swap if it is NOT my turn AND I have the matching resource
-    const factorySwap = !isMyTurn && game.canFactorySwap(game.currentResource);
-
-    if (factorySwap) {
-        const wantsSwap = confirm(`The Master Builder chose ${game.currentResource}.\nYour Factory holds ${game.currentResource}.\n\nDo you want to swap it for a different resource?`);
-        
-        if (wantsSwap) {
-            showResourcePicker(async (newRes) => {
-                // Override locally just for this placement
-                game.currentResource = newRes; 
-                await finalizePlacement(r, c);
-            });
-            return; 
-        }
-    }
-
-    // Normal path (No swap available OR user said 'Cancel')
-    await finalizePlacement(r, c);
-}
-
-// Helper function to handle the actual placement and server sync
-async function finalizePlacement(r: number, c: number) {
     try {
-        // 1. Update Local Board
         game.placeResource(r, c);
-
-        // 2. Send Update to Server (Sets hasPlaced = true)
         await multiplayer.commitTurn();
-
         renderAll();
         checkAndShowGameOver();
-
     } catch (e) {
         showToast((e as Error).message, "error");
     }
@@ -409,21 +380,42 @@ function handleConstructionClick(r: number, c: number) {
         // (Use saveBoardOnly instead of commitTurn)
         multiplayer.saveBoardOnly(); 
 
-        if (result.type === 'TRIGGER_EFFECT' && result.effectType === 'FACTORY') {
-            // Show the modal to pick a resource
-            showResourcePicker((chosenRes) => {
-                // Save the choice to the board metadata
-                game.setBuildingStorage(r, c, chosenRes);
-                // Save again so the metadata goes to the server
-                multiplayer.saveBoardOnly();
-                renderAll();
-            });
-        }
+       if (result.type === 'TRIGGER_EFFECT' && result.effectType === 'FACTORY') {
+            showResourcePicker(
+                "Setup Factory", 
+                "Choose a resource to store permanently on your Factory:", 
+                (chosenRes) => {
+                    game.setBuildingStorage(r, c, chosenRes);
+                    multiplayer.saveBoardOnly();
+                    renderAll();
+                }
+            );
+        } 
 
         resetConstructionState();
         renderAll();
         checkAndShowGameOver();
     }
+}
+
+function handleSwapClick() {
+    // NEW: Pass specific text
+    showResourcePicker(
+        "Factory Swap", 
+        "Select the resource you want to use this turn:", 
+        async (newRes) => {
+            const oldRes = game.currentResource;
+            
+            // 1. Update Game State
+            game.currentResource = newRes; 
+            
+            // 2. Feedback
+            showToast(`Factory activated! Swapped ${oldRes} for ${newRes}.`, "success");
+            
+            // 3. Re-render
+            renderAll();
+        }
+    );
 }
 
 function resetConstructionState() {
@@ -446,7 +438,29 @@ function pickRandom(list: any[]) {
 }
 
 function renderAll() {
-    renderer.render(game, activeConstruction, activePatternCoords, multiplayerStatusMessage);
+    // --- FACTORY BUTTON LOGIC ---
+    let showSwap = false;
+    
+    if (game.currentResource && !hasActedThisTurn) {
+        const isMyTurn = multiplayer.masterBuilderId === multiplayer.playerId;
+        const canSwap = game.canFactorySwap(game.currentResource);
+        
+        if (!isMyTurn && canSwap) {
+            showSwap = true;
+        }
+    }
+
+    // Update the Factory UI
+    renderer.toggleFactoryAction(showSwap, game.currentResource || '');
+
+    // --- RENDER MAIN BOARD ---
+    // FIX: Use 'activePatternCoords' and 'multiplayerStatusMessage' defined at the top of the file
+    renderer.render(
+        game, 
+        activeConstruction, 
+        activePatternCoords, 
+        multiplayerStatusMessage
+    );
 }
 
 function checkAndShowGameOver() {
@@ -666,9 +680,19 @@ function renderOpponents(players: any, currentRound: number) {
 }
 
 
-function showResourcePicker(callback: (res: ResourceType) => void) {
+function showResourcePicker(
+    title: string, 
+    message: string, 
+    callback: (res: ResourceType) => void
+) {
     const modal = document.getElementById('resource-picker-modal')!;
+    const titleEl = document.getElementById('picker-title')!;
+    const msgEl = document.getElementById('picker-message')!;
     const container = document.getElementById('picker-options')!;
+    
+    // Set dynamic text
+    titleEl.textContent = title;
+    msgEl.textContent = message;
     
     container.innerHTML = '';
     const resources: ResourceType[] = ['WOOD', 'WHEAT', 'BRICK', 'GLASS', 'STONE'];

@@ -9,14 +9,20 @@ export class Renderer {
     private scoreEl = document.getElementById('score-display')!;
     private undoBtn = document.getElementById('undo-btn') as HTMLButtonElement;
     private deckDisplayEl = document.getElementById('deck-display');
+    private factoryBar = document.getElementById('factory-action-bar')!;
+    private swapBtn = document.getElementById('factory-swap-btn')!;
+    private swapResLabel = document.getElementById('swap-res-name')!;
 
     // Callbacks for interaction
     public onCellClick: (r: number, c: number) => void = () => {};
     public onResourceSelect: (res: string) => void = () => {};
     public onBuildClick: (match: any) => void = () => {};
     public onCancelClick: () => void = () => {};
+    public onSwapClick: () => void = () => {};
 
-    constructor() {}
+    constructor() {
+        this.swapBtn.onclick = () => this.onSwapClick();
+    }
 
 render(game: Game, activeConstruction: any | null, highlightCoords: any[], customMessage?: string) {
         this.renderHeader(game);
@@ -321,5 +327,14 @@ render(game: Game, activeConstruction: any | null, highlightCoords: any[], custo
 
             this.deckDisplayEl!.appendChild(card);
         });
+    }
+
+    public toggleFactoryAction(show: boolean, resourceName: string = '') {
+        if (show) {
+            this.factoryBar.classList.remove('hidden');
+            this.swapResLabel.textContent = resourceName;
+        } else {
+            this.factoryBar.classList.add('hidden');
+        }
     }
 }

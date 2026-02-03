@@ -903,3 +903,58 @@ h1, h2, h3 {
 .stored-resource-icon.BRICK { background-color: #ef5350; }
 .stored-resource-icon.GLASS { background-color: #29b6f6; }
 .stored-resource-icon.STONE { background-color: #757575; }
+
+/* =========================================
+   11. ACTION BAR (Factory Swap)
+   ========================================= */
+.action-bar {
+    background: #263238; /* Dark factory color */
+    color: white;
+    padding: 10px 20px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    
+    /* Animation to pop in */
+    animation: slideDown 0.3s ease-out;
+    z-index: 100;
+}
+
+.action-text {
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 1px;
+    color: #cfd8dc;
+}
+
+.action-btn {
+    background: #ffa000; /* Amber */
+    border: none;
+    color: #3e2723;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 800;
+    font-family: 'Nunito', sans-serif;
+    cursor: pointer;
+    transition: transform 0.1s, background 0.2s;
+    box-shadow: 0 4px 0 #ff6f00; /* 3D effect */
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    background: #ffb300;
+}
+
+.action-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 0 0 #ff6f00;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}

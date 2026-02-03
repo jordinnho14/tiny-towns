@@ -91,16 +91,15 @@ export class Game {
         this.lastMove = null;
         this.scanForMatches();
 
-        const buildingDef = this.gameRegistry.find(b => b.name.toUpperCase() === match.buildingName.toUpperCase());
+        const realDef = BUILDING_REGISTRY.find(b => b.name.toUpperCase() === match.buildingName.toUpperCase());
         
-        if (buildingDef && buildingDef.effect) {
+        if (realDef && realDef.effect) {
             // Tell the UI: "Hey, I just built a Factory, please ask the user for a resource!"
             return { 
                 type: 'TRIGGER_EFFECT', 
-                effectType: buildingDef.effect.type 
+                effectType: realDef.effect.type 
             };
         }
-
         return { type: 'SUCCESS' };
     }
 
