@@ -43,7 +43,8 @@ export class MultiplayerGame {
                     name: hostName,
                     score: 0,
                     isReady: true,
-                    placedRound: 0, 
+                    placedRound: 0,
+                    isGameOver: false, 
                     board: this.serializeBoard()
                 }
             }
@@ -72,6 +73,7 @@ export class MultiplayerGame {
             score: 0,
             isReady: true,
             placedRound: 0,
+            isGameOver: false,
             board: this.serializeBoard()
         });
 
@@ -176,11 +178,33 @@ export class MultiplayerGame {
         
         updates[`${playerPath}/board`] = this.serializeBoard();
         updates[`${playerPath}/score`] = this.localGame.getScore().total;
-        
-        // NOTICE: We do NOT update 'placedRound' here.
-        // This keeps our status as "Thinking" (or not done).
 
         await update(ref(db), updates);
+    }
+
+    async declareGameOver() {
+        if (!this.gameId) return;
+        
+        const updates: any = {};
+        const playerPath = `games/${this.gameId}/players/${this.playerId}`;
+        
+        updates[`${playerPath}/isGameOver`] = true;
+        
+        // Also ensure they are marked as "done" for the current round 
+        // so they don't block the game if they quit mid-turn.
+        updates[`${playerPath}/placedRound`] = this.currentRound; 
+
+        await update(ref(db), updates);
+        
+        // Host check in case this was the last player
+        if (this.isHost) {
+            // We use a short timeout to let the update process
+            setTimeout(() => {
+                // We need to fetch data here or pass it if we had it, 
+                // but for simplicity, the existing listener will trigger 'checkTurnComplete'
+                // We just need to ensure checkTurnComplete handles "GameOver" players correctly.
+            }, 10);
+        }
     }
 
     private async checkTurnComplete(data: any) {
@@ -188,17 +212,68 @@ export class MultiplayerGame {
 
         const allPlayers = Object.values(data.players);
         const activeRound = data.roundNumber || 1;
+        const playerOrder = data.playerOrder || []; // We need the order to calculate skips
         
-        // Everyone must have placed in the CURRENT round
-        const allDone = allPlayers.every((p: any) => p.placedRound === activeRound);
+        // 1. Check Global Game Over (Everyone is out)
+        const allGameOver = allPlayers.every((p: any) => p.isGameOver === true);
+        if (allGameOver) {
+            if (data.status !== "FINISHED") {
+                console.log("GAME OVER FOR EVERYONE");
+                await update(ref(db, `games/${this.gameId}`), { status: "FINISHED" });
+            }
+            return;
+        }
 
-        // Only rotate if everyone is done AND we are currently in a Placement Phase (resource exists)
-        if (allDone && data.currentResource) {
+        // 2. Determine if we need to rotate
+        const isPlacementPhase = (data.currentResource !== undefined && data.currentResource !== null);
+        
+        // Condition A: Normal Round End (Everyone placed resource or is out)
+        const allDone = allPlayers.every((p: any) => 
+            p.placedRound === activeRound || p.isGameOver === true
+        );
+
+        // Condition B: Zombie Master Builder (Current Master is out, so we skip them immediately)
+        const currentMasterIdx = (data.masterBuilderIndex || 0) % playerOrder.length;
+        const currentMasterId = playerOrder[currentMasterIdx];
+        const masterIsDead = data.players[currentMasterId] && data.players[currentMasterId].isGameOver;
+
+        let shouldRotate = false;
+
+        if (isPlacementPhase && allDone) {
             console.log(`Round ${activeRound} Complete. Rotating.`);
-            
+            shouldRotate = true;
+        } 
+        else if (!isPlacementPhase && masterIsDead) {
+            console.log("Current Master Builder is finished. Skipping their turn.");
+            shouldRotate = true;
+        }
+
+        // 3. Perform Rotation (Finding next ALIVE player)
+        if (shouldRotate) {
+            let nextIndex = (data.masterBuilderIndex || 0);
+            let foundNext = false;
+
+            // Look ahead to find the next active player
+            // We loop i from 1 to N to check the next person, then the one after, etc.
+            for (let i = 1; i <= playerOrder.length; i++) {
+                const checkIdx = (nextIndex + i) % playerOrder.length;
+                const pid = playerOrder[checkIdx];
+                const player = data.players[pid];
+
+                if (player && !player.isGameOver) {
+                    nextIndex = nextIndex + i; // Set the new index
+                    foundNext = true;
+                    break;
+                }
+            }
+
+            // If we didn't find anyone (e.g., everyone else is dead), 
+            // we just increment by 1 (which will trigger Global Game Over on next check)
+            if (!foundNext) nextIndex++;
+
             const updates: any = {};
             updates[`games/${this.gameId}/currentResource`] = null; 
-            updates[`games/${this.gameId}/masterBuilderIndex`] = (data.masterBuilderIndex || 0) + 1;
+            updates[`games/${this.gameId}/masterBuilderIndex`] = nextIndex;
             updates[`games/${this.gameId}/roundNumber`] = activeRound + 1;
 
             await update(ref(db), updates);

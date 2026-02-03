@@ -22,6 +22,7 @@ let activeConstruction: any | null = null;
 let activePatternCoords: { row: number, col: number }[] = [];
 let multiplayerStatusMessage = '';
 let hasActedThisTurn = false;
+let hasDeclaredGameOver = false;
 
 // DOM Elements
 const elements = {
@@ -121,6 +122,12 @@ multiplayer.onStateChange = (data) => {
                     multiplayerStatusMessage = ""; // Renderer defaults to "Place [RESOURCE]..."
                     togglePalette(false); 
                 }
+            }
+
+            // 3. GAME OVER (Global)
+            if (data.status === 'FINISHED') {
+                alert("Everyone has finished! Final scores are ready.");
+                // You could show a leaderboard here later
             }
 
             // --- D. Render ---
@@ -389,7 +396,10 @@ function renderAll() {
 }
 
 function checkAndShowGameOver() {
-    if (game.checkGameOver() && !activeConstruction) {
+    // Only check if we haven't already finished
+    if (!hasDeclaredGameOver && game.checkGameOver() && !activeConstruction) {
+        
+        // 1. Show the screen locally
         const result = game.getScore();
         elements.finalScore.textContent = result.total.toString();
         elements.scoreList.innerHTML = '';
@@ -397,7 +407,15 @@ function checkAndShowGameOver() {
             if (score !== 0) addScoreListItem(name, score);
         });
         if (result.penaltyCount > 0) addScoreListItem('Empty Spaces', -result.penaltyCount, true);
+        
         elements.gameOverModal.classList.remove('hidden');
+        
+        // 2. Tell the server "I am out"
+        multiplayer.declareGameOver();
+        hasDeclaredGameOver = true;
+        
+        // Disable interactions
+        togglePalette(false);
     }
 }
 
