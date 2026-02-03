@@ -11,6 +11,7 @@ export class MultiplayerGame {
     public localGame: Game;
     public masterBuilderId: string | null = null;
     public myName: string = "Unknown";
+    public currentRound: number = 1; 
 
     public onStateChange: ((state: any) => void) | null = null;
     public onGameStart: (() => void) | null = null;
@@ -36,13 +37,14 @@ export class MultiplayerGame {
             deck: selectedDeckNames,
             currentResource: null,
             masterBuilderIndex: 0,
-            playerOrder: [this.playerId], // Initialize order with Host
+            roundNumber: 1, 
+            playerOrder: [this.playerId],
             players: {
                 [this.playerId]: {
                     name: hostName,
                     score: 0,
                     isReady: true,
-                    hasPlaced: false, 
+                    placedRound: 0, 
                     board: this.serializeBoard()
                 }
             }
@@ -64,17 +66,15 @@ export class MultiplayerGame {
         this.isHost = false;
         this.myName = playerName;
 
-        // 1. Add self to Players List
         const playerRef = ref(db, `games/${gameId}/players/${this.playerId}`);
         await set(playerRef, {
             name: playerName,
             score: 0,
             isReady: true,
-            hasPlaced: false,
+            placedRound: 0,
             board: this.serializeBoard()
         });
 
-        // 2. Add self to Player Order (Safe Update)
         const orderRef = ref(db, `games/${gameId}/playerOrder`);
         const orderSnap = await get(orderRef);
         const currentOrder = orderSnap.val() || [];
@@ -105,6 +105,9 @@ export class MultiplayerGame {
         const gameRef = ref(db, `games/${this.gameId}`);
         
         onValue(gameRef, (snapshot) => {
+            // DEBUG: Log Raw Entry
+            // console.log("Firebase Update Received");
+            
             const data = snapshot.val();
             if (!data) return;
 
@@ -117,39 +120,37 @@ export class MultiplayerGame {
             // 2. Identify Master Builder
             const rawOrder = data.playerOrder || [];
             const safeOrder = Array.isArray(rawOrder) ? rawOrder : Object.values(rawOrder);
-            
             if (safeOrder.length > 0) {
                 const idx = (data.masterBuilderIndex || 0) % safeOrder.length;
                 this.masterBuilderId = safeOrder[idx] as string;
-                console.log("Master Builder is:", this.masterBuilderId); // Debug Log
             }
 
-            // 3. Sync Resource (FORCE NULL if undefined)
-            if (data.currentResource === undefined) {
+            // 3. Sync Resource
+            if (data.currentResource === undefined || data.currentResource === "") {
                 this.localGame.currentResource = null;
             } else {
                 this.localGame.currentResource = data.currentResource;
             }
 
-            // 4. Send to UI
+            // 4. Sync Round Number
+            this.currentRound = data.roundNumber || 1;
+
+            // 5. Send to UI (IMMEDIATELY)
             if (this.onStateChange) this.onStateChange(data);
+
+            // 6. HOST MONITORING LOGIC (DECOUPLED)
+            // We run this in a timeout so it doesn't block the UI update or cause recursive listener issues
+            if (this.isHost && data.status === "PLAYING") {
+                setTimeout(() => this.checkTurnComplete(data), 10);
+            }
         });
     }
 
     async setGlobalResource(resource: ResourceType) {
-        console.log("Attempting to set resource:", resource);
         if (!this.gameId) return;
-        
-        // Debugging Logs
-        console.log("My ID:", this.playerId);
-        console.log("Master Builder ID:", this.masterBuilderId);
+        if (this.playerId !== this.masterBuilderId) return;
 
-        if (this.playerId !== this.masterBuilderId) {
-            console.warn("BLOCKED: Not your turn!");
-            alert("It is not your turn to choose a resource!");
-            return;
-        }
-
+        console.log("Setting Global Resource:", resource);
         const updates: any = {};
         updates[`games/${this.gameId}/currentResource`] = resource;
         await update(ref(db), updates);
@@ -158,41 +159,33 @@ export class MultiplayerGame {
     async commitTurn() {
         if (!this.gameId) return;
 
+        console.log(`Committing Turn. Round: ${this.currentRound}`);
+
         const updates: any = {};
         const playerPath = `games/${this.gameId}/players/${this.playerId}`;
         
         updates[`${playerPath}/board`] = this.serializeBoard();
         updates[`${playerPath}/score`] = this.localGame.getScore().total;
-        updates[`${playerPath}/hasPlaced`] = true; 
+        updates[`${playerPath}/placedRound`] = this.currentRound;
 
         await update(ref(db), updates);
-
-        if (this.isHost) {
-            this.checkTurnComplete();
-        }
     }
 
-    private async checkTurnComplete() {
-        const gameRef = ref(db, `games/${this.gameId}`);
-        const snap = await get(gameRef);
-        const data = snap.val();
-
+    private async checkTurnComplete(data: any) {
         if (!data || !data.players) return;
 
         const allPlayers = Object.values(data.players);
-        // Check if everyone has hasPlaced = true
-        const allDone = allPlayers.every((p: any) => p.hasPlaced === true);
+        const activeRound = data.roundNumber || 1;
+        
+        const allDone = allPlayers.every((p: any) => p.placedRound === activeRound);
 
-        if (allDone && data.currentResource !== null) {
-            console.log("Turn Complete! Rotating Master Builder.");
+        if (allDone && data.currentResource) {
+            console.log(`>>> ROUND ${activeRound} COMPLETE. ROTATING. <<<`);
             
             const updates: any = {};
-            updates[`games/${this.gameId}/currentResource`] = null;
+            updates[`games/${this.gameId}/currentResource`] = null; 
             updates[`games/${this.gameId}/masterBuilderIndex`] = (data.masterBuilderIndex || 0) + 1;
-            
-            Object.keys(data.players).forEach(pid => {
-                updates[`games/${this.gameId}/players/${pid}/hasPlaced`] = false;
-            });
+            updates[`games/${this.gameId}/roundNumber`] = activeRound + 1;
 
             await update(ref(db), updates);
         }

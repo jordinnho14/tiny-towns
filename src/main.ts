@@ -21,6 +21,7 @@ const multiplayer = new MultiplayerGame(game); // <--- NEW MANAGER
 let activeConstruction: any | null = null;
 let activePatternCoords: { row: number, col: number }[] = [];
 let multiplayerStatusMessage = '';
+let hasActedThisTurn = false;
 
 // DOM Elements
 const elements = {
@@ -71,10 +72,13 @@ multiplayer.onStateChange = (data) => {
         if (data.status === 'PLAYING') {
             if (!elements.startModal.classList.contains('hidden')) {
                 elements.startModal.classList.add('hidden');
+                renderAll();
                 renderer.renderDeck(game.gameRegistry);
             }
 
-            // --- CALCULATE STATUS MESSAGE ---
+            console.log("--- UI UPDATE ---", "Round:", data.roundNumber, "Res:", data.currentResource);
+
+            // --- MASTER BUILDER LOGIC ---
             let masterName = "Unknown";
             const rawOrder = data.playerOrder || [];
             const safeOrder = Array.isArray(rawOrder) ? rawOrder : Object.values(rawOrder);
@@ -88,11 +92,19 @@ multiplayer.onStateChange = (data) => {
             }
 
             const isMyTurn = multiplayer.masterBuilderId === multiplayer.playerId;
-            const resourceSelected = !!data.currentResource;
+            const resourceActive = (data.currentResource !== undefined && data.currentResource !== null);
+            
+            // LOCK LOGIC
+            const currentRound = data.roundNumber || 1;
             const myStatus = data.players ? data.players[multiplayer.playerId] : null;
+            if (myStatus) {
+                // Ensure we compare numbers to numbers
+                hasActedThisTurn = (Number(myStatus.placedRound) === Number(currentRound));
+            }
 
-            // 1. Nomination Phase (No resource selected yet)
-            if (!resourceSelected) {
+            // --- SET MESSAGE ---
+            if (!resourceActive) {
+                // NOMINATION PHASE
                 if (isMyTurn) {
                     multiplayerStatusMessage = "YOU are the Master Builder! Choose a resource.";
                     togglePalette(true);
@@ -100,21 +112,19 @@ multiplayer.onStateChange = (data) => {
                     multiplayerStatusMessage = `Waiting for ${masterName} to choose a resource...`;
                     togglePalette(false);
                 }
-            } 
-            // 2. Placement Phase (Resource IS selected)
-            else {
-                if (myStatus && myStatus.hasPlaced) {
+            } else {
+                // PLACEMENT PHASE
+                if (hasActedThisTurn) {
                     multiplayerStatusMessage = "Waiting for other players to finish placing...";
                     togglePalette(false);
                 } else {
-                    // We return "" (empty string) so the Renderer uses its default: "Place WOOD..."
                     multiplayerStatusMessage = ""; 
                     togglePalette(false); 
                 }
             }
 
             // Sync and Render
-            game.currentResource = data.currentResource;
+            game.currentResource = data.currentResource || null;
             renderAll();
         }
     } catch (err) {
@@ -163,6 +173,12 @@ renderer.onCellClick = (r, c) => {
 };
 
 async function handleResourceClick(r: number, c: number) {
+    if (hasActedThisTurn) {
+        alert("You have already placed a resource this turn! Wait for others.");
+        return;
+    }
+
+
     if (!game.currentResource) {
         // Should be blocked by UI, but good safety check
         alert("Waiting for Master Builder...");
