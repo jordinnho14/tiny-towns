@@ -19,10 +19,9 @@ export class MultiplayerGame {
     constructor(localGame: Game) {
         this.localGame = localGame;
         this.playerId = "player_" + Math.random().toString(36).substr(2, 9);
-        console.log("My Player ID:", this.playerId);
     }
 
-    // --- LOBBY ---
+    // --- LOBBY & SETUP ---
 
     async createGame(hostName: string, selectedDeckNames: string[]) {
         const gamesRef = ref(db, 'games');
@@ -66,6 +65,7 @@ export class MultiplayerGame {
         this.isHost = false;
         this.myName = playerName;
 
+        // Add self to Players List
         const playerRef = ref(db, `games/${gameId}/players/${this.playerId}`);
         await set(playerRef, {
             name: playerName,
@@ -75,6 +75,7 @@ export class MultiplayerGame {
             board: this.serializeBoard()
         });
 
+        // Add self to Player Order
         const orderRef = ref(db, `games/${gameId}/playerOrder`);
         const orderSnap = await get(orderRef);
         const currentOrder = orderSnap.val() || [];
@@ -105,9 +106,6 @@ export class MultiplayerGame {
         const gameRef = ref(db, `games/${this.gameId}`);
         
         onValue(gameRef, (snapshot) => {
-            // DEBUG: Log Raw Entry
-            // console.log("Firebase Update Received");
-            
             const data = snapshot.val();
             if (!data) return;
 
@@ -126,6 +124,7 @@ export class MultiplayerGame {
             }
 
             // 3. Sync Resource
+            // We treat undefined or empty string as NULL
             if (data.currentResource === undefined || data.currentResource === "") {
                 this.localGame.currentResource = null;
             } else {
@@ -135,11 +134,11 @@ export class MultiplayerGame {
             // 4. Sync Round Number
             this.currentRound = data.roundNumber || 1;
 
-            // 5. Send to UI (IMMEDIATELY)
+            // 5. Update UI
             if (this.onStateChange) this.onStateChange(data);
 
-            // 6. HOST MONITORING LOGIC (DECOUPLED)
-            // We run this in a timeout so it doesn't block the UI update or cause recursive listener issues
+            // 6. HOST ONLY: Check for Turn Completion
+            // Wrapped in setTimeout to decouple logic from UI rendering
             if (this.isHost && data.status === "PLAYING") {
                 setTimeout(() => this.checkTurnComplete(data), 10);
             }
@@ -147,10 +146,8 @@ export class MultiplayerGame {
     }
 
     async setGlobalResource(resource: ResourceType) {
-        if (!this.gameId) return;
-        if (this.playerId !== this.masterBuilderId) return;
+        if (!this.gameId || this.playerId !== this.masterBuilderId) return;
 
-        console.log("Setting Global Resource:", resource);
         const updates: any = {};
         updates[`games/${this.gameId}/currentResource`] = resource;
         await update(ref(db), updates);
@@ -158,8 +155,6 @@ export class MultiplayerGame {
 
     async commitTurn() {
         if (!this.gameId) return;
-
-        console.log(`Committing Turn. Round: ${this.currentRound}`);
 
         const updates: any = {};
         const playerPath = `games/${this.gameId}/players/${this.playerId}`;
@@ -171,16 +166,35 @@ export class MultiplayerGame {
         await update(ref(db), updates);
     }
 
+    async saveBoardOnly() {
+        if (!this.gameId) return;
+
+        console.log("Saving board state (Turn not finished)...");
+
+        const updates: any = {};
+        const playerPath = `games/${this.gameId}/players/${this.playerId}`;
+        
+        updates[`${playerPath}/board`] = this.serializeBoard();
+        updates[`${playerPath}/score`] = this.localGame.getScore().total;
+        
+        // NOTICE: We do NOT update 'placedRound' here.
+        // This keeps our status as "Thinking" (or not done).
+
+        await update(ref(db), updates);
+    }
+
     private async checkTurnComplete(data: any) {
         if (!data || !data.players) return;
 
         const allPlayers = Object.values(data.players);
         const activeRound = data.roundNumber || 1;
         
+        // Everyone must have placed in the CURRENT round
         const allDone = allPlayers.every((p: any) => p.placedRound === activeRound);
 
+        // Only rotate if everyone is done AND we are currently in a Placement Phase (resource exists)
         if (allDone && data.currentResource) {
-            console.log(`>>> ROUND ${activeRound} COMPLETE. ROTATING. <<<`);
+            console.log(`Round ${activeRound} Complete. Rotating.`);
             
             const updates: any = {};
             updates[`games/${this.gameId}/currentResource`] = null; 

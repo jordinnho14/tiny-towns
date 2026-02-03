@@ -62,23 +62,23 @@ const BUILDING_CATEGORIES = [
 
 // --- 2. MULTIPLAYER CALLBACKS ---
 
-// When the server says "Here is the new state", we update the screen
 multiplayer.onStateChange = (data) => {
     try {
+        // 1. LOBBY UI
         if (data.status === 'LOBBY') {
             renderLobbyList(data.players);
         }
         
+        // 2. GAME UI
         if (data.status === 'PLAYING') {
+            // Hide modal if game just started
             if (!elements.startModal.classList.contains('hidden')) {
                 elements.startModal.classList.add('hidden');
                 renderAll();
                 renderer.renderDeck(game.gameRegistry);
             }
 
-            console.log("--- UI UPDATE ---", "Round:", data.roundNumber, "Res:", data.currentResource);
-
-            // --- MASTER BUILDER LOGIC ---
+            // --- A. Identify Master Builder ---
             let masterName = "Unknown";
             const rawOrder = data.playerOrder || [];
             const safeOrder = Array.isArray(rawOrder) ? rawOrder : Object.values(rawOrder);
@@ -94,15 +94,15 @@ multiplayer.onStateChange = (data) => {
             const isMyTurn = multiplayer.masterBuilderId === multiplayer.playerId;
             const resourceActive = (data.currentResource !== undefined && data.currentResource !== null);
             
-            // LOCK LOGIC
+            // --- B. Check Lock Status (Have I acted this round?) ---
             const currentRound = data.roundNumber || 1;
             const myStatus = data.players ? data.players[multiplayer.playerId] : null;
             if (myStatus) {
-                // Ensure we compare numbers to numbers
+                // Strict number comparison to be safe
                 hasActedThisTurn = (Number(myStatus.placedRound) === Number(currentRound));
             }
 
-            // --- SET MESSAGE ---
+            // --- C. Update Status Message ---
             if (!resourceActive) {
                 // NOMINATION PHASE
                 if (isMyTurn) {
@@ -118,12 +118,12 @@ multiplayer.onStateChange = (data) => {
                     multiplayerStatusMessage = "Waiting for other players to finish placing...";
                     togglePalette(false);
                 } else {
-                    multiplayerStatusMessage = ""; 
+                    multiplayerStatusMessage = ""; // Renderer defaults to "Place [RESOURCE]..."
                     togglePalette(false); 
                 }
             }
 
-            // Sync and Render
+            // --- D. Render ---
             game.currentResource = data.currentResource || null;
             renderAll();
         }
@@ -337,11 +337,6 @@ function generateRandomDeck() {
     return deck;
 }
 
-// ... Reuse your existing helper functions ...
-// (handleConstructionClick, resetConstructionState, etc.)
-// COPY PASTE YOUR EXISTING HELPERS HERE OR KEEP THEM IF YOU EDITED THE FILE PARTIALLY
-// For safety, I'll include the critical ones below:
-
 function handleConstructionClick(r: number, c: number) {
     const grid = game.board.getGrid();
     const cellContent = grid[r][c];
@@ -356,10 +351,13 @@ function handleConstructionClick(r: number, c: number) {
             alert("Cannot build on Trading Post.");
             return;
         }
+        
+        // 1. Update local game state
         game.constructBuilding(activeConstruction, r, c);
         
-        // IMPORTANT: SYNC AFTER BUILDING
-        multiplayer.commitTurn(); 
+        // 2. Save new board to database, BUT DO NOT END TURN
+        // (Use saveBoardOnly instead of commitTurn)
+        multiplayer.saveBoardOnly(); 
 
         resetConstructionState();
         renderAll();
