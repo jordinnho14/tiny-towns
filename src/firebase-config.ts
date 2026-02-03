@@ -6,7 +6,7 @@ import { getDatabase } from "firebase/database";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDhDhpFMVbXOq04J2jZkGrfjeovdTT6U2o",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: "tiny-towns-multiplayer.firebaseapp.com",
   databaseURL: "https://tiny-towns-multiplayer-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "tiny-towns-multiplayer",
