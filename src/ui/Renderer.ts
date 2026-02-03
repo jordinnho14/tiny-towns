@@ -62,12 +62,12 @@ render(game: Game, activeConstruction: any | null, highlightCoords: any[], custo
 
             // 1. Reset State
             div.className = 'cell';
-            div.style.backgroundColor = ''; // Reset color to allow CSS to work
+            div.style.backgroundColor = ''; // Reset color
+            div.innerHTML = ''; // Clear content (Text AND Badges)
 
             // 2. Apply Classes & Styles based on Content
             if (cell === 'NONE') {
                 div.classList.add('empty');
-                div.textContent = '';
             } 
             else if (RESOURCES.includes(cell)) {
                 div.classList.add(cell); // WOOD, WHEAT, etc.
@@ -75,7 +75,6 @@ render(game: Game, activeConstruction: any | null, highlightCoords: any[], custo
             } 
             else {
                 // IT IS A BUILDING
-                div.textContent = ''; // Clear text so icon shows
                 
                 // Find definition to check for Monument status & Color
                 const def = game.gameRegistry.find(b => b.name.toUpperCase() === cell.toUpperCase());
@@ -94,8 +93,19 @@ render(game: Game, activeConstruction: any | null, highlightCoords: any[], custo
                     if (def.color) div.style.backgroundColor = def.color;
                 }
             }
+
+            // 3. Stored Resource Logic (NEW: FOR FACTORY/BANK)
+            // We check metadata to see if this building is holding a resource
+            const meta = game.board.getMetadata(r, c);
+            if (meta && meta.storedResource) {
+                const badge = document.createElement('div');
+                // Use the CSS class we added: stored-resource-icon + resource name (e.g. BRICK)
+                badge.className = `stored-resource-icon ${meta.storedResource}`;
+                badge.title = `Stored: ${meta.storedResource}`;
+                div.appendChild(badge);
+            }
             
-            // 3. Highlight Logic (UPDATED FOR TRADING POST)
+            // 4. Highlight Logic (UPDATED FOR TRADING POST)
             if (activeConstruction) {
                 const isPatternPart = highlightCoords.some(p => p.row === r && p.col === c);
                 
@@ -115,7 +125,7 @@ render(game: Game, activeConstruction: any | null, highlightCoords: any[], custo
                 }
             }
 
-            // 4. Ghost Logic (Previewing placement)
+            // 5. Ghost Logic (Previewing placement)
             if (cell === 'NONE' && game.currentResource && !activeConstruction) {
                  div.onmouseenter = () => {
                     div.classList.add('ghost', game.currentResource!);
@@ -130,19 +140,18 @@ render(game: Game, activeConstruction: any | null, highlightCoords: any[], custo
         });
 
         // ============================================
-        //  NEW MESSAGE LOGIC (This is the changed part)
+        //  MESSAGE LOGIC
         // ============================================
         if (activeConstruction) {
             this.msgLabel.textContent = `Select a highlighted square to build your ${activeConstruction.buildingName}!`;
             this.msgLabel.style.color = "#d32f2f"; 
         } 
-        // 1. Check Custom Message (from MultiplayerGame) first!
         else if (customMessage) {
             this.msgLabel.textContent = customMessage;
             if (customMessage.includes("Waiting")) {
-                this.msgLabel.style.color = "#d32f2f"; // Red for waiting
+                this.msgLabel.style.color = "#d32f2f"; 
             } else if (customMessage.includes("YOU")) {
-                this.msgLabel.style.color = "#2e7d32"; // Green for your turn
+                this.msgLabel.style.color = "#2e7d32"; 
             } else {
                 this.msgLabel.style.color = "#333";
             }

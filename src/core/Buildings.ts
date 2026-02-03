@@ -1,3 +1,4 @@
+import { FactoryStrategy } from './EffectStrategies';
 import { AdjacentFeederStrategy, ContiguousFeederStrategy, GlobalFeederStrategy, RowColFeederStrategy } from './FeederStrategies';
 import { AdjacencyRequirementStrategy, AdjacencyStrategy, AdjacentFedStrategy, AlmshouseStrategy, CategoryAdjacencyStrategy, CenterCountStrategy, CornerBuildingCountStrategy, FedCottageCountStrategy, FixedScoreStrategy, GlobalUniqueStrategy, IsolatedStrategy, LargestGroupStrategy, LineCountStrategy, MausoleumStrategy, MissingTypeStrategy, RestrictedNeighborStrategy, SavedScoreStrategy, UniqueLineStrategy, UniqueNeighborStrategy } from './ScoringStrategies';
 import { type Building, BuildingType, Resource } from './Types';
@@ -200,7 +201,8 @@ export const FACTORY: Building = {
         [Resource.WOOD, Resource.NONE, Resource.NONE, Resource.NONE],
         [Resource.BRICK, Resource.STONE, Resource.STONE, Resource.BRICK]
     ],
-    description: 'Place 1 resource on the factory, whenever another player chooses that resource, play a different one instead.'
+    description: 'Place 1 resource on the factory, whenever another player chooses that resource, play a different one instead.',
+    effect: new FactoryStrategy()
 };
 //TODO: IMPLEMENT FACTORY MECHANICS
 

@@ -43,7 +43,7 @@ export class Game {
         this.scanForMatches();
     }
 
-    constructBuilding(match: any, targetR: number, targetC: number) {
+    constructBuilding(match: any, targetR: number, targetC: number): { type: 'SUCCESS' | 'TRIGGER_EFFECT', effectType?: string} {
         // 1. Identify coordinates involved in the match
         const coords: { row: number, col: number }[] = [];
         let shrinePoints = 0;
@@ -90,6 +90,18 @@ export class Game {
         // 5. Clear Undo & Rescan
         this.lastMove = null;
         this.scanForMatches();
+
+        const buildingDef = this.gameRegistry.find(b => b.name.toUpperCase() === match.buildingName.toUpperCase());
+        
+        if (buildingDef && buildingDef.effect) {
+            // Tell the UI: "Hey, I just built a Factory, please ask the user for a resource!"
+            return { 
+                type: 'TRIGGER_EFFECT', 
+                effectType: buildingDef.effect.type 
+            };
+        }
+
+        return { type: 'SUCCESS' };
     }
 
     undo() {
@@ -153,4 +165,52 @@ export class Game {
         const grid = this.board.getGrid();
         return grid.some(row => row.some(cell => cell.toUpperCase().includes("OBELISK")));
     }
+
+    public findEffectBuildings(effectType: string): { r: number, c: number, storedRes: ResourceType }[] {
+        const grid = this.board.getGrid();
+        const results: { r: number, c: number, storedRes: ResourceType }[] = [];
+
+        grid.forEach((row, r) => {
+            row.forEach((cell, c) => {
+                // Skip resources and empty cells
+                if (['WOOD', 'WHEAT', 'BRICK', 'GLASS', 'STONE', 'NONE'].includes(cell)) return;
+
+                // Find the building definition
+                const buildingDef = this.gameRegistry.find(b => b.name.toUpperCase() === cell.toUpperCase());
+                
+                // Check if it has the matching effect
+                if (buildingDef && buildingDef.effect && buildingDef.effect.type === effectType) {
+                    // Get the stored resource from metadata
+                    const meta = this.board.getMetadata(r, c);
+                    if (meta && meta.storedResource) {
+                        results.push({ r, c, storedRes: meta.storedResource });
+                    }
+                }
+            });
+        });
+        return results;
+    }
+
+    /**
+     * Stores a resource in a specific building (Factory, Bank, etc).
+     * This updates the metadata for that cell.
+     */
+    public setBuildingStorage(r: number, c: number, resource: ResourceType) {
+        this.board.setMetadata(r, c, { storedResource: resource });
+    }
+
+    /**
+     * Checks if the player has a valid Factory swap available for the incoming resource.
+     * Returns the coordinates of the Factory if a swap is possible, or null.
+     */
+    public canFactorySwap(incomingResource: ResourceType): { r: number, c: number } | null {
+        // Find all my factories
+        const factories = this.findEffectBuildings('FACTORY');
+        
+        // See if any of them contain the EXACT resource being offered
+        const validFactory = factories.find(f => f.storedRes === incomingResource);
+        
+        return validFactory ? { r: validFactory.r, c: validFactory.c } : null;
+    }
 }
+

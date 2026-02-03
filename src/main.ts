@@ -11,6 +11,7 @@ import {
 import { Game } from './core/Game';
 import { Renderer } from './ui/Renderer';
 import { MultiplayerGame } from './core/MultiplayerGame';
+import type { ResourceType } from './core/Types';
 
 // --- 1. INITIALIZATION ---
 const game = new Game();
@@ -192,31 +193,54 @@ renderer.onCellClick = (r, c) => {
 
 async function handleResourceClick(r: number, c: number) {
     if (hasActedThisTurn) {
-        showToast("You have already placed a resource this turn! Wait for others.", "error");
+        showToast("You have already placed a resource this turn!", "error");
         return;
     }
 
-
     if (!game.currentResource) {
-        // Should be blocked by UI, but good safety check
         showToast("Waiting for Master Builder...", "info");
         return;
     }
-    
-    // 1. Update Local Board
+
+    // --- NEW: FACTORY LOGIC ---
+    // 1. Check if it is currently MY turn as Master Builder
+    const isMyTurn = multiplayer.masterBuilderId === multiplayer.playerId;
+
+    // 2. Only allow swap if it is NOT my turn AND I have the matching resource
+    const factorySwap = !isMyTurn && game.canFactorySwap(game.currentResource);
+
+    if (factorySwap) {
+        const wantsSwap = confirm(`The Master Builder chose ${game.currentResource}.\nYour Factory holds ${game.currentResource}.\n\nDo you want to swap it for a different resource?`);
+        
+        if (wantsSwap) {
+            showResourcePicker(async (newRes) => {
+                // Override locally just for this placement
+                game.currentResource = newRes; 
+                await finalizePlacement(r, c);
+            });
+            return; 
+        }
+    }
+
+    // Normal path (No swap available OR user said 'Cancel')
+    await finalizePlacement(r, c);
+}
+
+// Helper function to handle the actual placement and server sync
+async function finalizePlacement(r: number, c: number) {
     try {
+        // 1. Update Local Board
         game.placeResource(r, c);
+
+        // 2. Send Update to Server (Sets hasPlaced = true)
+        await multiplayer.commitTurn();
+
+        renderAll();
+        checkAndShowGameOver();
+
     } catch (e) {
         showToast((e as Error).message, "error");
-        return;
     }
-    
-    // 2. Send Update to Server (Sets hasPlaced = true)
-    await multiplayer.commitTurn();
-
-    renderAll();
-    // checkAndShowGameOver(); // Optional: move this inside renderAll or keep here
-    checkAndShowGameOver();
 }
 
 renderer.onBuildClick = (match) => {
@@ -379,11 +403,22 @@ function handleConstructionClick(r: number, c: number) {
         }
         
         // 1. Update local game state
-        game.constructBuilding(activeConstruction, r, c);
+        const result = game.constructBuilding(activeConstruction, r, c);
         
         // 2. Save new board to database, BUT DO NOT END TURN
         // (Use saveBoardOnly instead of commitTurn)
         multiplayer.saveBoardOnly(); 
+
+        if (result.type === 'TRIGGER_EFFECT' && result.effectType === 'FACTORY') {
+            // Show the modal to pick a resource
+            showResourcePicker((chosenRes) => {
+                // Save the choice to the board metadata
+                game.setBuildingStorage(r, c, chosenRes);
+                // Save again so the metadata goes to the server
+                multiplayer.saveBoardOnly();
+                renderAll();
+            });
+        }
 
         resetConstructionState();
         renderAll();
@@ -628,4 +663,25 @@ function renderOpponents(players: any, currentRound: number) {
         card.appendChild(gridDiv);
         elements.opponentsList.appendChild(card);
     });
+}
+
+
+function showResourcePicker(callback: (res: ResourceType) => void) {
+    const modal = document.getElementById('resource-picker-modal')!;
+    const container = document.getElementById('picker-options')!;
+    
+    container.innerHTML = '';
+    const resources: ResourceType[] = ['WOOD', 'WHEAT', 'BRICK', 'GLASS', 'STONE'];
+
+    resources.forEach(res => {
+        const btn = document.createElement('div');
+        btn.className = `res-btn ${res}`;
+        btn.onclick = () => {
+            modal.classList.add('hidden');
+            callback(res);
+        };
+        container.appendChild(btn);
+    });
+
+    modal.classList.remove('hidden');
 }

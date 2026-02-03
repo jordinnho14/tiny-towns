@@ -1,3 +1,4 @@
+import type { EffectStrategy } from "./EffectStrategies";
 import type { ScoringStrategy } from "./ScoringStrategies";
 
 export const Resource = {
@@ -72,4 +73,5 @@ export interface Building {
     feedCost?: number;
     countsAs?: BuildingName[];
     description?: string;
+    effect?: EffectStrategy;
 }
