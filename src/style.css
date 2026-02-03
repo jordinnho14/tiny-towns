@@ -620,3 +620,77 @@ h1, h2, h3 {
 .monument-pattern-grid .mini-cell {
     border-radius: 3px;
 }
+
+
+/* =========================================
+   8. MULTIPLAYER LEADERBOARD
+   ========================================= */
+.leaderboard-container {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 10px;
+    margin-top: 10px;
+}
+
+#leaderboard-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.leaderboard-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 15px;
+    background: white;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    font-family: 'Nunito', sans-serif;
+}
+
+/* Rank Badge (1st, 2nd, etc) */
+.rank-badge {
+    background: #eee;
+    color: #555;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center; justify-content: center;
+    font-weight: 800;
+    font-size: 13px;
+    margin-right: 12px;
+}
+
+/* Winner Styling */
+.leaderboard-row.winner {
+    border: 2px solid #fdd835;
+    background: #fffde7;
+    transform: scale(1.02);
+    box-shadow: 0 4px 10px rgba(253, 216, 53, 0.2);
+    z-index: 2;
+}
+
+.leaderboard-row.winner .rank-badge {
+    background: #fdd835;
+    color: #333;
+}
+
+.player-info {
+    flex: 1;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+}
+
+.player-name { font-weight: 800; color: #333; }
+.player-details { font-size: 11px; color: #777; }
+
+.final-total {
+    font-size: 20px;
+    font-weight: 900;
+    color: #2c3e50;
+}

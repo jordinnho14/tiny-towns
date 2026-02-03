@@ -38,6 +38,9 @@ const elements = {
     hostSettings: document.getElementById('host-settings')!,
     guestWaitingMsg: document.getElementById('guest-waiting-msg')!,
     startGameBtn: document.getElementById('start-game-btn')!,
+    multiplayerResultsModal: document.getElementById('multiplayer-results-modal')!,
+    leaderboardList: document.getElementById('leaderboard-list')!,
+    mpRestartBtn: document.getElementById('mp-restart-btn')!,
 
     // Existing helpers
     monumentGrid: document.getElementById('monument-pattern-grid')!,
@@ -123,17 +126,19 @@ multiplayer.onStateChange = (data) => {
                     togglePalette(false); 
                 }
             }
+        }
 
-            // 3. GAME OVER (Global)
-            if (data.status === 'FINISHED') {
-                alert("Everyone has finished! Final scores are ready.");
-                // You could show a leaderboard here later
+        if (data.status === 'FINISHED') {
+                elements.gameOverModal.classList.add('hidden');
+                
+                // Show the Global Leaderboard
+                renderLeaderboard(data.players);
+                elements.multiplayerResultsModal.classList.remove('hidden');
             }
 
             // --- D. Render ---
             game.currentResource = data.currentResource || null;
             renderAll();
-        }
     } catch (err) {
         console.error("Error in onStateChange:", err);
     }
@@ -224,6 +229,11 @@ elements.undoBtn.onclick = () => {
     // For now, let's disable it or make it local-only BEFORE commit.
     // If you already committed, you can't undo.
     alert("Undo not yet supported in Multiplayer!");
+};
+
+elements.mpRestartBtn.onclick = () => {
+    // For now, reloading is the safest way to reset state
+    location.reload();
 };
 
 
@@ -481,5 +491,35 @@ function togglePalette(enabled: boolean) {
     }
 }
 
-// STARTUP
-// We do NOT call game.start() here. We wait for the user to Create or Join.
+function renderLeaderboard(players: any) {
+    elements.leaderboardList.innerHTML = '';
+    
+    // Convert to array and Sort by Score (Descending)
+    const sorted = Object.values(players).sort((a: any, b: any) => b.score - a.score);
+    
+    sorted.forEach((p: any, index) => {
+        const li = document.createElement('li');
+        li.className = 'leaderboard-row';
+        
+        // Highlight 1st place
+        if (index === 0) li.classList.add('winner');
+        
+        // Calculate Rank (1, 2, 3...)
+        const rank = index + 1;
+        
+        li.innerHTML = `
+            <div style="display:flex; align-items:center;">
+                <div class="rank-badge">${rank}</div>
+                <div class="player-info">
+                    <span class="player-name">${p.name}</span>
+                    <span class="player-details">
+                        ${p.isGameOver ? "Finished" : "Playing"} 
+                    </span>
+                </div>
+            </div>
+            <div class="final-total">${p.score}</div>
+        `;
+        
+        elements.leaderboardList.appendChild(li);
+    });
+}
