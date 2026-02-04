@@ -1,7 +1,7 @@
 import type { ResourceType } from './Types';
 
 export interface EffectStrategy {
-    type: 'FACTORY' | 'BANK' | 'WAREHOUSE' | 'TRADING_POST';
+    type: 'FACTORY' | 'BANK' | 'WAREHOUSE' | 'TRADING_POST' | 'STATUE_BONDMAKER';
     description: string;
     // Helper to check if this building allows a swap
     canSwap?(storedResource: ResourceType, incomingResource: ResourceType): boolean;
@@ -27,4 +27,9 @@ export class WarehouseStrategy implements EffectStrategy {
     readonly type = 'WAREHOUSE';
     readonly description = "Stores up to 3 resources. You can Swap the current resource with one in storage. -1 point for each resource left at the end.";
     readonly capacity = 3;
+}
+
+export class StatueBondmakerStrategy implements EffectStrategy {
+    readonly type = 'STATUE_BONDMAKER';
+    readonly description = "When another player names a resource, you may place it on a square with a Cottage.";
 }

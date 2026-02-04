@@ -253,10 +253,37 @@ async function handleResourceClick(r: number, c: number) {
         showToast("You have already placed a resource this turn!", "error");
         return;
     }
+
     if (!game.currentResource) {
         showToast("Waiting for Master Builder...", "info");
         return;
     }
+
+    // --- BONDMAKER LOGIC ---
+    const isMasterBuilder = multiplayer.masterBuilderId === multiplayer.playerId;
+    const grid = game.board.getGrid();
+    const cell = grid[r][c];
+
+    // Check if player is trying to use the Bondmaker ability
+    if (cell.toUpperCase() === 'COTTAGE' && game.hasStatueOfBondmaker()) {
+        
+        // 1. PRIORITY CHECK: Is it already full?
+        // (We check this first so you get the "Full" error instead of the "Permission" error)
+        const meta = game.board.getMetadata(r, c);
+        if (meta && meta.storedResource) {
+             showToast("This Cottage is already holding a resource!", "error");
+             return;
+        }
+
+        // 2. SECONDARY CHECK: Am I allowed to do this?
+        // (Bondmaker only works if I am NOT the Master Builder)
+        if (isMasterBuilder) {
+            showToast("The Bondmaker only works when OTHER players name a resource!", "error");
+            return; 
+        }
+    }
+    // --- END BONDMAKER LOGIC ---
+
     try {
         game.placeResource(r, c);
         await multiplayer.commitTurn();
@@ -649,3 +676,39 @@ function calculateMasterId(data: any): string | null {
         elements.createGameBtn.parentElement?.classList.add('hidden'); 
     }
 })();
+
+
+// --- DEBUGGING TOOLS ---
+// Expose this function to the browser console
+(window as any).setMonument = (partialName: string) => {
+    // 1. Find the monument from the master list
+    const target = MONUMENTS_LIST.find(b => 
+        b.name.toUpperCase().includes(partialName.toUpperCase())
+    );
+
+    if (!target) {
+        console.error(`Could not find monument matching "${partialName}". Available:`, MONUMENTS_LIST.map(b => b.name));
+        return;
+    }
+
+    console.log(`Force-switching monument to: ${target.name}`);
+
+    // 2. Identify the "Shared Deck" (everything that isn't a monument)
+    const sharedDeck = game.gameRegistry.filter(b => !b.isMonument);
+
+    // 3. Update the Game Engine
+    game.setMonument(target, sharedDeck);
+
+    // 4. Update the UI
+    renderer.renderDeck(game.gameRegistry);
+    renderAll();
+
+    // 5. Update Server (so other players see your new sidebar card)
+    if (multiplayer.gameId) {
+        multiplayer.selectMonument(target.name);
+    }
+
+    showToast(`Debug: Switched to ${target.name}`, "success");
+};
+
+console.log("🛠️ DEBUG MODE: Type setMonument('Statue') in console to switch monuments.");

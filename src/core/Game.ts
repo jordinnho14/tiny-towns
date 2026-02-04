@@ -42,10 +42,32 @@ export class Game {
         }
     }
 
+
     placeResource(r: number, c: number) {
         if (!this.currentResource) throw new Error("No resource selected");
         
-        this.board.place(r, c, this.currentResource);
+        const grid = this.board.getGrid();
+        const cell = grid[r][c];
+
+        // 1. Standard Case: Empty Square
+        if (cell === 'NONE') {
+            this.board.place(r, c, this.currentResource);
+        }
+        // 2. Bondmaker Case: Occupied by Cottage
+        else if (cell === 'COTTAGE' && this.hasStatueOfBondmaker()) {
+            // Check if it already holds a resource
+            const meta = this.board.getMetadata(r, c);
+            if (meta && meta.storedResource) {
+                throw new Error("This Cottage is already holding a resource!");
+            }
+
+            // Place it in metadata (NOT on the grid itself, or we lose the Cottage)
+            this.board.setMetadata(r, c, { ...meta, storedResource: this.currentResource });
+        } 
+        else {
+            throw new Error("Cannot place resource here.");
+        }
+
         this.lastMove = { r, c };
         this.currentResource = null; 
         
@@ -81,10 +103,16 @@ export class Game {
             const item = this.board.getGrid()[pos.row][pos.col];
             // Normalize checking for Trading Post
             const isTradingPost = item && (item as string).toUpperCase().replace('_', ' ') === 'TRADING POST';
+            const meta = this.board.getMetadata(pos.row, pos.col);
+            const hasStoredResource = meta && meta.storedResource;
 
-            // If it's a Trading Post, DO NOT clear it (it stays).
-            // If it's a normal resource, clear it.
-            if (!isTradingPost) {
+            if (hasStoredResource) {
+                // We used the resource ON the cottage.
+                // Action: Just clear the resource, keep the Cottage.
+                this.board.setMetadata(pos.row, pos.col, { ...meta, storedResource: null });
+            }
+            else if (!isTradingPost) {
+                // Standard case: Remove the item from grid
                 this.board.remove(pos.row, pos.col);
             }
         });
@@ -136,7 +164,7 @@ export class Game {
         for (const building of this.gameRegistry) {
             if (hasMonument && building.isMonument) continue;
 
-            const matches = Matcher.findMatches(grid, building);
+            const matches = Matcher.findMatches(grid, building, this.board.metadata);
             matches.forEach(m => {
                 this.availableMatches.push({ ...m, buildingName: building.name.toUpperCase() });
             });
@@ -174,9 +202,9 @@ export class Game {
         return grid.some(row => row.some(cell => cell.toUpperCase().includes("OBELISK")));
     }
 
-    public findEffectBuildings(effectType: string): { r: number, c: number, storedRes: ResourceType }[] {
+    public findEffectBuildings(effectType: string, requireStorage: boolean = true): { r: number, c: number, storedRes: ResourceType | null }[] {
         const grid = this.board.getGrid();
-        const results: { r: number, c: number, storedRes: ResourceType }[] = [];
+        const results: { r: number, c: number, storedRes: ResourceType | null }[] = [];
 
         grid.forEach((row, r) => {
             row.forEach((cell, c) => {
@@ -188,10 +216,18 @@ export class Game {
                 
                 // Check if it has the matching effect
                 if (buildingDef && buildingDef.effect && buildingDef.effect.type === effectType) {
-                    // Get the stored resource from metadata
+                    
                     const meta = this.board.getMetadata(r, c);
-                    if (meta && meta.storedResource) {
-                        results.push({ r, c, storedRes: meta.storedResource });
+                    const storedRes = meta ? meta.storedResource : null;
+
+                    // FIX: strict check depending on the flag
+                    if (requireStorage) {
+                        if (storedRes) {
+                            results.push({ r, c, storedRes });
+                        }
+                    } else {
+                        // Return it even if empty (for passive buildings like Statue)
+                        results.push({ r, c, storedRes });
                     }
                 }
             });
@@ -224,7 +260,9 @@ export class Game {
     public getForbiddenResources(): ResourceType[] {
         // Find all banks and return the resources stored on them
         const banks = this.findEffectBuildings('BANK');
-        return banks.map(b => b.storedRes);
+        return banks
+            .map(b => b.storedRes)
+            .filter((res): res is ResourceType => res !== null);
     }
 
     // --- WAREHOUSE LOGIC ---
@@ -271,6 +309,13 @@ export class Game {
     public getWarehouseContents(r: number, c: number): ResourceType[] {
         const meta = this.board.getMetadata(r, c);
         return (meta?.storedResources as ResourceType[]) || [];
+    }
+
+    // In Game class
+    public hasStatueOfBondmaker(): boolean {
+        const buildings = this.findEffectBuildings('STATUE_BONDMAKER', false);
+        console.log(`Checking for Bondmaker. Found: ${buildings.length}`, buildings);
+        return buildings.length > 0;
     }
 }
 

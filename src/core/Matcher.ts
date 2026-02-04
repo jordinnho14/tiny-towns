@@ -22,7 +22,8 @@ export class Matcher {
     }
 
     // --- Search Logic ---
-    static findMatches(board: GridCell[][], building: Building) {
+    // Updated signature: accept metadata
+    static findMatches(board: GridCell[][], building: Building, metadata?: any) {
         const symmetries = this.getSymmetries(building.pattern);
         const matches = [];
 
@@ -32,7 +33,8 @@ export class Matcher {
 
             for (let r = 0; r <= 4 - height; r++) {
                 for (let c = 0; c <= 4 - width; c++) {
-                    if (this.isMatch(board, pattern, r, c)) {
+                    // Pass metadata down
+                    if (this.isMatch(board, pattern, r, c, metadata)) {
                         matches.push({ row: r, col: c, pattern });
                     }
                 }
@@ -41,19 +43,40 @@ export class Matcher {
         return matches;
     }
 
-    private static isMatch(board: GridCell[][], pattern: ResourceType[][], startR: number, startC: number): boolean {
+    private static isMatch(
+        board: GridCell[][], 
+        pattern: ResourceType[][], 
+        startR: number, 
+        startC: number,
+        metadata?: any
+    ): boolean {
         return pattern.every((row, r) =>
             row.every((requiredResource, c) => {
-                const boardCell = board[startR + r][startC + c];
+                const rPos = startR + r;
+                const cPos = startC + c;
+                const boardCell = board[rPos][cPos];
 
-                // 1. Skip empty pattern slots
+                // 1. Skip empty pattern slots (Always a match)
                 if (requiredResource === 'NONE') return true;
 
-                // 2. Exact Match
+                // 2. Exact Match (Resource on board matches pattern)
                 if (boardCell === requiredResource) return true;
 
+                // 3. Trading Post (Wildcard)
                 if (boardCell && (boardCell as string).toUpperCase().replace('_', ' ') === 'TRADING POST') {
                     return true;
+                }
+
+                // 4. Stored Resource (Statue of the Bondmaker Logic)
+                // If the pattern needs [WOOD], and the board has a Cottage holding [WOOD], that counts.
+                if (metadata) {
+                    // Handle Map or Object structure
+                    const key = `${rPos},${cPos}`;
+                    const meta = (metadata instanceof Map) ? metadata.get(key) : metadata[key];
+                    
+                    if (meta && meta.storedResource === requiredResource) {
+                        return true;
+                    }
                 }
 
                 return false;

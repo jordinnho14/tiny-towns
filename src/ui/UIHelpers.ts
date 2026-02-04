@@ -167,7 +167,8 @@ export function renderOpponents(
                         if (['WOOD', 'WHEAT', 'BRICK', 'GLASS', 'STONE'].includes(cell)) {
                             div.classList.add(cell);
                         } else {
-                            div.classList.add(cell);
+                            const safeName = cell.replace(/ /g, '-').replace(/'/g, '').toUpperCase();
+                            div.classList.add(safeName);
                             div.title = cell;
                             const standard = [
                                 'COTTAGE', 'FARM', 'GRANARY', 'GREENHOUSE', 'ORCHARD',
