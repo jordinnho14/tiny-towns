@@ -145,7 +145,8 @@ multiplayer.onStateChange = (data) => {
                     data.roundNumber || 1, 
                     multiplayer.playerId, 
                     elements.opponentsSidebar, 
-                    elements.opponentsList
+                    elements.opponentsList,
+                    calculateMasterId(data)
                 );
             }
 
@@ -625,6 +626,16 @@ function addScoreListItem(label: string, score: number, isPenalty: boolean = fal
     li.style.justifyContent = 'space-between';
     li.innerHTML = `<span>${label.toLowerCase()}</span><strong>${score}</strong>`;
     elements.scoreList.appendChild(li);
+}
+
+function calculateMasterId(data: any): string | null {
+    const rawOrder = data.playerOrder || [];
+    const safeOrder = Array.isArray(rawOrder) ? rawOrder : Object.values(rawOrder);
+    if (safeOrder.length > 0) {
+        const idx = (data.masterBuilderIndex || 0) % safeOrder.length;
+        return safeOrder[idx] as string;
+    }
+    return null;
 }
 
 // --- AUTO-JOIN VIA URL ---

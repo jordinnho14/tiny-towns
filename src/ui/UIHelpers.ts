@@ -113,7 +113,8 @@ export function renderOpponents(
     currentRound: number, 
     myPlayerId: string, 
     sidebarEl: HTMLElement, 
-    listEl: HTMLElement
+    listEl: HTMLElement,
+    masterBuilderId: string | null // <--- NEW ARGUMENT
 ) {
     // 1. Reveal Sidebar
     sidebarEl.classList.remove('hidden');
@@ -125,20 +126,29 @@ export function renderOpponents(
         if (key === myPlayerId) return;
 
         const p = players[key];
-
-        // Determine Status
         const isDone = (p.placedRound === currentRound) || p.isGameOver;
         const statusClass = isDone ? "done" : "thinking";
+        
+        // CHECK IF MASTER
+        const isMaster = (key === masterBuilderId);
 
         // Create Card HTML
         const card = document.createElement('div');
         card.className = 'opponent-card';
+        if (isMaster) {
+            card.style.border = "2px solid #ff9800"; // Orange border for Master
+            card.style.background = "#fff3e0";
+        }
 
         // Header
         const header = document.createElement('div');
         header.className = 'opponent-name';
+        
+        // Add Hammer Icon if Master
+        const masterIcon = isMaster ? '<span style="font-size:1.2em; margin-right:5px;">🔨</span>' : '';
+
         header.innerHTML = `
-            ${p.name}
+            ${masterIcon} ${p.name}
             <span class="status-dot ${statusClass}" title="${isDone ? 'Waiting' : 'Thinking'}"></span>
         `;
         card.appendChild(header);
@@ -147,21 +157,18 @@ export function renderOpponents(
         const gridDiv = document.createElement('div');
         gridDiv.className = 'mini-board';
 
-        // 3. Render 4x4 Grid
+        // ... (rest of the grid rendering code stays the same) ...
         if (p.board && Array.isArray(p.board)) {
             p.board.forEach((row: string[]) => {
                 row.forEach((cell: string) => {
                     const div = document.createElement('div');
                     div.className = 'mini-cell';
-
                     if (cell !== 'NONE') {
                         if (['WOOD', 'WHEAT', 'BRICK', 'GLASS', 'STONE'].includes(cell)) {
                             div.classList.add(cell);
                         } else {
                             div.classList.add(cell);
                             div.title = cell;
-
-                            // Standard buildings list to detect monuments
                             const standard = [
                                 'COTTAGE', 'FARM', 'GRANARY', 'GREENHOUSE', 'ORCHARD',
                                 'WELL', 'FOUNTAIN', 'MILLSTONE', 'SHED',
@@ -170,17 +177,13 @@ export function renderOpponents(
                                 'THEATER', 'BAKERY', 'TAILOR', 'MARKET',
                                 'FACTORY', 'BANK', 'WAREHOUSE', 'TRADING-POST'
                             ];
-
-                            if (!standard.includes(cell)) {
-                                div.classList.add('MONUMENT');
-                            }
+                            if (!standard.includes(cell)) div.classList.add('MONUMENT');
                         }
                     }
                     gridDiv.appendChild(div);
                 });
             });
         }
-
         card.appendChild(gridDiv);
         listEl.appendChild(card);
     });
