@@ -317,5 +317,20 @@ export class Game {
         console.log(`Checking for Bondmaker. Found: ${buildings.length}`, buildings);
         return buildings.length > 0;
     }
+
+    public placeFreeBuilding(r: number, c: number, buildingName: string) {
+        const grid = this.board.getGrid();
+        
+        // Validation: Must be empty
+        if (grid[r][c] !== 'NONE') {
+            throw new Error("Target square must be empty!");
+        }
+
+        // Place it directly
+        this.board.placeBuilding(r, c, buildingName);
+        
+        // Scan for matches just in case this triggers something (unlikely but safe)
+        this.scanForMatches();
+    }
 }
 

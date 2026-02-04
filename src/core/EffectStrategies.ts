@@ -1,7 +1,7 @@
 import type { ResourceType } from './Types';
 
 export interface EffectStrategy {
-    type: 'FACTORY' | 'BANK' | 'WAREHOUSE' | 'TRADING_POST' | 'STATUE_BONDMAKER';
+    type: 'FACTORY' | 'BANK' | 'WAREHOUSE' | 'TRADING_POST' | 'STATUE_BONDMAKER' | 'GROVE_UNIVERSITY';
     description: string;
     // Helper to check if this building allows a swap
     canSwap?(storedResource: ResourceType, incomingResource: ResourceType): boolean;
@@ -32,4 +32,9 @@ export class WarehouseStrategy implements EffectStrategy {
 export class StatueBondmakerStrategy implements EffectStrategy {
     readonly type = 'STATUE_BONDMAKER';
     readonly description = "When another player names a resource, you may place it on a square with a Cottage.";
+}
+
+export class GroveUniversityStrategy implements EffectStrategy {
+    readonly type = 'GROVE_UNIVERSITY';
+    readonly description = "Immediately place a building on an empty square in your town.";
 }

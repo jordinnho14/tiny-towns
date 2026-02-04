@@ -22,7 +22,8 @@ import {
     renderLeaderboard, 
     renderOpponents, 
     initHostDropdowns, 
-    showMonumentSelection
+    showMonumentSelection,
+    showBuildingPicker
 } from './ui/UIHelpers';
 
 // --- 1. INITIALIZATION ---
@@ -37,6 +38,7 @@ let multiplayerStatusMessage = '';
 let hasActedThisTurn = false;
 let hasDeclaredGameOver = false;
 let activeGameId = "";
+let pendingFreeBuildName: string | null = null;
 
 // DOM Elements
 const elements = {
@@ -230,6 +232,30 @@ renderer.onCellClick = (r, c) => {
     const grid = game.board.getGrid();
     const cell = grid[r][c];
 
+    if (pendingFreeBuildName) {
+        if (cell !== 'NONE') {
+            showToast("You must choose an EMPTY square!", "error");
+            return;
+        }
+
+        try {
+            // Execute the free build
+            game.placeFreeBuilding(r, c, pendingFreeBuildName);
+
+            // Clear state
+            pendingFreeBuildName = null;
+
+            // Now we are truly done
+            multiplayer.saveBoardOnly();
+            renderAll();
+            checkAndShowGameOver();
+            showToast("Scholarship claimed!", "success");
+        } catch (e) {
+            showToast("Error placing building.", "error");
+        }
+        return; // Stop processing other click types
+    }
+
     // Check if clicked cell is a Warehouse
     if (cell && cell.toUpperCase() === 'WAREHOUSE') {
         handleWarehouseClick(r, c);
@@ -416,6 +442,8 @@ function generateRandomDeck() {
     return deck;
 }
 
+// src/main.ts
+
 function handleConstructionClick(r: number, c: number) {
     const grid = game.board.getGrid();
     const cellContent = grid[r][c];
@@ -431,10 +459,20 @@ function handleConstructionClick(r: number, c: number) {
             return;
         }
 
+        // 1. Update local game state (Place the building)
         const result = game.constructBuilding(activeConstruction, r, c);
+
+        // 2. Save new board to database
         multiplayer.saveBoardOnly();
 
+        // --- CRITICAL FIX START ---
+        // We MUST clear the "hologram" state immediately after placement.
+        // Otherwise, the renderer thinks we are still trying to place the Grove University.
+        resetConstructionState(); 
+        // --- CRITICAL FIX END ---
+
         if (result.type === 'TRIGGER_EFFECT') {
+
             if (result.effectType === 'FACTORY') {
                 showResourcePicker(
                     "Setup Factory",
@@ -459,8 +497,23 @@ function handleConstructionClick(r: number, c: number) {
                     existingBanned
                 );
             }
+            // NEW: Grove University
+            else if (result.effectType === 'GROVE_UNIVERSITY') {
+                showBuildingPicker(game.gameRegistry, (chosenBuilding) => {
+                    // 1. Set the specific "Pending Free Build" state
+                    pendingFreeBuildName = chosenBuilding.name;
+                    
+                    showToast(`Select an empty square to build the ${chosenBuilding.name}.`, "success");
+                    
+                    // 2. Re-render (The renderer will see pendingFreeBuildName and update the message)
+                    renderAll();
+                });
+                // IMPORTANT: Return here so we DO NOT check for Game Over yet.
+                // The turn is not over until the free building is placed.
+                return; 
+            }
         }
-        resetConstructionState();
+
         renderAll();
         checkAndShowGameOver();
     }
@@ -616,11 +669,17 @@ function renderAll() {
         forbiddenResources = game.getForbiddenResources();
     }
 
+    let msg = multiplayerStatusMessage;
+    if (pendingFreeBuildName) {
+        msg = `🌟 BONUS: Click an empty square for your ${pendingFreeBuildName}!`;
+        togglePalette(false); // Disable resources
+    }
+
     renderer.render(
         game,
         activeConstruction,
         activePatternCoords,
-        multiplayerStatusMessage,
+        msg,
         forbiddenResources
     );
 }

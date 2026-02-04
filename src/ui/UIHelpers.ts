@@ -314,3 +314,140 @@ function renderMiniPattern(pattern: any[][]) {
     html += '</div>';
     return html;
 }
+// src/ui/UIHelpers.ts
+
+export function showBuildingPicker(
+    buildings: any[], 
+    onSelect: (selected: any) => void
+) {
+    const modal = document.getElementById('resource-picker-modal')!;
+    const title = document.getElementById('picker-title')!;
+    const msg = document.getElementById('picker-message')!;
+    const container = document.getElementById('picker-options')!;
+
+    title.textContent = "Grove University Scholarship";
+    msg.textContent = "Choose a building to construct immediately for free:";
+    container.innerHTML = '';
+    
+    // --- LAYOUT FIX: WIDEN THE MODAL ---
+    // Access the parent modal-content box and make it wider for this specific view
+    if (container.parentElement) {
+        container.parentElement.style.maxWidth = '600px'; 
+        container.parentElement.style.width = '95%';
+    }
+    // -----------------------------------
+
+    // Grid layout for the container
+    container.style.display = 'flex';
+    container.style.gap = '15px';
+    container.style.justifyContent = 'center';
+    container.style.flexWrap = 'wrap';
+    container.style.padding = '10px';
+    
+    // We can keep these just in case, but they shouldn't be needed with the wider layout
+    container.style.maxHeight = '70vh'; 
+    container.style.overflowY = 'auto'; 
+
+    buildings.forEach(b => {
+        if (b.isMonument) return;
+
+        const card = document.createElement('div');
+        
+        // CARD STYLING
+        card.style.border = "1px solid #e0e0e0";
+        card.style.borderRadius = "12px"; 
+        card.style.padding = "15px 10px";
+        card.style.cursor = "pointer";
+        card.style.background = "white";
+        card.style.width = "110px"; 
+        card.style.height = "130px";
+        card.style.display = "flex";
+        card.style.flexDirection = "column";
+        card.style.alignItems = "center";
+        card.style.justifyContent = "space-between";
+        card.style.transition = "all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1)";
+        card.style.boxShadow = "0 2px 5px rgba(0,0,0,0.05)";
+
+        // Determine bottom border color
+        let borderColor = '#ccc';
+        if (b.type === 'RED') borderColor = '#ef5350';
+        else if (b.type === 'BLUE') borderColor = '#42a5f5';
+        else if (b.type === 'YELLOW') borderColor = '#fdd835';
+        else if (b.type === 'GREEN') borderColor = '#66bb6a';
+        else if (b.type === 'GRAY') borderColor = '#bdbdbd';
+        else if (b.type === 'ORANGE') borderColor = '#ffca28';
+        else if (b.type === 'BLACK') borderColor = '#424242';
+        
+        card.style.borderBottom = `5px solid ${borderColor}`;
+
+        // 1. ICON CONTAINER
+        const iconWrapper = document.createElement('div');
+        iconWrapper.style.flex = "1"; 
+        iconWrapper.style.display = "flex";
+        iconWrapper.style.alignItems = "center";
+        iconWrapper.style.justifyContent = "center";
+        iconWrapper.style.width = "100%";
+        
+        const iconDiv = document.createElement('div');
+        const cssClass = b.name.replace(/ /g, '-').replace(/'/g, '').toUpperCase();
+        
+        iconDiv.className = `mini-cell ${cssClass}`;
+        
+        // Icon Sizing
+        iconDiv.style.width = "50px";
+        iconDiv.style.height = "50px";
+        iconDiv.style.transform = "none"; 
+        iconDiv.style.margin = "0";
+        iconDiv.style.backgroundSize = "contain"; 
+        iconDiv.style.backgroundRepeat = "no-repeat";
+        iconDiv.style.backgroundPosition = "center";
+        iconDiv.style.border = "none"; 
+        
+        iconWrapper.appendChild(iconDiv);
+
+        // 2. NAME LABEL
+        const nameLabel = document.createElement('span');
+        nameLabel.textContent = b.name;
+        nameLabel.style.fontSize = "0.85em";
+        nameLabel.style.fontWeight = "600";
+        nameLabel.style.color = "#333";
+        nameLabel.style.textAlign = "center";
+        nameLabel.style.marginTop = "5px";
+
+        card.appendChild(iconWrapper);
+        card.appendChild(nameLabel);
+
+        // INTERACTIONS
+        card.onmouseenter = () => {
+            card.style.transform = "translateY(-4px)";
+            card.style.boxShadow = "0 8px 15px rgba(0,0,0,0.1)";
+        };
+        card.onmouseleave = () => {
+            card.style.transform = "translateY(0)";
+            card.style.boxShadow = "0 2px 5px rgba(0,0,0,0.05)";
+        };
+
+        card.onclick = () => {
+            // --- CLEANUP ---
+            container.style.display = ''; 
+            container.style.gap = '';
+            container.style.justifyContent = '';
+            container.style.maxHeight = '';
+            container.style.overflowY = '';
+            container.style.padding = '';
+            
+            // Revert Modal Width to default (so Resource Picker stays narrow)
+            if (container.parentElement) {
+                container.parentElement.style.maxWidth = ''; 
+                container.parentElement.style.width = '';
+            }
+
+            modal.classList.add('hidden');
+            onSelect(b);
+        };
+
+        container.appendChild(card);
+    });
+
+    modal.classList.remove('hidden');
+}

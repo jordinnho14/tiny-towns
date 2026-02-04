@@ -1,4 +1,4 @@
-import { StatueBondmakerStrategy } from '../core/EffectStrategies';
+import { GroveUniversityStrategy, StatueBondmakerStrategy } from '../core/EffectStrategies';
 import { FixedScoreStrategy, GlobalUniqueStrategy, LargestGroupStrategy, MausoleumStrategy, MissingTypeStrategy, SavedScoreStrategy, UniqueNeighborStrategy } from '../core/ScoringStrategies';
 import { type Building, BuildingType, Resource } from '../core/Types';
 
@@ -147,8 +147,8 @@ export const UNIVERSITY: Building = {
     ],
     isMonument: true,
     scorer: new FixedScoreStrategy(3, false),
-    description: '3 points. Immediately place a building on an empty square in your town.'
-    // IMPLEMENT EFFECT
+    description: '3 points. Immediately place a building on an empty square in your town.',
+    effect: new GroveUniversityStrategy()
 };
 
 export const WATCH: Building = {
