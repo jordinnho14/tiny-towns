@@ -247,6 +247,8 @@ export class MultiplayerGame {
         }
     }
 
+    // In src/core/MultiplayerGame.ts
+
     private async checkTurnComplete(data: any) {
         if (!data || !data.players) return;
 
@@ -286,24 +288,43 @@ export class MultiplayerGame {
             shouldRotate = true;
         }
 
-        // 3. Perform Rotation
+        // 3. Perform Rotation (With Fort Ironweed Check)
         if (shouldRotate) {
-            let nextIndex = (data.masterBuilderIndex || 0);
+            let currentIndex = (data.masterBuilderIndex || 0);
+            let nextIndex = currentIndex;
             let foundNext = false;
+            
+            // Count how many players are actually still playing
+            const activePlayerCount = allPlayers.filter((p: any) => !p.isGameOver).length;
 
+            // Look ahead to find the next active player
             for (let i = 1; i <= playerOrder.length; i++) {
-                const checkIdx = (nextIndex + i) % playerOrder.length;
+                const checkIdx = (currentIndex + i) % playerOrder.length;
                 const pid = playerOrder[checkIdx];
                 const player = data.players[pid];
 
                 if (player && !player.isGameOver) {
-                    nextIndex = nextIndex + i; 
+                    
+                    // --- FORT IRONWEED LOGIC ---
+                    // Check if this player has Fort Ironweed on their board
+                    const hasFort = this.playerHasBuilding(player.board, 'FORT IRONWEED');
+
+                    // If they have the Fort, and they are NOT the last player standing, skip them.
+                    if (hasFort && activePlayerCount > 1) {
+                        console.log(`Skipping ${player.name} due to Fort Ironweed.`);
+                        continue; // Loop continues to the next person
+                    }
+                    // ---------------------------
+
+                    nextIndex = checkIdx; 
                     foundNext = true;
                     break;
                 }
             }
 
-            if (!foundNext) nextIndex++;
+            // If we didn't find anyone (everyone else is dead or has Forts?), 
+            // just increment by 1 to force game state to eventually resolve or end.
+            if (!foundNext) nextIndex = (currentIndex + 1) % playerOrder.length;
 
             const updates: any = {};
             updates[`games/${this.gameId}/currentResource`] = null; 
@@ -314,6 +335,16 @@ export class MultiplayerGame {
         }
     }
 
+    // Helper to check for building existence in the serialized board
+    private playerHasBuilding(boardGrid: any[][], buildingNamePart: string): boolean {
+        if (!boardGrid || !Array.isArray(boardGrid)) return false;
+        
+        return boardGrid.some(row => 
+            row.some(cell => 
+                typeof cell === 'string' && cell.toUpperCase().includes(buildingNamePart.toUpperCase())
+            )
+        );
+    }
     private syncDeck(deckNames: string[]) {
         if(!deckNames) return;
         this.localGame.gameRegistry = BUILDING_REGISTRY.filter(b => deckNames.includes(b.name));

@@ -1,4 +1,4 @@
-import { GroveUniversityStrategy, StatueBondmakerStrategy } from '../core/EffectStrategies';
+import { FortIronweedStrategy, GroveUniversityStrategy, StatueBondmakerStrategy } from '../core/EffectStrategies';
 import { FixedScoreStrategy, GlobalUniqueStrategy, LargestGroupStrategy, MausoleumStrategy, MissingTypeStrategy, SavedScoreStrategy, UniqueNeighborStrategy } from '../core/ScoringStrategies';
 import { type Building, BuildingType, Resource } from '../core/Types';
 
@@ -173,8 +173,8 @@ export const FORT: Building = {
     ],
     isMonument: true,
     scorer: new FixedScoreStrategy(7, false),
-    description: '7 points. Unless you are the last player in the game you can no longer take turns as the master builder.'
-    //IMPLEMENT EFFECT
+    description: '7 points. Unless you are the last player in the game you can no longer take turns as the master builder.',
+    effect: new FortIronweedStrategy()
 };
 
 

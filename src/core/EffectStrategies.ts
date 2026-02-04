@@ -1,7 +1,7 @@
 import type { ResourceType } from './Types';
 
 export interface EffectStrategy {
-    type: 'FACTORY' | 'BANK' | 'WAREHOUSE' | 'TRADING_POST' | 'STATUE_BONDMAKER' | 'GROVE_UNIVERSITY';
+    type: 'FACTORY' | 'BANK' | 'WAREHOUSE' | 'TRADING_POST' | 'STATUE_BONDMAKER' | 'GROVE_UNIVERSITY' | 'FORT_IRONWEED';
     description: string;
     // Helper to check if this building allows a swap
     canSwap?(storedResource: ResourceType, incomingResource: ResourceType): boolean;
@@ -37,4 +37,9 @@ export class StatueBondmakerStrategy implements EffectStrategy {
 export class GroveUniversityStrategy implements EffectStrategy {
     readonly type = 'GROVE_UNIVERSITY';
     readonly description = "Immediately place a building on an empty square in your town.";
+}
+
+export class FortIronweedStrategy implements EffectStrategy {
+    readonly type = 'FORT_IRONWEED';
+    readonly description = "Unless you are the last player in the game, you can no longer take turns as the Master Builder.";
 }
