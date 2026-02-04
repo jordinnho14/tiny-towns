@@ -1,12 +1,12 @@
-import { 
-    COTTAGE, 
+import {
+    COTTAGE,
     RED_BUILDINGS,
     GRAY_BUILDINGS,
     YELLOW_BUILDINGS,
     GREEN_BUILDINGS,
     BLACK_BUILDINGS,
     ORANGE_BUILDINGS,
-    BUILDING_REGISTRY 
+    BUILDING_REGISTRY
 } from './core/Buildings';
 import { Game } from './core/Game';
 import { Renderer } from './ui/Renderer';
@@ -77,7 +77,7 @@ multiplayer.onStateChange = (data) => {
         if (data.status === 'LOBBY') {
             renderLobbyList(data.players);
         }
-        
+
         // 2. GAME UI
         if (data.status === 'PLAYING') {
             // Hide modal if game just started
@@ -106,7 +106,7 @@ multiplayer.onStateChange = (data) => {
 
             const isMyTurn = multiplayer.masterBuilderId === multiplayer.playerId;
             const resourceActive = (data.currentResource !== undefined && data.currentResource !== null);
-            
+
             // --- B. Check Lock Status (Have I acted this round?) ---
             const currentRound = data.roundNumber || 1;
             const myStatus = data.players ? data.players[multiplayer.playerId] : null;
@@ -132,22 +132,22 @@ multiplayer.onStateChange = (data) => {
                     togglePalette(false);
                 } else {
                     multiplayerStatusMessage = ""; // Renderer defaults to "Place [RESOURCE]..."
-                    togglePalette(false); 
+                    togglePalette(false);
                 }
             }
         }
 
         if (data.status === 'FINISHED') {
-                elements.gameOverModal.classList.add('hidden');
-                
-                // Show the Global Leaderboard
-                renderLeaderboard(data.players);
-                elements.multiplayerResultsModal.classList.remove('hidden');
-            }
+            elements.gameOverModal.classList.add('hidden');
 
-            // --- D. Render ---
-            game.currentResource = data.currentResource || null;
-            renderAll();
+            // Show the Global Leaderboard
+            renderLeaderboard(data.players);
+            elements.multiplayerResultsModal.classList.remove('hidden');
+        }
+
+        // --- D. Render ---
+        game.currentResource = data.currentResource || null;
+        renderAll();
     } catch (err) {
         console.error("Error in onStateChange:", err);
     }
@@ -243,13 +243,13 @@ elements.mpRestartBtn.onclick = () => {
 // --- 4. LOBBY & START BUTTONS ---
 elements.createGameBtn.onclick = async () => {
     const name = elements.playerNameInput.value || "Host";
-    
+
     // 1. Create the game with a default deck first
     // (We will update the deck when the Host clicks 'Start Game')
     try {
         const defaultDeck = generateRandomDeck();
         const gameId = await multiplayer.createGame(name, defaultDeck.map(b => b.name));
-        
+
         // 2. Move to Lobby UI
         enterLobbyMode(gameId, true);
     } catch (err) {
@@ -278,7 +278,7 @@ elements.startGameBtn.onclick = async () => {
     // 1. Now that the Host is in the lobby and has configured the dropdowns,
     // we build the FINAL deck to send to everyone.
     const finalDeck = buildDeckFromUI();
-    
+
     // 2. Update the Cloud data with this specific deck
     await multiplayer.updateDeck(finalDeck.map(b => b.name));
 
@@ -293,7 +293,7 @@ elements.shareCodeDisplay.onclick = () => {
 };
 
 elements.restartBtn.onclick = () => {
-    location.reload(); 
+    location.reload();
 };
 
 elements.copyLinkBtn.onclick = () => {
@@ -314,7 +314,7 @@ function enterLobbyMode(gameId: string, isHost: boolean) {
     elements.landingUI.classList.add('hidden');
     elements.lobbyUI.classList.remove('hidden');
     elements.shareCodeDisplay.innerText = `Code: ${gameId}`;
-    
+
     if (isHost) {
         elements.hostSettings.classList.remove('hidden');
         elements.guestWaitingMsg.classList.add('hidden');
@@ -336,7 +336,7 @@ function renderLobbyList(players: any) {
 
 function buildDeckFromUI() {
     const deck: any[] = [COTTAGE]; // Always Cottage
-    
+
     // If the dropdowns aren't generated yet, return default
     const selects = document.querySelectorAll('.setup-select') as NodeListOf<HTMLSelectElement>;
     if (selects.length === 0) {
@@ -385,25 +385,41 @@ function handleConstructionClick(r: number, c: number) {
             showToast("Cannot build on Trading Post.", "error");
             return;
         }
-        
+
         // 1. Update local game state
         const result = game.constructBuilding(activeConstruction, r, c);
-        
+
         // 2. Save new board to database, BUT DO NOT END TURN
         // (Use saveBoardOnly instead of commitTurn)
-        multiplayer.saveBoardOnly(); 
+        multiplayer.saveBoardOnly();
 
-       if (result.type === 'TRIGGER_EFFECT' && result.effectType === 'FACTORY') {
-            showResourcePicker(
-                "Setup Factory", 
-                "Choose a resource to store permanently on your Factory:", 
-                (chosenRes) => {
-                    game.setBuildingStorage(r, c, chosenRes);
-                    multiplayer.saveBoardOnly();
-                    renderAll();
-                }
-            );
-        } 
+        if (result.type === 'TRIGGER_EFFECT') {
+
+            if (result.effectType === 'FACTORY') {
+                showResourcePicker(
+                    "Setup Factory",
+                    "Choose a resource to store on your Factory:",
+                    (chosenRes) => {
+                        game.setBuildingStorage(r, c, chosenRes);
+                        multiplayer.saveBoardOnly();
+                        renderAll();
+                    }
+                );
+            }
+            else if (result.effectType === 'BANK') {
+                const existingBanned = game.getForbiddenResources();
+                showResourcePicker(
+                    "Setup Bank",
+                    "Choose a resource to store on your Bank.\nYou will NOT be able to pick this resource as Master Builder!",
+                    (chosenRes) => {
+                        game.setBuildingStorage(r, c, chosenRes);
+                        multiplayer.saveBoardOnly();
+                        renderAll();
+                    },
+                    existingBanned
+                );
+            }
+        }
 
         resetConstructionState();
         renderAll();
@@ -414,17 +430,17 @@ function handleConstructionClick(r: number, c: number) {
 function handleSwapClick() {
     // NEW: Pass specific text
     showResourcePicker(
-        "Factory Swap", 
-        "Select the resource you want to use this turn:", 
+        "Factory Swap",
+        "Select the resource you want to use this turn:",
         async (newRes) => {
             const oldRes = game.currentResource;
-            
+
             // 1. Update Game State
-            game.currentResource = newRes; 
-            
+            game.currentResource = newRes;
+
             // 2. Feedback
             showToast(`Factory activated! Swapped ${oldRes} for ${newRes}.`, "success");
-            
+
             // 3. Re-render
             renderAll();
         }
@@ -453,33 +469,41 @@ function pickRandom(list: any[]) {
 function renderAll() {
     // --- FACTORY BUTTON LOGIC ---
     let showSwap = false;
-    
+
     if (game.currentResource && !hasActedThisTurn) {
         const isMyTurn = multiplayer.masterBuilderId === multiplayer.playerId;
         const canSwap = game.canFactorySwap(game.currentResource);
-        
+
         if (!isMyTurn && canSwap) {
             showSwap = true;
         }
     }
-
-    // Update the Factory UI
     renderer.toggleFactoryAction(showSwap, game.currentResource || '');
 
+    // --- BANK LOGIC ---
+    let forbiddenResources: any[] = [];
+    const isMyTurn = multiplayer.masterBuilderId === multiplayer.playerId;
+    
+    // Only calculate forbidden resources if it is MY turn to pick
+    // (If it's someone else's turn, my Bank doesn't stop me from receiving resources)
+    if (isMyTurn && !game.currentResource) {
+        forbiddenResources = game.getForbiddenResources();
+    }
+
     // --- RENDER MAIN BOARD ---
-    // FIX: Use 'activePatternCoords' and 'multiplayerStatusMessage' defined at the top of the file
     renderer.render(
-        game, 
-        activeConstruction, 
-        activePatternCoords, 
-        multiplayerStatusMessage
+        game,
+        activeConstruction,
+        activePatternCoords,
+        multiplayerStatusMessage,
+        forbiddenResources
     );
 }
 
 function checkAndShowGameOver() {
     // Only check if we haven't already finished
     if (!hasDeclaredGameOver && game.checkGameOver() && !activeConstruction) {
-        
+
         // 1. Show the screen locally
         const result = game.getScore();
         elements.finalScore.textContent = result.total.toString();
@@ -488,13 +512,13 @@ function checkAndShowGameOver() {
             if (score !== 0) addScoreListItem(name, score);
         });
         if (result.penaltyCount > 0) addScoreListItem('Empty Spaces', -result.penaltyCount, true);
-        
+
         elements.gameOverModal.classList.remove('hidden');
-        
+
         // 2. Tell the server "I am out"
         multiplayer.declareGameOver();
         hasDeclaredGameOver = true;
-        
+
         // Disable interactions
         togglePalette(false);
     }
@@ -516,7 +540,7 @@ function addScoreListItem(label: string, score: number, isPenalty: boolean = fal
 // Reuse the Dropdown Initialization for the Host
 function initHostDropdowns() {
     const container = document.getElementById('setup-container')!;
-    container.innerHTML = ''; 
+    container.innerHTML = '';
     const grid = document.createElement('div');
     grid.className = 'setup-grid';
 
@@ -552,7 +576,7 @@ function initHostDropdowns() {
 function togglePalette(enabled: boolean) {
     const palette = document.getElementById('resource-palette');
     if (!palette) return;
-    
+
     if (enabled) {
         palette.style.opacity = "1";
         palette.style.pointerEvents = "auto";
@@ -564,20 +588,20 @@ function togglePalette(enabled: boolean) {
 
 function renderLeaderboard(players: any) {
     elements.leaderboardList.innerHTML = '';
-    
+
     // Convert to array and Sort by Score (Descending)
     const sorted = Object.values(players).sort((a: any, b: any) => b.score - a.score);
-    
+
     sorted.forEach((p: any, index) => {
         const li = document.createElement('li');
         li.className = 'leaderboard-row';
-        
+
         // Highlight 1st place
         if (index === 0) li.classList.add('winner');
-        
+
         // Calculate Rank (1, 2, 3...)
         const rank = index + 1;
-        
+
         li.innerHTML = `
             <div style="display:flex; align-items:center;">
                 <div class="rank-badge">${rank}</div>
@@ -590,7 +614,7 @@ function renderLeaderboard(players: any) {
             </div>
             <div class="final-total">${p.score}</div>
         `;
-        
+
         elements.leaderboardList.appendChild(li);
     });
 }
@@ -614,7 +638,7 @@ function showToast(message: string, type: 'info' | 'error' | 'success' = 'info')
 function renderOpponents(players: any, currentRound: number) {
     // 1. Reveal Sidebar
     elements.opponentsSidebar.classList.remove('hidden');
-    elements.opponentsList.innerHTML = ''; 
+    elements.opponentsList.innerHTML = '';
 
     // 2. Loop through all players
     Object.keys(players).forEach(key => {
@@ -622,7 +646,7 @@ function renderOpponents(players: any, currentRound: number) {
         if (key === multiplayer.playerId) return;
 
         const p = players[key];
-        
+
         // Determine Status (Green dot if they are done with this round)
         const isDone = (p.placedRound === currentRound) || p.isGameOver;
         const statusClass = isDone ? "done" : "thinking";
@@ -630,7 +654,7 @@ function renderOpponents(players: any, currentRound: number) {
         // Create Card HTML
         const card = document.createElement('div');
         card.className = 'opponent-card';
-        
+
         // Header
         const header = document.createElement('div');
         header.className = 'opponent-name';
@@ -651,32 +675,32 @@ function renderOpponents(players: any, currentRound: number) {
                 row.forEach((cell: string) => {
                     const div = document.createElement('div');
                     div.className = 'mini-cell';
-                    
+
                     if (cell !== 'NONE') {
                         // Check if it is a Resource
-                        if (['WOOD','WHEAT','BRICK','GLASS','STONE'].includes(cell)) {
+                        if (['WOOD', 'WHEAT', 'BRICK', 'GLASS', 'STONE'].includes(cell)) {
                             div.classList.add(cell);
                         } else {
                             // IT IS A BUILDING
-                            
+
                             // 1. Add the specific name (e.g., "COTTAGE", "FARM")
                             // This allows the CSS to find the right icon/color
-                            div.classList.add(cell); 
-                            
+                            div.classList.add(cell);
+
                             // 2. Add tooltip for hovering
                             div.title = cell;
 
                             // 3. Handle Monument Styling (Optional but good)
                             // If it's not a standard resource or standard building, assume it's a monument
                             const standard = [
-                                'COTTAGE','FARM','GRANARY','GREENHOUSE','ORCHARD',
-                                'WELL','FOUNTAIN','MILLSTONE','SHED',
-                                'CHAPEL','ABBEY','CLOISTER','TEMPLE',
-                                'TAVERN','ALMSHOUSE','INN','FEAST-HALL',
-                                'THEATER','BAKERY','TAILOR','MARKET',
-                                'FACTORY','BANK','WAREHOUSE','TRADING-POST'
+                                'COTTAGE', 'FARM', 'GRANARY', 'GREENHOUSE', 'ORCHARD',
+                                'WELL', 'FOUNTAIN', 'MILLSTONE', 'SHED',
+                                'CHAPEL', 'ABBEY', 'CLOISTER', 'TEMPLE',
+                                'TAVERN', 'ALMSHOUSE', 'INN', 'FEAST-HALL',
+                                'THEATER', 'BAKERY', 'TAILOR', 'MARKET',
+                                'FACTORY', 'BANK', 'WAREHOUSE', 'TRADING-POST'
                             ];
-                            
+
                             if (!standard.includes(cell)) {
                                 div.classList.add('MONUMENT');
                             }
@@ -694,23 +718,25 @@ function renderOpponents(players: any, currentRound: number) {
 
 
 function showResourcePicker(
-    title: string, 
-    message: string, 
-    callback: (res: ResourceType) => void
+    title: string,
+    message: string,
+    callback: (res: ResourceType) => void,
+    excludedResources: string[] = []
 ) {
     const modal = document.getElementById('resource-picker-modal')!;
     const titleEl = document.getElementById('picker-title')!;
     const msgEl = document.getElementById('picker-message')!;
     const container = document.getElementById('picker-options')!;
-    
+
     // Set dynamic text
     titleEl.textContent = title;
     msgEl.textContent = message;
-    
+
     container.innerHTML = '';
     const resources: ResourceType[] = ['WOOD', 'WHEAT', 'BRICK', 'GLASS', 'STONE'];
 
     resources.forEach(res => {
+        if (excludedResources.includes(res)) return;
         const btn = document.createElement('div');
         btn.className = `res-btn ${res}`;
         btn.onclick = () => {
@@ -730,7 +756,7 @@ function showResourcePicker(
 
     if (inviteCode) {
         console.log("Invite code detected:", inviteCode);
-        
+
         // 1. Pre-fill the Join Input
         elements.gameIdInput.value = inviteCode;
 
@@ -741,7 +767,7 @@ function showResourcePicker(
 
         // 3. Optional: Add a visual cue
         showToast(`Invite code ${inviteCode} detected! Enter your name to join.`, "success");
-        
+
         // If you wanted to get fancy, you could hide the "Create Game" button here
         // so it looks like a dedicated join screen.
         elements.createGameBtn.parentElement?.classList.add('hidden'); // Hides the create/host container if they are separate

@@ -24,11 +24,17 @@ export class Renderer {
         this.swapBtn.onclick = () => this.onSwapClick();
     }
 
-render(game: Game, activeConstruction: any | null, highlightCoords: any[], customMessage?: string) {
+render(
+    game: Game,
+    activeConstruction: any | null, 
+    highlightCoords: any[], 
+    customMessage?: string,
+    forbiddenResources: string[] = []
+) {
         this.renderHeader(game);
         this.renderBoard(game, activeConstruction, highlightCoords, customMessage); // Pass it down
         this.renderSidebar(game, activeConstruction);
-        this.renderControls(game, activeConstruction);
+        this.renderControls(game, activeConstruction, forbiddenResources);
     }
 
     // --- 1. HEADER ---
@@ -249,7 +255,7 @@ render(game: Game, activeConstruction: any | null, highlightCoords: any[], custo
     }
 
     // --- 4. CONTROLS (Palette) ---
-    private renderControls(game: Game, activeConstruction: any | null) {
+    private renderControls(game: Game, activeConstruction: any | null, forbidden: string[]) {
         this.paletteEl.innerHTML = '';
         const list = [Resource.WOOD, Resource.WHEAT, Resource.BRICK, Resource.GLASS, Resource.STONE];
 
@@ -257,10 +263,15 @@ render(game: Game, activeConstruction: any | null, highlightCoords: any[], custo
             const btn = document.createElement('div');
             let className = `res-btn ${res}`;
             if (game.currentResource === res && !activeConstruction) className += ' selected';
-            
+            if (forbidden.includes(res)) {
+                className += ' disabled'; 
+                btn.title = "Blocked by bank"
+            }
             btn.className = className;
             btn.textContent = res.charAt(0);
-            btn.onclick = () => this.onResourceSelect(res);
+            if (!forbidden.includes(res)) {
+                btn.onclick = () => this.onResourceSelect(res);
+            }
             this.paletteEl.appendChild(btn);
         });
 

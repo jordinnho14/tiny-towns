@@ -16,3 +16,9 @@ export class FactoryStrategy implements EffectStrategy {
         return storedResource === incomingResource;
     }
 }
+
+export class BankStrategy implements EffectStrategy {
+    readonly type = 'BANK';
+    readonly description = "Stores a resource. You cannot choose this resource as Master Builder.";
+    // No specific methods needed, the type check is enough
+}

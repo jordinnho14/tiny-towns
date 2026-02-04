@@ -156,6 +156,14 @@ h1, h2, h3 {
     border-top: 8px solid #2c3e50;
 }
 
+.res-btn.disabled {
+    opacity: 0.2;
+    pointer-events: none;
+    filter: grayscale(100%);
+    cursor: not-allowed;
+    border: 2px solid #555;
+}
+
 
 /* =========================================
    3. THE BOARD
@@ -882,7 +890,7 @@ h1, h2, h3 {
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
     
     /* Optional: Add a subtle bounce so you notice it */
-    animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: transform 0.2s;
 }
 
 @keyframes bounceIn {

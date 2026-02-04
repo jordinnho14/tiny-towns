@@ -211,5 +211,11 @@ export class Game {
         
         return validFactory ? { r: validFactory.r, c: validFactory.c } : null;
     }
+
+    public getForbiddenResources(): ResourceType[] {
+        // Find all banks and return the resources stored on them
+        const banks = this.findEffectBuildings('BANK');
+        return banks.map(b => b.storedRes);
+    }
 }
 

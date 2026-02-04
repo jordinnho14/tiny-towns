@@ -1,4 +1,4 @@
-import { FactoryStrategy } from './EffectStrategies';
+import { BankStrategy, FactoryStrategy } from './EffectStrategies';
 import { AdjacentFeederStrategy, ContiguousFeederStrategy, GlobalFeederStrategy, RowColFeederStrategy } from './FeederStrategies';
 import { AdjacencyRequirementStrategy, AdjacencyStrategy, AdjacentFedStrategy, AlmshouseStrategy, CategoryAdjacencyStrategy, CenterCountStrategy, CornerBuildingCountStrategy, FedCottageCountStrategy, FixedScoreStrategy, GlobalUniqueStrategy, IsolatedStrategy, LargestGroupStrategy, LineCountStrategy, MausoleumStrategy, MissingTypeStrategy, RestrictedNeighborStrategy, SavedScoreStrategy, UniqueLineStrategy, UniqueNeighborStrategy } from './ScoringStrategies';
 import { type Building, BuildingType, Resource } from './Types';
@@ -204,7 +204,6 @@ export const FACTORY: Building = {
     description: 'Place 1 resource on the factory, whenever another player chooses that resource, play a different one instead.',
     effect: new FactoryStrategy()
 };
-//TODO: IMPLEMENT FACTORY MECHANICS
 
 export const TRADING_POST: Building = {
     name: 'Trading Post',
@@ -225,8 +224,8 @@ export const BANK: Building = {
         [Resource.STONE, Resource.STONE, Resource.NONE],
         [Resource.WOOD, Resource.WOOD, Resource.BRICK]
     ],
-    scorer: new FixedScoreStrategy(4)
-    //TODO: IMPLEMENT BANK MECHANICS
+    scorer: new FixedScoreStrategy(4),
+    effect: new BankStrategy()
 };
 
 export const WAREHOUSE: Building = {
