@@ -22,3 +22,9 @@ export class BankStrategy implements EffectStrategy {
     readonly description = "Stores a resource. You cannot choose this resource as Master Builder.";
     // No specific methods needed, the type check is enough
 }
+
+export class WarehouseStrategy implements EffectStrategy {
+    readonly type = 'WAREHOUSE';
+    readonly description = "Stores up to 3 resources. You can Swap the current resource with one in storage. -1 point for each resource left at the end.";
+    readonly capacity = 3;
+}

@@ -966,3 +966,29 @@ h1, h2, h3 {
     from { opacity: 0; transform: translateY(-20px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+/* Warehouse Storage Container */
+.warehouse-storage {
+    position: absolute;
+    bottom: 2px;
+    left: 2px;
+    right: 2px;
+    display: flex;
+    justify-content: center;
+    gap: 2px;
+    z-index: 10;
+}
+
+/* Tiny Resource Cubes */
+.mini-resource {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    border: 1px solid rgba(0,0,0,0.3);
+    box-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+.mini-resource.WOOD { background-color: #5d4037; }
+.mini-resource.WHEAT { background-color: #fdd835; }
+.mini-resource.BRICK { background-color: #ef5350; }
+.mini-resource.GLASS { background-color: #29b6f6; }
+.mini-resource.STONE { background-color: #757575; }

@@ -1,4 +1,4 @@
-import { BankStrategy, FactoryStrategy } from './EffectStrategies';
+import { BankStrategy, FactoryStrategy, WarehouseStrategy } from './EffectStrategies';
 import { AdjacentFeederStrategy, ContiguousFeederStrategy, GlobalFeederStrategy, RowColFeederStrategy } from './FeederStrategies';
 import { AdjacencyRequirementStrategy, AdjacencyStrategy, AdjacentFedStrategy, AlmshouseStrategy, CategoryAdjacencyStrategy, CenterCountStrategy, CornerBuildingCountStrategy, FedCottageCountStrategy, FixedScoreStrategy, GlobalUniqueStrategy, IsolatedStrategy, LargestGroupStrategy, LineCountStrategy, MausoleumStrategy, MissingTypeStrategy, RestrictedNeighborStrategy, SavedScoreStrategy, UniqueLineStrategy, UniqueNeighborStrategy } from './ScoringStrategies';
 import { type Building, BuildingType, Resource } from './Types';
@@ -236,8 +236,7 @@ export const WAREHOUSE: Building = {
         [Resource.STONE, Resource.STONE, Resource.NONE],
         [Resource.WOOD, Resource.WOOD, Resource.BRICK]
     ],
-    scorer: new FixedScoreStrategy(1)
-    // TODO: IMPLEMENT WAREHOUSE MECHANICS
+    effect: new WarehouseStrategy()
 };
 
 export const BLACK_BUILDINGS = [FACTORY, TRADING_POST, BANK, WAREHOUSE];

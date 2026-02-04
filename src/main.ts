@@ -182,6 +182,14 @@ renderer.onResourceSelect = (res) => {
 
 // B. Clicking the Board
 renderer.onCellClick = (r, c) => {
+    const grid = game.board.getGrid();
+    const cell = grid[r][c];
+
+    // NEW: Check if clicked cell is a Warehouse
+    if (cell && cell.toUpperCase() === 'WAREHOUSE') {
+        handleWarehouseClick(r, c);
+        return; // Stop here
+    }
     try {
         if (activeConstruction) {
             handleConstructionClick(r, c);
@@ -773,3 +781,111 @@ function showResourcePicker(
         elements.createGameBtn.parentElement?.classList.add('hidden'); // Hides the create/host container if they are separate
     }
 })();
+
+function handleWarehouseClick(r: number, c: number) {
+    if (hasActedThisTurn) return;
+    if (!game.currentResource) return; // Can't interact if Master Builder hasn't spoken
+
+    const contents = game.getWarehouseContents(r, c);
+    const canStore = contents.length < 3;
+    const currentRes = game.currentResource;
+
+    // Reuse the picker modal structure
+    const modal = document.getElementById('resource-picker-modal')!;
+    const container = document.getElementById('picker-options')!;
+    const title = document.getElementById('picker-title')!;
+    const msg = document.getElementById('picker-message')!;
+
+    title.textContent = "Warehouse Manager";
+    msg.textContent = `Current Resource: ${currentRes}`;
+    container.innerHTML = '';
+
+    // --- OPTION 1: STORE (Only if space exists) ---
+    if (canStore) {
+        const btn = document.createElement('button');
+        btn.className = `primary-btn`;
+        btn.style.width = "100%";
+        btn.style.marginBottom = "20px";
+        btn.innerHTML = `📥 <strong>Store ${currentRes}</strong> <br><span style="font-size:0.8em; font-weight:normal">(Ends Turn)</span>`;
+        btn.onclick = () => {
+            game.storeInWarehouse(r, c, currentRes);
+            commitWarehouseAction(true); // TRUE = End Turn
+            modal.classList.add('hidden');
+        };
+        container.appendChild(btn);
+    } else {
+        const p = document.createElement('p');
+        p.textContent = "Warehouse Full (Max 3)";
+        p.style.color = "#d32f2f";
+        p.style.fontWeight = "bold";
+        p.style.textAlign = "center";
+        container.appendChild(p);
+    }
+
+    // --- OPTION 2: SWAP (Only if items exist) ---
+    if (contents.length > 0) {
+        const divider = document.createElement('div');
+        divider.style.borderTop = "1px solid #ddd";
+        divider.style.margin = "15px 0";
+        container.appendChild(divider);
+
+        const label = document.createElement('p');
+        label.innerHTML = `Swap <strong>${currentRes}</strong> for:`;
+        label.style.textAlign = "center";
+        container.appendChild(label);
+
+        const row = document.createElement('div');
+        row.style.display = 'flex';
+        row.style.gap = '15px';
+        row.style.justifyContent = 'center';
+
+        contents.forEach((storedRes, idx) => {
+            const wrapper = document.createElement('div');
+            wrapper.style.display = 'flex';
+            wrapper.style.flexDirection = 'column';
+            wrapper.style.alignItems = 'center';
+            
+            const btn = document.createElement('div');
+            btn.className = `res-btn ${storedRes}`;
+            btn.textContent = storedRes[0];
+            btn.style.cursor = "pointer";
+            
+            btn.onclick = () => {
+                // 1. Perform Swap
+                const poppedRes = game.swapInWarehouse(r, c, idx, currentRes);
+                
+                if (poppedRes) {
+                    // 2. Update local Hand
+                    game.currentResource = poppedRes;
+                    
+                    showToast(`Swapped! Place ${poppedRes} on the board.`, "success");
+                    
+                    // 3. Save Warehouse State (Turn continues)
+                    commitWarehouseAction(false); 
+                    
+                    modal.classList.add('hidden');
+                }
+            };
+            
+            wrapper.appendChild(btn);
+            row.appendChild(wrapper);
+        });
+        container.appendChild(row);
+    }
+
+    modal.classList.remove('hidden');
+}
+
+async function commitWarehouseAction(endTurn: boolean) {
+    try {
+        if (endTurn) {
+            await multiplayer.commitTurn(); // Done.
+        } else {
+            await multiplayer.saveBoardOnly(); // Just save the warehouse contents
+        }
+        renderAll();
+        checkAndShowGameOver(); 
+    } catch (e) {
+        showToast("Error saving warehouse: " + e, "error");
+    }
+}

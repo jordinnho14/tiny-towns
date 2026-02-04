@@ -217,5 +217,51 @@ export class Game {
         const banks = this.findEffectBuildings('BANK');
         return banks.map(b => b.storedRes);
     }
+
+    // --- WAREHOUSE LOGIC ---
+
+    /**
+     * Stores a resource (only if space exists).
+     */
+    public storeInWarehouse(r: number, c: number, res: ResourceType): boolean {
+        const meta = this.board.getMetadata(r, c) || {};
+        const stored = (meta.storedResources || []) as ResourceType[];
+        
+        if (stored.length >= 3) return false;
+
+        stored.push(res);
+        this.board.setMetadata(r, c, { ...meta, storedResources: stored });
+        return true;
+    }
+
+    /**
+     * Swaps the incoming resource with one already in the warehouse.
+     * Returns the resource that was popped OUT.
+     */
+    public swapInWarehouse(r: number, c: number, indexToTake: number, incomingRes: ResourceType): ResourceType | null {
+        const meta = this.board.getMetadata(r, c);
+        if (!meta || !meta.storedResources) return null;
+
+        const stored = [...(meta.storedResources as ResourceType[])]; // Copy array
+        
+        if (indexToTake < 0 || indexToTake >= stored.length) return null;
+
+        // 1. Get the item we are removing
+        const itemTaken = stored[indexToTake];
+
+        // 2. Put the new item in its place
+        stored[indexToTake] = incomingRes;
+
+        // 3. Save back
+        this.board.setMetadata(r, c, { ...meta, storedResources: stored });
+        
+        return itemTaken;
+    }
+
+    // Helper to get contents
+    public getWarehouseContents(r: number, c: number): ResourceType[] {
+        const meta = this.board.getMetadata(r, c);
+        return (meta?.storedResources as ResourceType[]) || [];
+    }
 }
 

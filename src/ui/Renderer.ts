@@ -116,6 +116,19 @@ render(
                 badge.title = `Stored: ${meta.storedResource}`;
                 div.appendChild(badge);
             }
+
+            if (meta && meta.storedResources && Array.isArray(meta.storedResources)) {
+                const container = document.createElement('div');
+                container.className = 'warehouse-storage';
+                
+                meta.storedResources.forEach((res: any) => {
+                    const badge = document.createElement('div');
+                    // Use the CSS class we just added
+                    badge.className = `mini-resource ${res}`;
+                    container.appendChild(badge);
+                });
+                div.appendChild(container);
+            }
             
             // 4. Highlight Logic (UPDATED FOR TRADING POST)
             if (activeConstruction) {
