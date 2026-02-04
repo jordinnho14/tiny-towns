@@ -45,7 +45,7 @@ render(
     }
 
     // --- 2. BOARD (The Smart Version) ---
-  private renderBoard(game: Game, activeConstruction: any | null, highlightCoords: any[], customMessage?: string) {
+private renderBoard(game: Game, activeConstruction: any | null, highlightCoords: any[], customMessage?: string) {
         const grid = game.board.getGrid();
         
         // Define resources locally
@@ -106,51 +106,51 @@ render(
                 }
             }
 
-            // 3. Stored Resource Logic (NEW: FOR FACTORY/BANK)
-            // We check metadata to see if this building is holding a resource
+            // 3. Stored Resource Logic (Factory/Bank - Single Item)
             const meta = game.board.getMetadata(r, c);
             if (meta && meta.storedResource) {
                 const badge = document.createElement('div');
-                // Use the CSS class we added: stored-resource-icon + resource name (e.g. BRICK)
                 badge.className = `stored-resource-icon ${meta.storedResource}`;
                 badge.title = `Stored: ${meta.storedResource}`;
                 div.appendChild(badge);
             }
 
+            // 4. Warehouse Logic (Multiple Items)
             if (meta && meta.storedResources && Array.isArray(meta.storedResources)) {
                 const container = document.createElement('div');
                 container.className = 'warehouse-storage';
                 
                 meta.storedResources.forEach((res: any) => {
                     const badge = document.createElement('div');
-                    // Use the CSS class we just added
                     badge.className = `mini-resource ${res}`;
                     container.appendChild(badge);
                 });
                 div.appendChild(container);
             }
+
+            // 5. Interactive Pulse Logic (NEW: Make Warehouse Glow)
+            // If it's my turn (I have a resource) and not building, light up the Warehouse
+            if (game.currentResource && !activeConstruction) {
+                if (cell.toUpperCase() === 'WAREHOUSE') {
+                    div.classList.add('interactive-building');
+                    div.title = "Click to Store or Swap";
+                }
+            }
             
-            // 4. Highlight Logic (UPDATED FOR TRADING POST)
+            // 6. Highlight Logic (Construction)
             if (activeConstruction) {
                 const isPatternPart = highlightCoords.some(p => p.row === r && p.col === c);
-                
-                // Ability Checks
                 const hasObelisk = game.hasObeliskAbility();
                 const isShed = activeConstruction.buildingName.toUpperCase() === 'SHED';
-                
-                // It is a valid "Build Anywhere" target if it's empty AND we have the ability
                 const isGlobalTarget = (hasObelisk || isShed) && cell === 'NONE';
-
-                // Check for Trading Post (to prevent highlighting it)
                 const isTradingPost = cell && cell.toUpperCase().replace('_', ' ') === 'TRADING POST';
 
-                // LOGIC: Highlight if it's a pattern part (that isn't a TP) OR a valid global target
                 if ((isPatternPart && !isTradingPost) || isGlobalTarget) {
                     div.classList.add('match-highlight');
                 }
             }
 
-            // 5. Ghost Logic (Previewing placement)
+            // 7. Ghost Logic (Previewing placement)
             if (cell === 'NONE' && game.currentResource && !activeConstruction) {
                  div.onmouseenter = () => {
                     div.classList.add('ghost', game.currentResource!);

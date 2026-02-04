@@ -231,7 +231,7 @@ export const BANK: Building = {
 export const WAREHOUSE: Building = {
     name: 'Warehouse',
     type: 'BLACK',
-    description: "-1 for each resource on this building. YADA YADA YADA",
+    description: "-1 for each resource on this building. When another player chooses a resource, you may place that resource on the warehouse, or swap it with a resource already stored here. It can store 3 resources.",
     pattern: [
         [Resource.STONE, Resource.STONE, Resource.NONE],
         [Resource.WOOD, Resource.WOOD, Resource.BRICK]
