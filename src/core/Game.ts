@@ -18,6 +18,15 @@ export class Game {
         this.board = new Board();
     }
 
+    setMonument(monument: any, sharedDeck: any[]) {
+        this.activeMonument = monument;
+        // The registry is the shared deck + my unique monument
+        this.gameRegistry = [...sharedDeck, this.activeMonument];
+        
+        // Re-scan immediately to ensure the Matcher knows about the monument
+        this.scanForMatches();
+    }
+
     start() {
         this.board = new Board();
         this.currentResource = null;

@@ -30,7 +30,7 @@ export const MILLSTONE: Building = {
 export const SHED: Building = {
     name: 'Shed',
     type: 'GRAY',
-    description: "Worth 1 point. (Standard placement rules apply).",
+    description: "Worth 1 point. Can be placed anywhere.",
     pattern: [[Resource.WOOD, Resource.STONE]],
     scorer: new FixedScoreStrategy(1)
 };

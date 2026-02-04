@@ -1,8 +1,10 @@
 import { db } from "../firebase-config";
-import { ref, set, onValue, push, get, update, onDisconnect } from "firebase/database";
+// Added 'child' to the imports
+import { ref, set, onValue, push, get, update, onDisconnect, child } from "firebase/database";
 import { Game } from "./Game";
 import { type ResourceType } from "./Types";
-import { BUILDING_REGISTRY } from "./Buildings";
+// Added MONUMENTS_LIST to imports
+import { BUILDING_REGISTRY, MONUMENTS_LIST } from "./Buildings";
 
 export class MultiplayerGame {
     public gameId: string | null = null;
@@ -92,8 +94,55 @@ export class MultiplayerGame {
     }
 
     async startGame() {
-        if (!this.isHost || !this.gameId) return;
-        await update(ref(db, `games/${this.gameId}`), { status: "PLAYING" });
+        if (!this.gameId) return;
+
+        // FIXED: Define the reference locally
+        const gameRef = ref(db, `games/${this.gameId}`);
+
+        // 1. Get current player list to deal cards
+        const snapshot = await get(child(gameRef, 'players'));
+        const players = snapshot.val() || {};
+        const playerIds = Object.keys(players);
+
+        // 2. Shuffle Monuments
+        const deck = [...MONUMENTS_LIST].sort(() => Math.random() - 0.5);
+
+        // 3. Prepare updates
+        const updates: any = {
+            status: 'PLAYING',
+            currentResource: null,
+            roundNumber: 1,
+            masterBuilderIndex: 0,
+            playerOrder: playerIds 
+        };
+
+        // 4. Deal 2 Monuments to each player
+        playerIds.forEach(pid => {
+            const opt1 = deck.pop();
+            const opt2 = deck.pop();
+            
+            if (opt1 && opt2) {
+                // FIXED: Use string path construction for updates
+                updates[`players/${pid}/monumentOptions`] = [opt1.name, opt2.name];
+                updates[`players/${pid}/monumentChosen`] = false; 
+            }
+        });
+
+        // FIXED: Update using the local reference
+        await update(gameRef, updates);
+    }
+
+    // New Method: Player chooses their monument
+    async selectMonument(buildingName: string) {
+        if (!this.gameId || !this.playerId) return;
+        
+        // FIXED: Define reference locally and update specific path
+        const playerRef = ref(db, `games/${this.gameId}/players/${this.playerId}`);
+        
+        await update(playerRef, {
+            activeMonument: buildingName,
+            monumentChosen: true
+        });
     }
 
     async updateDeck(deckNames: string[]) {
@@ -126,7 +175,6 @@ export class MultiplayerGame {
             }
 
             // 3. Sync Resource
-            // We treat undefined or empty string as NULL
             if (data.currentResource === undefined || data.currentResource === "") {
                 this.localGame.currentResource = null;
             } else {
@@ -140,7 +188,6 @@ export class MultiplayerGame {
             if (this.onStateChange) this.onStateChange(data);
 
             // 6. HOST ONLY: Check for Turn Completion
-            // Wrapped in setTimeout to decouple logic from UI rendering
             if (this.isHost && data.status === "PLAYING") {
                 setTimeout(() => this.checkTurnComplete(data), 10);
             }
@@ -189,20 +236,13 @@ export class MultiplayerGame {
         const playerPath = `games/${this.gameId}/players/${this.playerId}`;
         
         updates[`${playerPath}/isGameOver`] = true;
-        
-        // Also ensure they are marked as "done" for the current round 
-        // so they don't block the game if they quit mid-turn.
         updates[`${playerPath}/placedRound`] = this.currentRound; 
 
         await update(ref(db), updates);
         
-        // Host check in case this was the last player
         if (this.isHost) {
-            // We use a short timeout to let the update process
             setTimeout(() => {
-                // We need to fetch data here or pass it if we had it, 
-                // but for simplicity, the existing listener will trigger 'checkTurnComplete'
-                // We just need to ensure checkTurnComplete handles "GameOver" players correctly.
+                // Host will process game over logic in checkTurnComplete
             }, 10);
         }
     }
@@ -212,9 +252,9 @@ export class MultiplayerGame {
 
         const allPlayers = Object.values(data.players);
         const activeRound = data.roundNumber || 1;
-        const playerOrder = data.playerOrder || []; // We need the order to calculate skips
+        const playerOrder = data.playerOrder || []; 
         
-        // 1. Check Global Game Over (Everyone is out)
+        // 1. Check Global Game Over
         const allGameOver = allPlayers.every((p: any) => p.isGameOver === true);
         if (allGameOver) {
             if (data.status !== "FINISHED") {
@@ -227,12 +267,10 @@ export class MultiplayerGame {
         // 2. Determine if we need to rotate
         const isPlacementPhase = (data.currentResource !== undefined && data.currentResource !== null);
         
-        // Condition A: Normal Round End (Everyone placed resource or is out)
         const allDone = allPlayers.every((p: any) => 
             p.placedRound === activeRound || p.isGameOver === true
         );
 
-        // Condition B: Zombie Master Builder (Current Master is out, so we skip them immediately)
         const currentMasterIdx = (data.masterBuilderIndex || 0) % playerOrder.length;
         const currentMasterId = playerOrder[currentMasterIdx];
         const masterIsDead = data.players[currentMasterId] && data.players[currentMasterId].isGameOver;
@@ -248,27 +286,23 @@ export class MultiplayerGame {
             shouldRotate = true;
         }
 
-        // 3. Perform Rotation (Finding next ALIVE player)
+        // 3. Perform Rotation
         if (shouldRotate) {
             let nextIndex = (data.masterBuilderIndex || 0);
             let foundNext = false;
 
-            // Look ahead to find the next active player
-            // We loop i from 1 to N to check the next person, then the one after, etc.
             for (let i = 1; i <= playerOrder.length; i++) {
                 const checkIdx = (nextIndex + i) % playerOrder.length;
                 const pid = playerOrder[checkIdx];
                 const player = data.players[pid];
 
                 if (player && !player.isGameOver) {
-                    nextIndex = nextIndex + i; // Set the new index
+                    nextIndex = nextIndex + i; 
                     foundNext = true;
                     break;
                 }
             }
 
-            // If we didn't find anyone (e.g., everyone else is dead), 
-            // we just increment by 1 (which will trigger Global Game Over on next check)
             if (!foundNext) nextIndex++;
 
             const updates: any = {};

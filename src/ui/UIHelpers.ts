@@ -1,4 +1,4 @@
-import type { ResourceType } from "../core/Types";
+import type { Building, ResourceType } from "../core/Types";
 
 // --- TOASTS ---
 export function showToast(message: string, type: 'info' | 'error' | 'success' = 'info') {
@@ -219,4 +219,94 @@ export function initHostDropdowns(containerEl: HTMLElement, categories: any[]) {
         grid.appendChild(group);
     });
     containerEl.appendChild(grid);
+}
+
+export function showMonumentSelection(
+    options: Building[], 
+    onSelect: (selected: Building) => void
+) {
+    const modal = document.getElementById('resource-picker-modal')!; // Reuse or create new
+    const title = document.getElementById('picker-title')!;
+    const msg = document.getElementById('picker-message')!;
+    const container = document.getElementById('picker-options')!;
+
+    title.textContent = "Choose Your Monument";
+    msg.textContent = "You have been granted two options. Choose one to construct in your town.";
+    container.innerHTML = '';
+    
+    // Flex container for the two cards
+    container.style.display = 'flex';
+    container.style.gap = '20px';
+    container.style.justifyContent = 'center';
+    container.style.flexWrap = 'wrap';
+
+    options.forEach(b => {
+        const card = document.createElement('div');
+        card.className = 'monument-card-choice';
+        card.style.border = "2px solid #9c27b0";
+        card.style.borderRadius = "8px";
+        card.style.padding = "15px";
+        card.style.cursor = "pointer";
+        card.style.background = "white";
+        card.style.width = "180px";
+        card.style.textAlign = "center";
+        card.style.transition = "transform 0.2s";
+
+        // Hover effect
+        card.onmouseenter = () => card.style.transform = "scale(1.05)";
+        card.onmouseleave = () => card.style.transform = "scale(1)";
+
+        card.innerHTML = `
+            <h4 style="color:#6a1b9a; margin:0 0 10px 0;">${b.name}</h4>
+            <div class="mini-grid" style="margin: 0 auto 10px auto;">
+                ${renderMiniPattern(b.pattern)}
+            </div>
+            <p style="font-size:0.8em; color:#555;">${b.description || "Unique Scoring"}</p>
+        `;
+
+        card.onclick = () => {
+            // Reset container styles (since we reused generic picker)
+            container.style.display = ''; 
+            container.style.gap = '';
+            container.style.justifyContent = '';
+            
+            modal.classList.add('hidden');
+            onSelect(b);
+        };
+
+        container.appendChild(card);
+    });
+
+    modal.classList.remove('hidden');
+}
+
+// Helper to draw the pattern pattern inside the card
+function renderMiniPattern(pattern: any[][]) {
+    // 1. Container is a Column (stacks rows vertically)
+    let html = '<div style="display:flex; flex-direction:column; gap:2px; align-items:center;">';
+    
+    pattern.forEach(row => {
+        // 2. Each Row is a Flex Row (stacks cells horizontally)
+        html += '<div style="display:flex; gap:2px;">';
+        
+        row.forEach(cell => {
+             let color = 'transparent'; // Default for NONE
+             let border = '1px solid transparent'; // Invisible border for empty space
+
+             if(cell !== 'NONE') {
+                 border = '1px solid rgba(0,0,0,0.1)'; // Subtle border for resources
+                 if(cell==='WOOD') color='#5d4037';
+                 if(cell==='WHEAT') color='#fdd835';
+                 if(cell==='BRICK') color='#ef5350';
+                 if(cell==='GLASS') color='#29b6f6';
+                 if(cell==='STONE') color='#757575';
+             }
+             
+             html += `<div style="width:15px; height:15px; background:${color}; border:${border}; border-radius:2px;"></div>`;
+        });
+
+        html += '</div>';
+    });
+    html += '</div>';
+    return html;
 }

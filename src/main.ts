@@ -6,7 +6,8 @@ import {
     GREEN_BUILDINGS,
     BLACK_BUILDINGS,
     ORANGE_BUILDINGS,
-    BUILDING_REGISTRY
+    BUILDING_REGISTRY,
+    MONUMENTS_LIST
 } from './core/Buildings';
 import { Game } from './core/Game';
 import { Renderer } from './ui/Renderer';
@@ -20,7 +21,8 @@ import {
     renderLobbyList, 
     renderLeaderboard, 
     renderOpponents, 
-    initHostDropdowns 
+    initHostDropdowns, 
+    showMonumentSelection
 } from './ui/UIHelpers';
 
 // --- 1. INITIALIZATION ---
@@ -71,7 +73,6 @@ const BUILDING_CATEGORIES = [
     { id: 'GREEN', label: 'Tavern (Green)', options: GREEN_BUILDINGS },
     { id: 'ORANGE', label: 'Chapel (Orange)', options: ORANGE_BUILDINGS },
     { id: 'BLACK', label: 'Factory (Black)', options: BLACK_BUILDINGS },
-    { id: 'PURPLE', label: 'Monument', options: BUILDING_REGISTRY.filter(b => b.isMonument) }
 ];
 
 // --- 2. MULTIPLAYER CALLBACKS ---
@@ -85,11 +86,59 @@ multiplayer.onStateChange = (data) => {
 
         // 2. GAME UI
         if (data.status === 'PLAYING') {
+            // Hide modal if game just started
             if (!elements.startModal.classList.contains('hidden')) {
                 elements.startModal.classList.add('hidden');
-                renderAll();
-                renderer.renderDeck(game.gameRegistry);
+                // We don't renderAll here anymore, we wait for monument check below
             }
+
+            // ============================================================
+            // NEW: MONUMENT SELECTION LOGIC
+            // ============================================================
+            const myData = data.players ? data.players[multiplayer.playerId] : null;
+
+            // A. Check if I need to choose a monument (Options exist, but not chosen)
+            if (myData && myData.monumentOptions && !myData.monumentChosen) {
+                const modal = document.getElementById('resource-picker-modal');
+                
+                // Only trigger if modal is currently hidden (prevents loop re-opening)
+                if (modal && modal.classList.contains('hidden')) {
+                    // Convert string names back to Building Objects
+                    const options = myData.monumentOptions.map((name: string) => 
+                        MONUMENTS_LIST.find(b => b.name === name)
+                    ).filter((b: any) => !!b);
+
+                    if (options.length > 0) {
+                        showMonumentSelection(options, (chosen) => {
+                            // Tell server what we picked
+                            multiplayer.selectMonument(chosen.name);
+                        });
+                    }
+                }
+                // IMPORTANT: Stop here. Do not render the game board while choosing.
+                return; 
+            }
+
+            // B. Check if I have chosen, but my local game doesn't know about it yet
+            if (myData && myData.activeMonument && !game.activeMonument) {
+                // Find my specific monument
+                const myMonument = MONUMENTS_LIST.find(b => b.name === myData.activeMonument);
+                
+                // Reconstruct the shared deck from server data
+                const sharedDeckNames = data.deck || [];
+                const sharedDeck = sharedDeckNames.map((name: string) => 
+                    BUILDING_REGISTRY.find(b => b.name === name)
+                ).filter((b: any) => !!b);
+
+                // Inject into Game Engine
+                if (myMonument) {
+                    game.setMonument(myMonument, sharedDeck);
+                    renderer.renderDeck(game.gameRegistry); // Update Sidebar
+                }
+            }
+            // ============================================================
+
+
             if (data.players) {
                 renderOpponents(
                     data.players, 
@@ -100,7 +149,7 @@ multiplayer.onStateChange = (data) => {
                 );
             }
 
-            // A. Identify Master Builder
+            // C. Identify Master Builder
             let masterName = "Unknown";
             const rawOrder = data.playerOrder || [];
             const safeOrder = Array.isArray(rawOrder) ? rawOrder : Object.values(rawOrder);
@@ -116,14 +165,14 @@ multiplayer.onStateChange = (data) => {
             const isMyTurn = multiplayer.masterBuilderId === multiplayer.playerId;
             const resourceActive = (data.currentResource !== undefined && data.currentResource !== null);
 
-            // B. Check Lock Status
+            // D. Check Lock Status
             const currentRound = data.roundNumber || 1;
             const myStatus = data.players ? data.players[multiplayer.playerId] : null;
             if (myStatus) {
                 hasActedThisTurn = (Number(myStatus.placedRound) === Number(currentRound));
             }
 
-            // C. Update Status Message
+            // E. Update Status Message
             if (!resourceActive) {
                 if (isMyTurn) {
                     multiplayerStatusMessage = "YOU are the Master Builder! Choose a resource.";
@@ -149,6 +198,7 @@ multiplayer.onStateChange = (data) => {
             elements.multiplayerResultsModal.classList.remove('hidden');
         }
 
+        // Final Render
         game.currentResource = data.currentResource || null;
         renderAll();
     } catch (err) {
