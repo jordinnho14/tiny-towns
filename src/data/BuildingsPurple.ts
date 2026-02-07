@@ -1,4 +1,4 @@
-import { FortIronweedStrategy, GroveUniversityStrategy, StatueBondmakerStrategy } from '../core/EffectStrategies';
+import { ArchitectsGuildStrategy, FortIronweedStrategy, GroveUniversityStrategy, StatueBondmakerStrategy } from '../core/EffectStrategies';
 import { FixedScoreStrategy, GlobalUniqueStrategy, LargestGroupStrategy, MausoleumStrategy, MissingTypeStrategy, SavedScoreStrategy, UniqueNeighborStrategy } from '../core/ScoringStrategies';
 import { type Building, BuildingType, Resource } from '../core/Types';
 
@@ -134,8 +134,8 @@ export const GUILD: Building = {
     ],
     isMonument: true,
     scorer: new FixedScoreStrategy(1, false),
-    description: '1 point. When constructed, replace up to 2 buildings in your town with any other building types.'
-// IMPLEMENT EFFECT
+    description: '1 point. When constructed, replace up to 2 buildings in your town with any other building types.',
+    effect: new ArchitectsGuildStrategy()
 };
 
 export const UNIVERSITY: Building = {

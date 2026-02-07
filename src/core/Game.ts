@@ -332,5 +332,24 @@ export class Game {
         // Scan for matches just in case this triggers something (unlikely but safe)
         this.scanForMatches();
     }
+
+    public replaceBuilding(r: number, c: number, newBuildingName: string) {
+        const grid = this.board.getGrid();
+        const current = grid[r][c];
+
+        // Validation
+        if (current === 'NONE' || ['WOOD','WHEAT','BRICK','GLASS','STONE'].includes(current)) {
+            throw new Error("Must select an existing building!");
+        }
+
+        // Execute Replacement
+        this.board.placeBuilding(r, c, newBuildingName);
+        
+        // Clear any old metadata (e.g. if replacing a Factory or Cottage)
+        this.board.setMetadata(r, c, {}); 
+
+        // Re-scan matches
+        this.scanForMatches();
+    }
 }
 

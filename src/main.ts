@@ -29,7 +29,7 @@ import {
 // --- 1. INITIALIZATION ---
 const game = new Game();
 const renderer = new Renderer();
-const multiplayer = new MultiplayerGame(game); 
+const multiplayer = new MultiplayerGame(game);
 
 // UI State
 let activeConstruction: any | null = null;
@@ -39,6 +39,7 @@ let hasActedThisTurn = false;
 let hasDeclaredGameOver = false;
 let activeGameId = "";
 let pendingFreeBuildName: string | null = null;
+let guildReplacementsLeft = 0;
 
 // DOM Elements
 const elements = {
@@ -65,6 +66,7 @@ const elements = {
     scoreList: document.getElementById('score-breakdown-list')!,
     restartBtn: document.getElementById('restart-btn')!,
     undoBtn: document.getElementById('undo-btn')!,
+    finishGuildBtn: document.getElementById('finish-guild-btn')!
 };
 
 // --- CONFIGURATION ---
@@ -232,6 +234,7 @@ renderer.onCellClick = (r, c) => {
     const grid = game.board.getGrid();
     const cell = grid[r][c];
 
+    // 1. GROVE UNIVERSITY LOGIC (Pending Free Build)
     if (pendingFreeBuildName) {
         if (cell !== 'NONE') {
             showToast("You must choose an EMPTY square!", "error");
@@ -256,11 +259,47 @@ renderer.onCellClick = (r, c) => {
         return; // Stop processing other click types
     }
 
-    // Check if clicked cell is a Warehouse
+    // 2. ARCHITECT'S GUILD LOGIC (Replacement Mode)
+    if (guildReplacementsLeft > 0) {
+        // Validation: Must be a building (not empty, not a resource)
+        const isBuilding = cell !== 'NONE' && !['WOOD','WHEAT','BRICK','GLASS','STONE'].includes(cell);
+        
+        if (!isBuilding) {
+            showToast("You must select an existing building to replace!", "error");
+            return;
+        }
+
+        // Open Picker to choose the NEW building
+        showBuildingPicker(game.gameRegistry, (newBuilding) => {
+            try {
+                // Perform Replacement
+                game.replaceBuilding(r, c, newBuilding.name);
+                guildReplacementsLeft--;
+
+                if (guildReplacementsLeft > 0) {
+                     showToast(`Replaced! Select one more building or click 'Done'.`, "success");
+                } else {
+                     showToast("Replacements complete.", "success");
+                     finishGuildAction();
+                }
+
+                // Render update
+                multiplayer.saveBoardOnly();
+                renderAll();
+            } catch(e) {
+                showToast("Error replacing building.", "error");
+            }
+        });
+        return; // Stop processing
+    }
+
+    // 3. WAREHOUSE LOGIC
     if (cell && cell.toUpperCase() === 'WAREHOUSE') {
         handleWarehouseClick(r, c);
         return; 
     }
+
+    // 4. STANDARD CONSTRUCTION / RESOURCE LOGIC
     try {
         if (activeConstruction) {
             handleConstructionClick(r, c);
@@ -497,7 +536,23 @@ function handleConstructionClick(r: number, c: number) {
                     existingBanned
                 );
             }
-            // NEW: Grove University
+            else if (result.effectType === 'ARCHITECTS_GUILD') {
+                // 1. Set State
+                guildReplacementsLeft = 2;
+                
+                // 2. Show UI Feedback
+                showToast("Architect's Guild: Select a building to replace (2 remaining).", "info");
+                
+                // 3. Show a "Done" button (Reusing the cancel button temporarily or adding a custom one)
+                // Let's create a temporary button in the UI overlay if possible, 
+                // or just hijack the status message area.
+                multiplayerStatusMessage = "Select a building to replace (or click Resource to skip)";
+                
+                // Save the board immediately (Guild is built)
+                multiplayer.saveBoardOnly(); 
+                renderAll();
+                return;
+            }
             else if (result.effectType === 'GROVE_UNIVERSITY') {
                 showBuildingPicker(game.gameRegistry, (chosenBuilding) => {
                     // 1. Set the specific "Pending Free Build" state
@@ -669,6 +724,19 @@ function renderAll() {
         forbiddenResources = game.getForbiddenResources();
     }
 
+    if (guildReplacementsLeft > 0) {
+        elements.finishGuildBtn.classList.remove('hidden');
+        elements.finishGuildBtn.textContent = `Done Replacing (${guildReplacementsLeft} left)`;
+        togglePalette(false); // Lock resources
+        
+        // Override message
+        multiplayerStatusMessage = `Architect's Guild: Select a building to replace.`;
+    } else {
+        if (!elements.finishGuildBtn.classList.contains('hidden')) {
+            elements.finishGuildBtn.classList.add('hidden');
+        }
+    }
+
     let msg = multiplayerStatusMessage;
     if (pendingFreeBuildName) {
         msg = `🌟 BONUS: Click an empty square for your ${pendingFreeBuildName}!`;
@@ -722,6 +790,20 @@ function calculateMasterId(data: any): string | null {
         return safeOrder[idx] as string;
     }
     return null;
+}
+
+elements.finishGuildBtn.onclick = () => {
+    finishGuildAction();
+};
+
+function finishGuildAction() {
+    guildReplacementsLeft = 0;
+    elements.finishGuildBtn.classList.add('hidden');
+    
+    // Commit the turn finally
+    multiplayer.commitTurn(); 
+    renderAll();
+    checkAndShowGameOver();
 }
 
 // --- AUTO-JOIN VIA URL ---
