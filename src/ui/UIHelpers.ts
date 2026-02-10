@@ -157,9 +157,11 @@ export function renderOpponents(
         const gridDiv = document.createElement('div');
         gridDiv.className = 'mini-board';
 
-        // ... (rest of the grid rendering code stays the same) ...
-        if (p.board && Array.isArray(p.board)) {
-            p.board.forEach((row: string[]) => {
+        const rawBoard = p.board;
+        const grid = (rawBoard && rawBoard.grid) ? rawBoard.grid : rawBoard;
+
+        if (grid && Array.isArray(grid)) {
+            grid.forEach((row: string[]) => {
                 row.forEach((cell: string) => {
                     const div = document.createElement('div');
                     div.className = 'mini-cell';
@@ -170,6 +172,7 @@ export function renderOpponents(
                             const safeName = cell.replace(/ /g, '-').replace(/'/g, '').toUpperCase();
                             div.classList.add(safeName);
                             div.title = cell;
+                            // ... (rest of class logic)
                             const standard = [
                                 'COTTAGE', 'FARM', 'GRANARY', 'GREENHOUSE', 'ORCHARD',
                                 'WELL', 'FOUNTAIN', 'MILLSTONE', 'SHED',
@@ -449,5 +452,197 @@ export function showBuildingPicker(
         container.appendChild(card);
     });
 
+    modal.classList.remove('hidden');
+}
+
+// src/ui/UIHelpers.ts
+
+export function showMultiBuildingPicker(
+    buildings: any[], 
+    count: number,
+    onConfirm: (selectedNames: string[]) => void
+) {
+    const modal = document.getElementById('resource-picker-modal')!;
+    const title = document.getElementById('picker-title')!;
+    const msg = document.getElementById('picker-message')!;
+    const container = document.getElementById('picker-options')!;
+
+    title.textContent = `Opaleye's Watch Setup`;
+    msg.textContent = `Select exactly ${count} unique buildings to place on your Watch.`;
+    container.innerHTML = '';
+    
+    // Widen modal
+    if (container.parentElement) {
+        container.parentElement.style.maxWidth = '700px';
+        container.parentElement.style.width = '95%';
+    }
+
+    container.style.display = 'flex';
+    container.style.gap = '10px';
+    container.style.justifyContent = 'center';
+    container.style.flexWrap = 'wrap';
+
+    // State for this picker
+    const selected = new Set<string>();
+    const confirmBtnId = 'multi-picker-confirm-btn';
+
+    // Helper to update visual state
+    const updateVisuals = () => {
+        // Update Card Styles
+        Array.from(container.children).forEach((child: any) => {
+            if (child.id === confirmBtnId) return;
+            const name = child.dataset.name;
+            if (selected.has(name)) {
+                child.style.border = "3px solid #2e7d32";
+                child.style.background = "#e8f5e9";
+                child.style.transform = "scale(1.05)";
+            } else {
+                child.style.border = "1px solid #e0e0e0";
+                child.style.background = "white";
+                child.style.transform = "scale(1)";
+            }
+        });
+
+        // Update Button State
+        const btn = document.getElementById(confirmBtnId) as HTMLButtonElement;
+        if (btn) {
+            btn.disabled = selected.size !== count;
+            btn.textContent = selected.size !== count 
+                ? `Select ${selected.size}/${count}` 
+                : "Confirm Selection";
+            btn.style.opacity = selected.size !== count ? "0.5" : "1";
+        }
+    };
+
+    // Render Building Cards
+    buildings.forEach(b => {
+        if (b.isMonument || b.name === "Opaleye's Watch") return; // Filter out monuments
+
+        const card = document.createElement('div');
+        card.dataset.name = b.name;
+        
+        // Basic Card Styling
+        card.style.borderRadius = "8px";
+        card.style.padding = "10px";
+        card.style.cursor = "pointer";
+        card.style.width = "100px";
+        card.style.height = "120px";
+        card.style.display = "flex";
+        card.style.flexDirection = "column";
+        card.style.alignItems = "center";
+        card.style.textAlign = "center";
+        card.style.transition = "all 0.2s";
+
+        // Icon
+        const iconDiv = document.createElement('div');
+        const cssClass = b.name.replace(/ /g, '-').replace(/'/g, '').toUpperCase();
+        iconDiv.className = `mini-cell ${cssClass}`;
+        iconDiv.style.width = "40px";
+        iconDiv.style.height = "40px";
+        iconDiv.style.marginBottom = "5px";
+        iconDiv.style.backgroundSize = "contain";
+        iconDiv.style.border = "none";
+
+        const nameLabel = document.createElement('span');
+        nameLabel.textContent = b.name;
+        nameLabel.style.fontSize = "0.75em";
+        nameLabel.style.fontWeight = "bold";
+
+        card.appendChild(iconDiv);
+        card.appendChild(nameLabel);
+
+        card.onclick = () => {
+            if (selected.has(b.name)) {
+                selected.delete(b.name);
+            } else {
+                if (selected.size < count) {
+                    selected.add(b.name);
+                }
+            }
+            updateVisuals();
+        };
+
+        container.appendChild(card);
+    });
+
+    // Add Confirm Button at the bottom
+    const btnContainer = document.createElement('div');
+    btnContainer.style.width = "100%";
+    btnContainer.style.marginTop = "20px";
+    btnContainer.style.textAlign = "center";
+
+    const confirmBtn = document.createElement('button');
+    confirmBtn.id = confirmBtnId;
+    confirmBtn.className = "primary-btn";
+    confirmBtn.textContent = `Select 0/${count}`;
+    confirmBtn.disabled = true;
+    confirmBtn.onclick = () => {
+        // Reset modal width
+        if (container.parentElement) {
+            container.parentElement.style.maxWidth = '';
+            container.parentElement.style.width = '';
+        }
+        modal.classList.add('hidden');
+        onConfirm(Array.from(selected));
+    };
+
+    btnContainer.appendChild(confirmBtn);
+    container.appendChild(btnContainer);
+
+    modal.classList.remove('hidden');
+}
+
+export function showOpaleyeBonusModal(
+    buildingName: string,
+    onConfirm: () => void
+) {
+    const modal = document.getElementById('resource-picker-modal')!;
+    const title = document.getElementById('picker-title')!;
+    const msg = document.getElementById('picker-message')!;
+    const container = document.getElementById('picker-options')!;
+
+    // 1. Set Text
+    title.textContent = "Opaleye's Watch Triggered!";
+    msg.innerHTML = `Your neighbor constructed a <strong>${buildingName}</strong>.<br>You may place one immediately!`;
+    container.innerHTML = '';
+
+    // 2. Adjust Layout (Centered Column)
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
+    container.style.alignItems = 'center';
+    container.style.gap = '20px';
+
+    // 3. Create Big Icon
+    const icon = document.createElement('div');
+    const safeClass = buildingName.replace(/ /g, '-').replace(/'/g, '').toUpperCase();
+    
+    // Reuse 'mini-cell' for correct background/icon, but override size
+    icon.className = `mini-cell ${safeClass}`;
+    icon.style.width = '80px';
+    icon.style.height = '80px';
+    icon.style.borderRadius = '12px';
+    icon.style.boxShadow = '0 4px 10px rgba(0,0,0,0.1)';
+    icon.style.backgroundSize = '60%'; // Make icon fit nicely
+    icon.style.border = '2px solid #7b1fa2'; // Purple border for Opaleye theme
+
+    container.appendChild(icon);
+
+    // 4. Create "Place Now" Button
+    const btn = document.createElement('button');
+    btn.className = 'primary-btn';
+    btn.textContent = "Select Square to Build";
+    btn.onclick = () => {
+        // Reset styles we messed with
+        container.style.display = '';
+        container.style.flexDirection = '';
+        container.style.alignItems = '';
+        container.style.gap = '';
+        
+        modal.classList.add('hidden');
+        onConfirm();
+    };
+    container.appendChild(btn);
+
+    // 5. Show
     modal.classList.remove('hidden');
 }

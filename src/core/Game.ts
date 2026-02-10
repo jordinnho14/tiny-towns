@@ -10,7 +10,7 @@ export class Game {
     public availableMatches: any[] = [];
     public activeMonument: any = null;
     public gameRegistry: any[] = [];
-    
+
     // Undo History
     public lastMove: { r: number, c: number } | null = null;
 
@@ -22,7 +22,7 @@ export class Game {
         this.activeMonument = monument;
         // The registry is the shared deck + my unique monument
         this.gameRegistry = [...sharedDeck, this.activeMonument];
-        
+
         // Re-scan immediately to ensure the Matcher knows about the monument
         this.scanForMatches();
     }
@@ -45,7 +45,7 @@ export class Game {
 
     placeResource(r: number, c: number) {
         if (!this.currentResource) throw new Error("No resource selected");
-        
+
         const grid = this.board.getGrid();
         const cell = grid[r][c];
 
@@ -63,23 +63,23 @@ export class Game {
 
             // Place it in metadata (NOT on the grid itself, or we lose the Cottage)
             this.board.setMetadata(r, c, { ...meta, storedResource: this.currentResource });
-        } 
+        }
         else {
             throw new Error("Cannot place resource here.");
         }
 
         this.lastMove = { r, c };
-        this.currentResource = null; 
-        
+        this.currentResource = null;
+
         this.scanForMatches();
     }
 
-    constructBuilding(match: any, targetR: number, targetC: number): { type: 'SUCCESS' | 'TRIGGER_EFFECT', effectType?: string} {
+    constructBuilding(match: any, targetR: number, targetC: number): { type: 'SUCCESS' | 'TRIGGER_EFFECT', effectType?: string } {
         // 1. Identify coordinates involved in the match
         const coords: { row: number, col: number }[] = [];
         let shrinePoints = 0;
         let isShrine = false;
-        
+
         match.pattern.forEach((row: any[], r: number) => {
             row.forEach((cell: string, c: number) => {
                 if (cell && cell !== 'NONE') {
@@ -90,12 +90,12 @@ export class Game {
 
         // 2. Shrine Logic
         if (match.buildingName.toUpperCase() === 'SHRINE OF THE ELDER TREE') {
-             isShrine = true;
-             const buildingCount = this.countBuildingsOnBoard();
-             // Add 1 because we are about to place the Shrine itself
-             const total = buildingCount + 1;
-             if (total < 6) shrinePoints = total; 
-             else shrinePoints = 8;
+            isShrine = true;
+            const buildingCount = this.countBuildingsOnBoard();
+            // Add 1 because we are about to place the Shrine itself
+            const total = buildingCount + 1;
+            if (total < 6) shrinePoints = total;
+            else shrinePoints = 8;
         }
 
         // 3. Clear Resources (SMART CLEARING for Trading Post)
@@ -123,18 +123,18 @@ export class Game {
         if (isShrine) {
             this.board.setMetadata(targetR, targetC, { savedScore: shrinePoints });
         }
- 
+
         // 5. Clear Undo & Rescan
         this.lastMove = null;
         this.scanForMatches();
 
         const realDef = BUILDING_REGISTRY.find(b => b.name.toUpperCase() === match.buildingName.toUpperCase());
-        
+
         if (realDef && realDef.effect) {
             // Tell the UI: "Hey, I just built a Factory, please ask the user for a resource!"
-            return { 
-                type: 'TRIGGER_EFFECT', 
-                effectType: realDef.effect.type 
+            return {
+                type: 'TRIGGER_EFFECT',
+                effectType: realDef.effect.type
             };
         }
         return { type: 'SUCCESS' };
@@ -155,10 +155,10 @@ export class Game {
     scanForMatches() {
         this.availableMatches = [];
         const grid = this.board.getGrid();
-        
+
         const hasMonument = grid.some(row => row.some(cell => {
-             const def = this.gameRegistry.find(b => b.name.toUpperCase() === cell.toUpperCase());
-             return def?.isMonument;
+            const def = this.gameRegistry.find(b => b.name.toUpperCase() === cell.toUpperCase());
+            return def?.isMonument;
         }));
 
         for (const building of this.gameRegistry) {
@@ -185,8 +185,8 @@ export class Game {
     private countBuildingsOnBoard(): number {
         const grid = this.board.getGrid();
         let count = 0;
-        const resources = ['WOOD','WHEAT','BRICK','GLASS','STONE','NONE'];
-        
+        const resources = ['WOOD', 'WHEAT', 'BRICK', 'GLASS', 'STONE', 'NONE'];
+
         grid.forEach(row => {
             row.forEach(cell => {
                 if (!resources.includes(cell)) {
@@ -213,10 +213,10 @@ export class Game {
 
                 // Find the building definition
                 const buildingDef = this.gameRegistry.find(b => b.name.toUpperCase() === cell.toUpperCase());
-                
+
                 // Check if it has the matching effect
                 if (buildingDef && buildingDef.effect && buildingDef.effect.type === effectType) {
-                    
+
                     const meta = this.board.getMetadata(r, c);
                     const storedRes = meta ? meta.storedResource : null;
 
@@ -250,10 +250,10 @@ export class Game {
     public canFactorySwap(incomingResource: ResourceType): { r: number, c: number } | null {
         // Find all my factories
         const factories = this.findEffectBuildings('FACTORY');
-        
+
         // See if any of them contain the EXACT resource being offered
         const validFactory = factories.find(f => f.storedRes === incomingResource);
-        
+
         return validFactory ? { r: validFactory.r, c: validFactory.c } : null;
     }
 
@@ -273,7 +273,7 @@ export class Game {
     public storeInWarehouse(r: number, c: number, res: ResourceType): boolean {
         const meta = this.board.getMetadata(r, c) || {};
         const stored = (meta.storedResources || []) as ResourceType[];
-        
+
         if (stored.length >= 3) return false;
 
         stored.push(res);
@@ -290,7 +290,7 @@ export class Game {
         if (!meta || !meta.storedResources) return null;
 
         const stored = [...(meta.storedResources as ResourceType[])]; // Copy array
-        
+
         if (indexToTake < 0 || indexToTake >= stored.length) return null;
 
         // 1. Get the item we are removing
@@ -301,7 +301,7 @@ export class Game {
 
         // 3. Save back
         this.board.setMetadata(r, c, { ...meta, storedResources: stored });
-        
+
         return itemTaken;
     }
 
@@ -320,7 +320,7 @@ export class Game {
 
     public placeFreeBuilding(r: number, c: number, buildingName: string) {
         const grid = this.board.getGrid();
-        
+
         // Validation: Must be empty
         if (grid[r][c] !== 'NONE') {
             throw new Error("Target square must be empty!");
@@ -328,7 +328,7 @@ export class Game {
 
         // Place it directly
         this.board.placeBuilding(r, c, buildingName);
-        
+
         // Scan for matches just in case this triggers something (unlikely but safe)
         this.scanForMatches();
     }
@@ -338,18 +338,77 @@ export class Game {
         const current = grid[r][c];
 
         // Validation
-        if (current === 'NONE' || ['WOOD','WHEAT','BRICK','GLASS','STONE'].includes(current)) {
+        if (current === 'NONE' || ['WOOD', 'WHEAT', 'BRICK', 'GLASS', 'STONE'].includes(current)) {
             throw new Error("Must select an existing building!");
         }
 
         // Execute Replacement
         this.board.placeBuilding(r, c, newBuildingName);
-        
+
         // Clear any old metadata (e.g. if replacing a Factory or Cottage)
-        this.board.setMetadata(r, c, {}); 
+        this.board.setMetadata(r, c, {});
 
         // Re-scan matches
         this.scanForMatches();
     }
-}
 
+    // ----------- OPALEYES WATCH LOGIC -----------
+    public initializeOpaleye(r: number, c: number, selectedBuildings: string[]) {
+        this.board.setMetadata(r, c, { opaleyeBuildings: selectedBuildings });
+    }
+
+    // 2. Check: Do I have this building on my Watch?
+    public checkOpaleyeMatch(buildingName: string): { r: number, c: number } | null {
+        const grid = this.board.getGrid();
+        const target = buildingName.toUpperCase(); // Normalize incoming name
+
+        for (let r = 0; r < 4; r++) {
+            for (let c = 0; c < 4; c++) {
+                // Check for Opaleye (handling potential name variations like "Opaleye's Watch")
+                if (grid[r][c].toUpperCase().includes('OPALEYE')) {
+                    const meta = this.board.getMetadata(r, c);
+
+                    if (meta && meta.opaleyeBuildings) {
+                        // Check if ANY stored building matches the target (case-insensitive)
+                        const hasMatch = meta.opaleyeBuildings.some((b: string) =>
+                            b.toUpperCase() === target
+                        );
+
+                        if (hasMatch) return { r, c };
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    // 3. Remove: Take the building off the card
+    public removeOpaleyeItem(r: number, c: number, buildingName: string) {
+        const meta = this.board.getMetadata(r, c);
+
+        if (!meta || !meta.opaleyeBuildings) {
+            console.error("[Opaleye] No metadata found at", r, c);
+            return;
+        }
+
+        console.log("[Opaleye] Attempting remove:", buildingName);
+        console.log("[Opaleye] Current List:", meta.opaleyeBuildings);
+
+        const target = buildingName.trim().toUpperCase();
+
+        // Filter out ONE instance of the building
+        // (If you somehow had 2 Cottages, this removes only one if you want, 
+        //  but usually we just filter all matching since they are unique types)
+        const updatedList = meta.opaleyeBuildings.filter((b: string) =>
+            b.trim().toUpperCase() !== target
+        );
+
+        console.log("[Opaleye] Updated List:", updatedList);
+
+        if (updatedList.length === meta.opaleyeBuildings.length) {
+            console.warn("[Opaleye] WARNING: Nothing was removed! Name mismatch?");
+        }
+
+        this.board.setMetadata(r, c, { ...meta, opaleyeBuildings: updatedList });
+    }
+}

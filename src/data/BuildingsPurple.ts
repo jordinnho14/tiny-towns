@@ -1,4 +1,4 @@
-import { ArchitectsGuildStrategy, FortIronweedStrategy, GroveUniversityStrategy, StatueBondmakerStrategy } from '../core/EffectStrategies';
+import { ArchitectsGuildStrategy, FortIronweedStrategy, GroveUniversityStrategy, OpaleyeWatchStrategy, StatueBondmakerStrategy } from '../core/EffectStrategies';
 import { FixedScoreStrategy, GlobalUniqueStrategy, LargestGroupStrategy, MausoleumStrategy, MissingTypeStrategy, SavedScoreStrategy, UniqueNeighborStrategy } from '../core/ScoringStrategies';
 import { type Building, BuildingType, Resource } from '../core/Types';
 
@@ -160,8 +160,8 @@ export const WATCH: Building = {
         [Resource.STONE, Resource.NONE, Resource.NONE, Resource.NONE ]
     ],
     isMonument: true,
-    description: 'Immediately place 3 unique buildings on this card. Whenever a player on the left or right of you constructs 1 of those buildings, take the building from here and place it on an empty square in your town.'
-    //IMPLEMENT EFFECT
+    description: 'Immediately place 3 unique buildings on this card. Whenever a player on the left or right of you constructs 1 of those buildings, take the building from here and place it on an empty square in your town.',
+    effect: new OpaleyeWatchStrategy()
 };
 
 export const FORT: Building = {

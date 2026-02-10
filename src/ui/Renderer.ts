@@ -128,6 +128,25 @@ private renderBoard(game: Game, activeConstruction: any | null, highlightCoords:
                 div.appendChild(container);
             }
 
+            // --- NEW: Opaleye's Watch Visuals ---
+            if (meta && meta.opaleyeBuildings && Array.isArray(meta.opaleyeBuildings)) {
+                const container = document.createElement('div');
+                // Reuse the warehouse flex container for layout
+                container.className = 'warehouse-storage'; 
+                
+                meta.opaleyeBuildings.forEach((bName: string) => {
+                    const badge = document.createElement('div');
+                    const safeClass = bName.replace(/ /g, '-').replace(/'/g, '').toUpperCase();
+                    
+                    // Use 'mini-cell' to get the correct background colors/icons
+                    badge.className = `mini-cell ${safeClass} on-board-mini`;
+                    badge.title = bName;
+                    
+                    container.appendChild(badge);
+                });
+                div.appendChild(container);
+            }
+
             // 5. Interactive Pulse Logic (NEW: Make Warehouse Glow)
             // If it's my turn (I have a resource) and not building, light up the Warehouse
             if (game.currentResource && !activeConstruction) {

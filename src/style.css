@@ -993,6 +993,15 @@ h1, h2, h3 {
 .mini-resource.GLASS { background-color: #29b6f6; }
 .mini-resource.STONE { background-color: #757575; }
 
+.on-board-mini {
+    width: 22px;   /* Small enough to fit 3 in a row */
+    height: 22px;
+    border: 1px solid rgba(0,0,0,0.2);
+    border-radius: 4px;
+    box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+    background-size: 80%; /* Ensure icon fits inside */
+}
+
 
 /* Add this to src/style.css */
 

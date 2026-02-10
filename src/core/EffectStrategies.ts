@@ -1,7 +1,7 @@
 import type { ResourceType } from './Types';
 
 export interface EffectStrategy {
-    type: 'FACTORY' | 'BANK' | 'WAREHOUSE' | 'TRADING_POST' | 'STATUE_BONDMAKER' | 'GROVE_UNIVERSITY' | 'FORT_IRONWEED' | 'ARCHITECTS_GUILD';
+    type: string;
     description: string;
     // Helper to check if this building allows a swap
     canSwap?(storedResource: ResourceType, incomingResource: ResourceType): boolean;
@@ -47,4 +47,9 @@ export class FortIronweedStrategy implements EffectStrategy {
 export class ArchitectsGuildStrategy implements EffectStrategy {
     readonly type = 'ARCHITECTS_GUILD';
     readonly description = "Replace up to 2 buildings in your town with any other building types.";
+}
+
+export class OpaleyeWatchStrategy implements EffectStrategy {
+    readonly type = 'OPALEYE_WATCH';
+    readonly description = "Place 3 unique buildings on this card. When neighbors build them, you get them.";
 }

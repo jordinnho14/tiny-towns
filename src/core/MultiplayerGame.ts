@@ -14,7 +14,9 @@ export class MultiplayerGame {
     public masterBuilderId: string | null = null;
     public myName: string = "Unknown";
     public currentRound: number = 1; 
+    private lastNeighborCounts: Record<string, Record<string, number>> = {};
 
+    public onOpaleyeBonus: ((buildingName: string, source: {r: number, c: number}) => void) | null = null;
     public onStateChange: ((state: any) => void) | null = null;
     public onGameStart: (() => void) | null = null;
 
@@ -184,6 +186,27 @@ export class MultiplayerGame {
             // 4. Sync Round Number
             this.currentRound = data.roundNumber || 1;
 
+            // --- NEIGHBOR WATCH (Opaleye Logic) ---
+            if (data.status === "PLAYING" && data.players && data.playerOrder) {
+                this.checkNeighborsForOpaleye(data.players, data.playerOrder);
+            }
+
+            // --- NEW: RESTORE LOCAL METADATA ---
+            // This ensures Opaleye/Warehouse items don't disappear on refresh
+            if (data.players && data.players[this.playerId]) {
+                const myData = data.players[this.playerId];
+                
+                // If the server has metadata, load it into our local board
+                if (myData.board && myData.board.metadata) {
+                    const newMeta = new Map<string, any>();
+                    Object.entries(myData.board.metadata).forEach(([key, value]) => {
+                        newMeta.set(key, value);
+                    });
+                    this.localGame.board.metadata = newMeta;
+                }
+            }
+            // -----------------------------------
+
             // 5. Update UI
             if (this.onStateChange) this.onStateChange(data);
 
@@ -352,6 +375,84 @@ export class MultiplayerGame {
     }
 
     private serializeBoard() {
-        return this.localGame.board.getGrid();
+        // Convert Map to Object for Firebase storage
+        const metaObj: any = {};
+        this.localGame.board.metadata.forEach((value, key) => {
+            metaObj[key] = value;
+        });
+
+        return {
+            grid: this.localGame.board.getGrid(),
+            metadata: metaObj
+        };
+    }
+
+    private checkNeighborsForOpaleye(players: any, playerOrder: string[]) {
+        const myIndex = playerOrder.indexOf(this.playerId);
+        if (myIndex === -1) return;
+
+        const totalPlayers = playerOrder.length;
+        if (totalPlayers < 2) return;
+
+        // Determine Neighbors
+        const leftIndex = (myIndex - 1 + totalPlayers) % totalPlayers;
+        const rightIndex = (myIndex + 1) % totalPlayers;
+        
+        const neighborIds = new Set([playerOrder[leftIndex], playerOrder[rightIndex]]);
+
+        neighborIds.forEach(nId => {
+            if (nId === this.playerId) return; 
+            
+            const neighborData = players[nId];
+            if (!neighborData || !neighborData.board) return;
+
+            // 1. Count buildings on neighbor's board
+            const currentCounts = this.countBuildings(neighborData.board);
+            const prevCounts = this.lastNeighborCounts[nId];
+
+            // 2. Only check diff if we have history
+            if (prevCounts) {
+                Object.keys(currentCounts).forEach(bName => {
+                    const diff = (currentCounts[bName] || 0) - (prevCounts[bName] || 0);
+                    
+                    // If they built 1 (or more) of 'bName'
+                    if (diff > 0) {
+                        // Check if *I* have this on my Opaleye Watch
+                        const match = this.localGame.checkOpaleyeMatch(bName);
+                        if (match && this.onOpaleyeBonus) {
+                            console.log(`[Opaleye] Bonus! Building: ${bName} at Watch Coords:`, match);
+                            this.onOpaleyeBonus(bName, match);
+                        }
+                    }
+                });
+            }
+
+            // 3. Update history
+            this.lastNeighborCounts[nId] = currentCounts;
+        });
+    }
+
+    private countBuildings(boardData: any): Record<string, number> {
+        const counts: Record<string, number> = {};
+        const resources = ['WOOD','WHEAT','BRICK','GLASS','STONE','NONE'];
+        
+        // --- FIX START ---
+        // Check if we are receiving the new object wrapper or the old array
+        const grid = (boardData && boardData.grid) ? boardData.grid : boardData;
+        
+        if (!Array.isArray(grid)) return counts;
+
+        grid.forEach((row: any[]) => {
+            if(Array.isArray(row)) {
+                row.forEach((cell: string) => {
+                    if (typeof cell === 'string' && !resources.includes(cell)) {
+                        counts[cell] = (counts[cell] || 0) + 1;
+                    }
+                });
+            }
+        });
+        // --- FIX END ---
+        
+        return counts;
     }
 }

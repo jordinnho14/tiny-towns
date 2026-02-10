@@ -23,7 +23,9 @@ import {
     renderOpponents, 
     initHostDropdowns, 
     showMonumentSelection,
-    showBuildingPicker
+    showBuildingPicker,
+    showMultiBuildingPicker,
+    showOpaleyeBonusModal
 } from './ui/UIHelpers';
 
 // --- 1. INITIALIZATION ---
@@ -40,6 +42,7 @@ let hasDeclaredGameOver = false;
 let activeGameId = "";
 let pendingFreeBuildName: string | null = null;
 let guildReplacementsLeft = 0;
+let activeOpaleyeSource: { r: number, c: number } | null = null;
 
 // DOM Elements
 const elements = {
@@ -234,7 +237,7 @@ renderer.onCellClick = (r, c) => {
     const grid = game.board.getGrid();
     const cell = grid[r][c];
 
-    // 1. GROVE UNIVERSITY LOGIC (Pending Free Build)
+    // 1. UNIFIED FREE BUILD LOGIC (Grove University & Opaleye)
     if (pendingFreeBuildName) {
         if (cell !== 'NONE') {
             showToast("You must choose an EMPTY square!", "error");
@@ -242,21 +245,39 @@ renderer.onCellClick = (r, c) => {
         }
 
         try {
-            // Execute the free build
+            console.log(`[Main] Executing Free Build: ${pendingFreeBuildName}`);
+            
+            // A. Place the building
             game.placeFreeBuilding(r, c, pendingFreeBuildName);
 
-            // Clear state
+            // B. Remove from Watch Card (ONLY if this came from Opaleye)
+            if (activeOpaleyeSource) {
+                console.log(`[Main] Removing from Opaleye at ${activeOpaleyeSource.r},${activeOpaleyeSource.c}`);
+                game.removeOpaleyeItem(
+                    activeOpaleyeSource.r, 
+                    activeOpaleyeSource.c, 
+                    pendingFreeBuildName
+                );
+                
+                // Clear the source so we don't try to remove again
+                activeOpaleyeSource = null; 
+            }
+
+            // C. Clear pending state
             pendingFreeBuildName = null;
 
-            // Now we are truly done
-            multiplayer.saveBoardOnly();
+            // D. Save & Render
+            // This saves the new metadata (item removed) to the server
+            multiplayer.saveBoardOnly(); 
             renderAll();
             checkAndShowGameOver();
-            showToast("Scholarship claimed!", "success");
+            showToast("Building constructed!", "success");
+
         } catch (e) {
+            console.error("Error placing building:", e);
             showToast("Error placing building.", "error");
         }
-        return; // Stop processing other click types
+        return; // STOP here. Do not process other clicks.
     }
 
     // 2. ARCHITECT'S GUILD LOGIC (Replacement Mode)
@@ -293,13 +314,13 @@ renderer.onCellClick = (r, c) => {
         return; // Stop processing
     }
 
-    // 3. WAREHOUSE LOGIC
+    // 4. WAREHOUSE LOGIC
     if (cell && cell.toUpperCase() === 'WAREHOUSE') {
         handleWarehouseClick(r, c);
         return; 
     }
 
-    // 4. STANDARD CONSTRUCTION / RESOURCE LOGIC
+    // 5. STANDARD CONSTRUCTION / RESOURCE LOGIC
     try {
         if (activeConstruction) {
             handleConstructionClick(r, c);
@@ -567,6 +588,18 @@ function handleConstructionClick(r: number, c: number) {
                 // The turn is not over until the free building is placed.
                 return; 
             }
+            else if (result.effectType === 'OPALEYE_WATCH') {
+                // Open the 3-building picker
+                showMultiBuildingPicker(game.gameRegistry, 3, (selectedNames) => {
+                    game.initializeOpaleye(r, c, selectedNames);
+                    multiplayer.saveBoardOnly(); 
+                    renderAll();
+                    showToast("Opaleye's Watch prepared!", "success");
+                });
+                
+                // Don't render yet, wait for picker
+                return; 
+            }
         }
 
         renderAll();
@@ -794,6 +827,20 @@ function calculateMasterId(data: any): string | null {
 
 elements.finishGuildBtn.onclick = () => {
     finishGuildAction();
+};
+
+multiplayer.onOpaleyeBonus = (buildingName, sourceCoords) => {
+    console.log(`[Main] Opaleye Bonus Received: ${buildingName}`, sourceCoords);
+    
+    // Trigger the Modal
+    showOpaleyeBonusModal(buildingName, () => {
+        // This runs when they click "Select Square to Build"
+        pendingFreeBuildName = buildingName;
+        activeOpaleyeSource = sourceCoords;
+        
+        renderAll(); // Updates the top bar message
+        showToast(`Select an empty square for your ${buildingName}.`, "info");
+    });
 };
 
 function finishGuildAction() {
