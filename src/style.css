@@ -25,6 +25,22 @@ h1, h2, h3 {
     font-weight: 800; /* Extra bold headers */
 }
 
+.game-logo {
+    max-width: 100%;
+    width: 350px; /* Good size for a header */
+    height: auto;
+    margin: 0 auto 20px auto; /* Center it */
+    display: block;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); /* Subtle shadow for depth */
+}
+
+/* Mobile tweak for logo */
+@media (max-width: 600px) {
+    .game-logo {
+        width: 250px;
+    }
+}
+
 .game-container {
     display: flex;
     justify-content: center;
