@@ -1,4 +1,4 @@
-import { AlmshouseStrategy, FixedScoreStrategy, IsolatedStrategy } from '../core/ScoringStrategies';
+import { AlmshouseStrategy, FeastHallStrategy, IsolatedStrategy } from '../core/ScoringStrategies';
 import { type Building, Resource } from '../core/Types';
 
 export const ALMSHOUSE: Building = {
@@ -28,7 +28,7 @@ export const FEAST_HALL: Building = {
         [Resource.WOOD, Resource.WOOD, Resource.GLASS]
     ],
     description: 'Get 2 points, and an extra 1 if you have more Feast Halls than the player on your right.',
-    scorer: new FixedScoreStrategy(2)
+    scorer: new FeastHallStrategy()
 };
 
 export const TAVERN: Building = {

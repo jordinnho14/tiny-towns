@@ -209,6 +209,7 @@ export class MultiplayerGame {
             // --- NEIGHBOR WATCH (Opaleye Logic) ---
             if (data.status === "PLAYING" && data.players && data.playerOrder) {
                 this.checkNeighborsForOpaleye(data.players, data.playerOrder);
+                this.updateNeighborFeastHallStats(data.players, data.playerOrder);
             }
 
             // --- NEW: RESTORE LOCAL METADATA ---
@@ -495,5 +496,27 @@ export class MultiplayerGame {
         // --- FIX END ---
         
         return counts;
+    }
+
+    private updateNeighborFeastHallStats(players: any, playerOrder: string[]) {
+        const myIndex = playerOrder.indexOf(this.playerId);
+        if (myIndex === -1 || playerOrder.length < 2) {
+            this.localGame.setRightNeighborFeastHallCount(0);
+            return;
+        }
+
+        // Identify Right Neighbor (Clockwise: index + 1)
+        const rightIndex = (myIndex + 1) % playerOrder.length;
+        const rightPid = playerOrder[rightIndex];
+        const rightPlayer = players[rightPid];
+
+        if (rightPlayer && rightPlayer.board) {
+            const counts = this.countBuildings(rightPlayer.board);
+            // Matcher uses uppercase names, so we look for "FEAST HALL"
+            const fhCount = counts['FEAST HALL'] || 0; 
+            this.localGame.setRightNeighborFeastHallCount(fhCount);
+        } else {
+            this.localGame.setRightNeighborFeastHallCount(0);
+        }
     }
 }

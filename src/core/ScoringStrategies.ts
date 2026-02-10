@@ -13,6 +13,7 @@ export interface ScoringContext {
     registry: Building[];
     fedCottageCount: number;
     finishRank?: number;
+    rightNeighborFeastHallCount?: number;
 }
 
 // 2. The Interface
@@ -540,5 +541,18 @@ export class StarloomScoreStrategy implements ScoringStrategy {
         if (rank === 3) return 2;
         
         return 0;
+    }
+}
+
+export class FeastHallStrategy implements ScoringStrategy {
+    score(ctx: ScoringContext): number {
+        // "Feast Hall" on the board is usually uppercase "FEAST HALL" due to Matcher logic
+        const myCount = ctx.counts['FEAST HALL'] || 0; 
+        const neighborCount = ctx.rightNeighborFeastHallCount || 0;
+
+        // Base 2 points. +1 extra if my count > right neighbor count.
+        // The rule applies per building, so we return the value *of this specific building*.
+        // If I have more, every Feast Hall is worth 3. If not, every Feast Hall is worth 2.
+        return (myCount > neighborCount) ? 3 : 2;
     }
 }

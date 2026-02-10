@@ -8,7 +8,7 @@ export interface ScoreResult {
 
 export class ScoreManager {
     // We expect 'registry' to be passed in from Game.ts (the active deck for this game)
-    static calculateScore(grid: GridCell[][], metadata: any, registry: Building[], finishRank?: number): ScoreResult {
+    static calculateScore(grid: GridCell[][], metadata: any, registry: Building[], finishRank?: number, rightNeighborFeastHallCount: number = 0): ScoreResult {
         const rows = 4;
         const cols = 4;
         const breakdown: Record<string, number> = {};
@@ -114,7 +114,8 @@ export class ScoreManager {
                         allFedPositions: finalFedState,
                         registry: registry,
                         fedCottageCount: fedCottageCount,
-                        finishRank: finishRank
+                        finishRank: finishRank,
+                        rightNeighborFeastHallCount: rightNeighborFeastHallCount
                     };
                     const pts = def.scorer.score(ctx);
                     breakdown[cell] = (breakdown[cell] || 0) + pts;

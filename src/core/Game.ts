@@ -10,12 +10,17 @@ export class Game {
     public availableMatches: any[] = [];
     public activeMonument: any = null;
     public gameRegistry: any[] = [];
+    public rightNeighborFeastHallCount: number = 0;
 
     // Undo History
     public lastMove: { r: number, c: number } | null = null;
 
     constructor() {
         this.board = new Board();
+    }
+
+    public setRightNeighborFeastHallCount(count: number) {
+        this.rightNeighborFeastHallCount = count;
     }
 
     setMonument(monument: any, sharedDeck: any[]) {
@@ -179,7 +184,7 @@ export class Game {
     }
 
     getScore(finishRank?: number) {
-        return ScoreManager.calculateScore(this.board.getGrid(), this.board.metadata, this.gameRegistry, finishRank);
+        return ScoreManager.calculateScore(this.board.getGrid(), this.board.metadata, this.gameRegistry, finishRank, this.rightNeighborFeastHallCount);
     }
 
     private countBuildingsOnBoard(): number {
