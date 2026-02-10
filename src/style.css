@@ -1121,6 +1121,65 @@ h1, h2, h3 {
 
 /* Mobile Styles */
 @media (max-width: 768px) {
+    body {
+        overflow-x: hidden;
+        height: 100%;
+    }
+
+    .main-area h1 {
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+    }
+
+    /* Make the dashboard (Score/Resource) more compact */
+    .dashboard-panel {
+        padding: 10px 15px;
+        margin-bottom: 10px;
+        border-radius: 12px;
+    }
+
+    /* RESPONSIVE BOARD */
+    .board {
+        padding: 10px;
+        gap: 8px; /* Slightly tighter gap */
+        width: 95vw; /* Fill the screen width */
+        max-width: 380px;
+        aspect-ratio: 1 / 1;
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .cell {
+        width: 100%;
+        height: 100%; /* Becomes a square due to grid aspect-ratio */
+        max-width: none;
+        max-height: none;
+        border-width: 2px;
+    }
+
+    /* MATCH NOTIFICATION BADGE */
+    .match-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: #e53935;
+        color: white;
+        font-size: 12px;
+        font-weight: 900;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        display: none; /* Hidden by default */
+        justify-content: center;
+        align-items: center;
+        border: 2px solid white;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+
+    /* Pulse the button when you can build */
+    .can-build {
+        animation: pulseMatch 1.5s infinite;
+        background: #2e7d32 !important; /* Green for "Go" */
+    }
     /* 1. Stack the layout vertically */
     .game-container {
         flex-direction: column;
@@ -1131,28 +1190,31 @@ h1, h2, h3 {
     .fab-btn {
         display: flex;
     }
-    
-    /* 3. Adjust the Main Area */
-    .main-area {
-        width: 100%;
-        margin-right: 0;
-        padding-bottom: 80px; /* Space for the button */
-    }
 
     /* 4. Transform Sidebar into a Drawer */
     #sidebar {
         position: fixed;
         top: 0;
         right: 0;
-        width: 85%; /* Cover most of screen */
+        width: 85%;
         max-width: 320px;
+        
+        /* [UPDATED] Use dvh (Dynamic Viewport Height) if available */
         height: 100vh;
+        height: 100dvh; 
+        
         background: white;
         z-index: 1500;
         box-shadow: -5px 0 15px rgba(0,0,0,0.2);
-        transform: translateX(100%); /* Hidden off-screen right */
-        transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
-        overflow-y: auto;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+
+        /* [NEW] This is crucial: Make the drawer itself scrollable */
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto; 
+        -webkit-overflow-scrolling: touch; /* Smooth scroll for iOS */
+        padding-bottom: 40px; /* Extra padding so the last button isn't on the edge */
     }
 
    #opponents-sidebar {
@@ -1163,6 +1225,7 @@ h1, h2, h3 {
         width: 85%;
         max-width: 300px;
         height: 100vh;
+        height: 100dvh;
         background: white;
         z-index: 1500;
         box-shadow: 5px 0 15px rgba(0,0,0,0.2);
@@ -1170,17 +1233,14 @@ h1, h2, h3 {
         transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
         overflow-y: auto;
     }
-    
-    /* 6. Adjust Board Grid for Tiny Screens */
-    .board {
-        gap: 5px;
+
+    #build-menu {
+        flex-shrink: 0; /* Don't squash the buttons */
     }
-    .cell {
-        width: 13vw; /* Responsive cell size */
-        height: 13vw;
-        max-width: 50px;
-        max-height: 50px;
-        font-size: 1.5rem; /* Smaller emoji */
+
+    #deck-display {
+        max-height: none !important; /* Let it take as much space as it needs inside the scrolling sidebar */
+        overflow-y: visible !important;
     }
     
     /* 7. Modal Adjustments */

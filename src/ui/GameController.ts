@@ -3,10 +3,10 @@ import { Renderer } from "./Renderer";
 import { MultiplayerGame } from "../core/MultiplayerGame";
 import { AudioManager } from "../core/AudioManager";
 import { BUILDING_REGISTRY, MONUMENTS_LIST } from "../core/Buildings";
-import { 
-    showToast, togglePalette, showResourcePicker, showMonumentSelection, 
-    renderOpponents, renderLeaderboard, showBuildingPicker, 
-    showMultiBuildingPicker, showConfirmationModal, showOpaleyeBonusModal 
+import {
+    showToast, togglePalette, showResourcePicker, showMonumentSelection,
+    renderOpponents, renderLeaderboard, showBuildingPicker,
+    showMultiBuildingPicker, showConfirmationModal, showOpaleyeBonusModal
 } from "./UIHelpers";
 
 export class GameController {
@@ -95,7 +95,7 @@ export class GameController {
         this.elements.undoBtn.onclick = () => this.onUndo();
         this.elements.finishGuildBtn.onclick = () => this.finishGuildAction();
         this.elements.finishTownBtn.onclick = () => this.onFinishTown();
-        
+
         // System Buttons
         this.elements.restartBtn.onclick = () => location.reload();
         this.elements.mpRestartBtn.onclick = () => location.reload();
@@ -108,46 +108,46 @@ export class GameController {
         this.multiplayer.onOpaleyeBonus = (bName, coords) => this.onOpaleyeBonus(bName, coords);
 
         if (this.elements.sidebarToggle) {
-        this.elements.sidebarToggle.onclick = (e) => {
-            e.stopPropagation(); // Prevent triggering document click
-            this.elements.sidebar.classList.toggle('sidebar-open');
-            this.elements.opponentsSidebar.classList.remove('opponents-open'); // Ensure opponents sidebar is closed
-        };
+            this.elements.sidebarToggle.onclick = (e) => {
+                e.stopPropagation(); // Prevent triggering document click
+                this.elements.sidebar.classList.toggle('sidebar-open');
+                this.elements.opponentsSidebar.classList.remove('opponents-open'); // Ensure opponents sidebar is closed
+            };
 
-        this.elements.opponentsToggle.onclick = (e) => {
-            e.stopPropagation();
-            this.elements.opponentsSidebar.classList.toggle('opponents-open');
-            this.elements.sidebar.classList.remove('sidebar-open'); // Close other drawer
-        };
+            this.elements.opponentsToggle.onclick = (e) => {
+                e.stopPropagation();
+                this.elements.opponentsSidebar.classList.toggle('opponents-open');
+                this.elements.sidebar.classList.remove('sidebar-open'); // Close other drawer
+            };
 
-        // Global click to close both
+            // Global click to close both
+            document.addEventListener('click', (e) => {
+                const target = e.target as HTMLElement;
+
+                // Close if clicking main board area while drawers are open
+                if (this.elements.sidebar.classList.contains('sidebar-open') && !this.elements.sidebar.contains(target)) {
+                    this.elements.sidebar.classList.remove('sidebar-open');
+                }
+                if (this.elements.opponentsSidebar.classList.contains('opponents-open') && !this.elements.opponentsSidebar.contains(target)) {
+                    this.elements.opponentsSidebar.classList.remove('opponents-open');
+                }
+            });
+
+
+        }
+
+        // [ADDED] Close sidebar when clicking outside (on the main area)
         document.addEventListener('click', (e) => {
             const target = e.target as HTMLElement;
-            
-            // Close if clicking main board area while drawers are open
-            if (this.elements.sidebar.classList.contains('sidebar-open') && !this.elements.sidebar.contains(target)) {
+            const isSidebar = this.elements.sidebar.contains(target);
+            const isButton = this.elements.sidebarToggle.contains(target);
+            const isOpen = this.elements.sidebar.classList.contains('sidebar-open');
+
+            if (isOpen && !isSidebar && !isButton) {
                 this.elements.sidebar.classList.remove('sidebar-open');
-            }
-            if (this.elements.opponentsSidebar.classList.contains('opponents-open') && !this.elements.opponentsSidebar.contains(target)) {
-                this.elements.opponentsSidebar.classList.remove('opponents-open');
+                this.elements.sidebarToggle.textContent = '🏰';
             }
         });
-
-
-    }
-
-    // [ADDED] Close sidebar when clicking outside (on the main area)
-    document.addEventListener('click', (e) => {
-        const target = e.target as HTMLElement;
-        const isSidebar = this.elements.sidebar.contains(target);
-        const isButton = this.elements.sidebarToggle.contains(target);
-        const isOpen = this.elements.sidebar.classList.contains('sidebar-open');
-
-        if (isOpen && !isSidebar && !isButton) {
-            this.elements.sidebar.classList.remove('sidebar-open');
-            this.elements.sidebarToggle.textContent = '🏰';
-        }
-    });
     }
 
     // --- GAME LOGIC ---
@@ -157,7 +157,7 @@ export class GameController {
 
         if (!this.game.currentResource || (this.pendingState && this.pendingState.type === 'SELECT_RESOURCE')) {
             this.pendingState = { type: 'SELECT_RESOURCE', data: res };
-            this.game.currentResource = res as any; 
+            this.game.currentResource = res as any;
             this.renderAll();
         } else {
             console.log("Blocked: Resource already active");
@@ -226,7 +226,7 @@ export class GameController {
 
         this.game.placeResource(r, c);
         this.audio.play('click');
-        this.multiplayer.commitTurn(); 
+        this.multiplayer.commitTurn();
         this.renderAll();
         this.checkAndShowGameOver();
     }
@@ -248,7 +248,7 @@ export class GameController {
 
             const result = this.game.constructBuilding(this.activeConstruction, r, c);
             this.multiplayer.saveBoardOnly();
-            this.resetConstructionState(); 
+            this.resetConstructionState();
 
             if (result.type === 'TRIGGER_EFFECT') {
                 this.handleBuildingEffect(result.effectType!, r, c);
@@ -280,7 +280,7 @@ export class GameController {
             this.guildReplacementsLeft = 2;
             showToast("Select a building to replace (2 remaining).", "info");
             this.multiplayerStatusMessage = "Select a building to replace.";
-            this.multiplayer.saveBoardOnly(); 
+            this.multiplayer.saveBoardOnly();
             this.renderAll();
         }
         else if (type === 'GROVE_UNIVERSITY') {
@@ -293,7 +293,7 @@ export class GameController {
         else if (type === 'OPALEYE_WATCH') {
             showMultiBuildingPicker(this.game.gameRegistry, 3, (names) => {
                 this.game.initializeOpaleye(r, c, names);
-                this.multiplayer.saveBoardOnly(); 
+                this.multiplayer.saveBoardOnly();
                 this.renderAll();
                 showToast("Opaleye's Watch prepared!", "success");
             });
@@ -309,10 +309,10 @@ export class GameController {
             this.game.placeFreeBuilding(r, c, this.pendingFreeBuildName!);
             if (this.activeOpaleyeSource) {
                 this.game.removeOpaleyeItem(this.activeOpaleyeSource.r, this.activeOpaleyeSource.c, this.pendingFreeBuildName!);
-                this.activeOpaleyeSource = null; 
+                this.activeOpaleyeSource = null;
             }
             this.pendingFreeBuildName = null;
-            this.multiplayer.saveBoardOnly(); 
+            this.multiplayer.saveBoardOnly();
             this.audio.play('build');
             this.renderAll();
             this.checkAndShowGameOver();
@@ -324,7 +324,7 @@ export class GameController {
     }
 
     private handleGuildReplacement(r: number, c: number, cell: any) {
-        const isBuilding = cell !== 'NONE' && !['WOOD','WHEAT','BRICK','GLASS','STONE'].includes(cell);
+        const isBuilding = cell !== 'NONE' && !['WOOD', 'WHEAT', 'BRICK', 'GLASS', 'STONE'].includes(cell);
         if (!isBuilding) {
             showToast("Select a building!", "error", this.audio);
             return;
@@ -333,9 +333,9 @@ export class GameController {
             this.game.replaceBuilding(r, c, newBuilding.name);
             this.guildReplacementsLeft--;
             if (this.guildReplacementsLeft <= 0) {
-                 this.finishGuildAction();
+                this.finishGuildAction();
             } else {
-                 showToast(`Replaced! ${this.guildReplacementsLeft} left.`, "success");
+                showToast(`Replaced! ${this.guildReplacementsLeft} left.`, "success");
             }
             this.multiplayer.saveBoardOnly();
             this.audio.play('build');
@@ -344,18 +344,18 @@ export class GameController {
     }
 
     private handleWarehouseClick(r: number, c: number) {
-        if (this.hasActedThisTurn || !this.game.currentResource) return; 
-    
+        if (this.hasActedThisTurn || !this.game.currentResource) return;
+
         const contents = this.game.getWarehouseContents(r, c);
         const canStore = contents.length < 3;
         const currentRes = this.game.currentResource;
         const modal = document.getElementById('resource-picker-modal')!;
         const container = document.getElementById('picker-options')!;
-        
+
         document.getElementById('picker-title')!.textContent = "Warehouse Manager";
         document.getElementById('picker-message')!.textContent = `Current: ${currentRes}`;
         container.innerHTML = '';
-    
+
         // Store Option
         if (canStore) {
             const btn = document.createElement('button');
@@ -369,7 +369,7 @@ export class GameController {
             };
             container.appendChild(btn);
         }
-    
+
         // Swap Option
         if (contents.length > 0) {
             // ... (Swap UI generation similar to before)
@@ -385,7 +385,7 @@ export class GameController {
                     if (popped) {
                         this.game.currentResource = popped;
                         showToast(`Swapped for ${popped}`, "success");
-                        this.commitWarehouseAction(false); 
+                        this.commitWarehouseAction(false);
                         modal.classList.add('hidden');
                     }
                 };
@@ -397,10 +397,10 @@ export class GameController {
     }
 
     private async commitWarehouseAction(endTurn: boolean) {
-        if (endTurn) await this.multiplayer.commitTurn(); 
-        else await this.multiplayer.saveBoardOnly(); 
+        if (endTurn) await this.multiplayer.commitTurn();
+        else await this.multiplayer.saveBoardOnly();
         this.renderAll();
-        this.checkAndShowGameOver(); 
+        this.checkAndShowGameOver();
     }
 
     private async onConfirm() {
@@ -457,16 +457,16 @@ export class GameController {
     private finishGuildAction() {
         this.guildReplacementsLeft = 0;
         this.elements.finishGuildBtn.classList.add('hidden');
-        this.multiplayer.commitTurn(); 
+        this.multiplayer.commitTurn();
         this.renderAll();
         this.checkAndShowGameOver();
     }
 
-    private onOpaleyeBonus(buildingName: string, sourceCoords: {r: number, c: number}) {
+    private onOpaleyeBonus(buildingName: string, sourceCoords: { r: number, c: number }) {
         showOpaleyeBonusModal(buildingName, () => {
             this.pendingFreeBuildName = buildingName;
             this.activeOpaleyeSource = sourceCoords;
-            this.renderAll(); 
+            this.renderAll();
             showToast(`Place your ${buildingName}.`, "info");
         });
     }
@@ -494,7 +494,7 @@ export class GameController {
         if (this.guildReplacementsLeft > 0) {
             this.elements.finishGuildBtn.classList.remove('hidden');
             this.elements.finishGuildBtn.textContent = `Done (${this.guildReplacementsLeft})`;
-            togglePalette(false); 
+            togglePalette(false);
             this.multiplayerStatusMessage = `Select a building to replace.`;
         } else {
             this.elements.finishGuildBtn.classList.add('hidden');
@@ -505,7 +505,7 @@ export class GameController {
         if (this.pendingState && this.pendingState.type === 'SELECT_RESOURCE') {
             this.elements.confirmBtn.classList.remove('hidden');
             this.elements.undoBtn.classList.add('hidden');
-            togglePalette(true); 
+            togglePalette(true);
             msg = `Selected ${this.pendingState.data}. Confirm or change.`;
         } else {
             this.elements.confirmBtn.classList.add('hidden');
@@ -515,6 +515,24 @@ export class GameController {
         if (this.pendingFreeBuildName) {
             msg = `BONUS: Place your ${this.pendingFreeBuildName}!`;
             togglePalette(false);
+        }
+
+        // --- NEW: MATCH DETECTION FOR MOBILE ---
+        const totalMatches = this.game.availableMatches.length;
+
+        const badge = document.getElementById('match-badge');
+        const toggleBtn = this.elements.sidebarToggle;
+
+        if (totalMatches > 0) {
+            if (badge) {
+                badge.innerText = totalMatches.toString();
+                badge.style.display = 'flex';
+            }
+            // Add a class to make the 🏰 button pulse green
+            if (toggleBtn) toggleBtn.classList.add('can-build');
+        } else {
+            if (badge) badge.style.display = 'none';
+            if (toggleBtn) toggleBtn.classList.remove('can-build');
         }
 
         // Score
@@ -566,7 +584,7 @@ export class GameController {
         if (myData && myData.monumentOptions && !myData.monumentChosen) {
             const modal = document.getElementById('resource-picker-modal');
             if (modal && modal.classList.contains('hidden')) {
-                const options = myData.monumentOptions.map((name: string) => 
+                const options = myData.monumentOptions.map((name: string) =>
                     MONUMENTS_LIST.find(b => b.name === name)
                 ).filter((b: any) => !!b);
 
@@ -584,7 +602,7 @@ export class GameController {
         if (myData && myData.activeMonument && !this.game.activeMonument) {
             const myMonument = MONUMENTS_LIST.find(b => b.name === myData.activeMonument);
             const sharedDeckNames = data.deck || [];
-            const sharedDeck = sharedDeckNames.map((name: string) => 
+            const sharedDeck = sharedDeckNames.map((name: string) =>
                 BUILDING_REGISTRY.find(b => b.name === name)
             ).filter((b: any) => !!b);
 
@@ -599,7 +617,7 @@ export class GameController {
         const rawOrder = data.playerOrder || [];
         const safeOrder = Array.isArray(rawOrder) ? rawOrder : Object.values(rawOrder);
         let masterId = null;
-        
+
         if (safeOrder.length > 0) {
             const idx = (data.masterBuilderIndex || 0) % safeOrder.length;
             masterId = safeOrder[idx] as string;
@@ -607,10 +625,10 @@ export class GameController {
 
         if (data.players) {
             renderOpponents(
-                data.players, 
-                data.roundNumber || 1, 
-                this.multiplayer.playerId, 
-                this.elements.opponentsSidebar, 
+                data.players,
+                data.roundNumber || 1,
+                this.multiplayer.playerId,
+                this.elements.opponentsSidebar,
                 this.elements.opponentsList,
                 masterId,
                 safeOrder
@@ -623,7 +641,7 @@ export class GameController {
         const resourceActive = (data.currentResource !== undefined && data.currentResource !== null);
         const currentRound = data.roundNumber || 1;
         const myStatus = data.players ? data.players[this.multiplayer.playerId] : null;
-        
+
         if (myStatus) {
             this.hasActedThisTurn = (Number(myStatus.placedRound) === Number(currentRound));
         }
@@ -641,7 +659,7 @@ export class GameController {
                 this.multiplayerStatusMessage = "Waiting for other players...";
                 togglePalette(false);
             } else {
-                this.multiplayerStatusMessage = ""; 
+                this.multiplayerStatusMessage = "";
                 togglePalette(false);
             }
         }
