@@ -1083,3 +1083,96 @@ h1, h2, h3 {
 .interactive-building:hover::after {
     opacity: 1;
 }
+
+/* --- MOBILE RESPONSIVENESS --- */
+
+/* Floating Action Button (Hidden on Desktop) */
+.fab-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #2c3e50;
+    color: white;
+    font-size: 24px;
+    border: none;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    z-index: 2000; /* On top of everything */
+    cursor: pointer;
+    display: none; /* Hidden by default */
+    justify-content: center;
+    align-items: center;
+}
+
+/* Sidebar "Drawer" State */
+.sidebar-open {
+    transform: translateX(0) !important; /* Slide In */
+}
+
+/* Mobile Styles */
+@media (max-width: 768px) {
+    /* 1. Stack the layout vertically */
+    .game-container {
+        flex-direction: column;
+        padding: 10px;
+    }
+
+    /* 2. Show the Toggle Button */
+    .fab-btn {
+        display: flex;
+    }
+    
+    /* 3. Adjust the Main Area */
+    .main-area {
+        width: 100%;
+        margin-right: 0;
+        padding-bottom: 80px; /* Space for the button */
+    }
+
+    /* 4. Transform Sidebar into a Drawer */
+    #sidebar {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 85%; /* Cover most of screen */
+        max-width: 320px;
+        height: 100vh;
+        background: white;
+        z-index: 1500;
+        box-shadow: -5px 0 15px rgba(0,0,0,0.2);
+        transform: translateX(100%); /* Hidden off-screen right */
+        transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+        overflow-y: auto;
+    }
+
+    /* 5. Hide Opponents Sidebar on Mobile (Too cramped) */
+    /* Only show if we specifically toggle it, otherwise hide */
+    #opponents-sidebar {
+        display: none; 
+    }
+    
+    /* 6. Adjust Board Grid for Tiny Screens */
+    .board {
+        gap: 5px;
+    }
+    .cell {
+        width: 13vw; /* Responsive cell size */
+        height: 13vw;
+        max-width: 50px;
+        max-height: 50px;
+        font-size: 1.5rem; /* Smaller emoji */
+    }
+    
+    /* 7. Modal Adjustments */
+    .modal-content {
+        width: 95%;
+        padding: 15px;
+        margin: 10px;
+    }
+    
+    .game-logo {
+        width: 200px;
+    }
+}

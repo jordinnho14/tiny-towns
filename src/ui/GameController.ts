@@ -43,7 +43,9 @@ export class GameController {
         multiplayerResultsModal: document.getElementById('multiplayer-results-modal')!,
         leaderboardList: document.getElementById('leaderboard-list')!,
         mpRestartBtn: document.getElementById('mp-restart-btn')!,
-        muteBtn: document.getElementById('mute-btn') as HTMLButtonElement
+        muteBtn: document.getElementById('mute-btn') as HTMLButtonElement,
+        sidebarToggle: document.getElementById('sidebar-toggle-btn')!,
+        sidebar: document.getElementById('sidebar')!,
     };
 
     constructor(game: Game, renderer: Renderer, multiplayer: MultiplayerGame, audio: AudioManager) {
@@ -103,6 +105,29 @@ export class GameController {
 
         // Multiplayer Hooks
         this.multiplayer.onOpaleyeBonus = (bName, coords) => this.onOpaleyeBonus(bName, coords);
+
+        if (this.elements.sidebarToggle) {
+        this.elements.sidebarToggle.onclick = () => {
+            this.elements.sidebar.classList.toggle('sidebar-open');
+
+            // Optional: Change icon based on state
+            const isOpen = this.elements.sidebar.classList.contains('sidebar-open');
+            this.elements.sidebarToggle.textContent = isOpen ? '❌' : '🏰';
+        };
+    }
+
+    // [ADDED] Close sidebar when clicking outside (on the main area)
+    document.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement;
+        const isSidebar = this.elements.sidebar.contains(target);
+        const isButton = this.elements.sidebarToggle.contains(target);
+        const isOpen = this.elements.sidebar.classList.contains('sidebar-open');
+
+        if (isOpen && !isSidebar && !isButton) {
+            this.elements.sidebar.classList.remove('sidebar-open');
+            this.elements.sidebarToggle.textContent = '🏰';
+        }
+    });
     }
 
     // --- GAME LOGIC ---
