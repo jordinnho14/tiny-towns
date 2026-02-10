@@ -3,12 +3,13 @@ export class AudioManager {
     private muted: boolean = false;
 
     constructor() {
+        const baseUrl = import.meta.env.BASE_URL;
         // Preload sounds
-        this.load('place', 'public/sounds/place.mp3');
-        this.load('build', 'public/sounds/build.mp3');
-        this.load('error', 'public/sounds/error.mp3');
-        this.load('fanfare', 'public/sounds/fanfare.mp3');
-        this.load('click', 'public/sounds/click.mp3');
+        this.load('place', `${baseUrl}sounds/place.mp3`);
+        this.load('build', `${baseUrl}sounds/build.mp3`);
+        this.load('error', `${baseUrl}sounds/error.mp3`);
+        this.load('fanfare', `${baseUrl}sounds/fanfare.mp3`);
+        this.load('click', `${baseUrl}sounds/click.mp3`);
     }
 
     private load(name: string, path: string) {
