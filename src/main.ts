@@ -44,6 +44,10 @@ let activeGameId = "";
 let pendingFreeBuildName: string | null = null;
 let guildReplacementsLeft = 0;
 let activeOpaleyeSource: { r: number, c: number } | null = null;
+let pendingState: {
+    type: 'PLACE' | 'SELECT_RESOURCE';
+    data?: any;
+} | null = null;
 
 // DOM Elements
 const elements = {
@@ -69,7 +73,8 @@ const elements = {
     finalScore: document.getElementById('final-score')!,
     scoreList: document.getElementById('score-breakdown-list')!,
     restartBtn: document.getElementById('restart-btn')!,
-    undoBtn: document.getElementById('undo-btn')!,
+    undoBtn: document.getElementById('undo-btn') as HTMLButtonElement,
+    confirmBtn: document.getElementById('confirm-btn') as HTMLButtonElement,
     finishGuildBtn: document.getElementById('finish-guild-btn')!,
     finishTownBtn: document.getElementById('finish-town-btn')!
 };
@@ -229,8 +234,17 @@ multiplayer.onGameStart = () => {
 renderer.onResourceSelect = (res) => {
     if (activeConstruction) return;
 
-    if (!game.currentResource) {
-        multiplayer.setGlobalResource(res as any);
+    // Allow selection if nothing is selected OR if we are currently in the drafting phase
+    if (!game.currentResource || (pendingState && pendingState.type === 'SELECT_RESOURCE')) {
+        
+        // 1. Update/Set Pending State
+        pendingState = { type: 'SELECT_RESOURCE', data: res };
+        
+        // 2. Visually update local state
+        game.currentResource = res as any; 
+        
+        // 3. Render (this will keep palette active and show confirm button)
+        renderAll();
     } else {
         console.log("Blocked: Resource already active:", game.currentResource);
     }
@@ -343,6 +357,11 @@ async function handleResourceClick(r: number, c: number) {
         return;
     }
 
+    if (pendingState?.type === 'SELECT_RESOURCE') {
+        showToast("Please confirm your resource selection first!", "error");
+        return;
+    }
+
     if (!game.currentResource) {
         showToast("Waiting for Master Builder...", "info");
         return;
@@ -396,6 +415,25 @@ renderer.onCancelClick = () => {
 
 elements.undoBtn.onclick = () => {
     showToast("Undo not yet supported in Multiplayer!", "info");
+};
+
+elements.confirmBtn.onclick = async () => {
+    if (!pendingState) return;
+
+    try {
+        if (pendingState.type === 'SELECT_RESOURCE') {
+            const res = pendingState.data;
+            await multiplayer.setGlobalResource(res);
+            showToast(`Confirmed! Everyone must place ${res}.`, "success");
+        }
+
+        // Clear state
+        pendingState = null;
+        renderAll();
+        
+    } catch (e) {
+        showToast("Error confirming: " + e, "error");
+    }
 };
 
 elements.mpRestartBtn.onclick = () => {
@@ -774,6 +812,21 @@ function renderAll() {
     }
 
     let msg = multiplayerStatusMessage;
+    if (pendingState && pendingState.type === 'SELECT_RESOURCE') {
+        // Show Confirm, Hide Undo
+        elements.confirmBtn.classList.remove('hidden');
+        elements.undoBtn.classList.add('hidden'); // HIDDEN: Just click another resource to switch
+        elements.undoBtn.disabled = true;
+        
+        // IMPORTANT: Keep palette active so they can switch!
+        togglePalette(true); 
+
+        msg = `Selected ${pendingState.data}. Click Confirm or choose another.`;
+    } else {
+        // Normal State
+        elements.confirmBtn.classList.add('hidden');
+        elements.undoBtn.classList.add('hidden'); 
+    }
     if (pendingFreeBuildName) {
         msg = `🌟 BONUS: Click an empty square for your ${pendingFreeBuildName}!`;
         togglePalette(false); // Disable resources

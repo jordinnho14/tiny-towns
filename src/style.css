@@ -976,6 +976,20 @@ h1, h2, h3 {
     box-shadow: 0 0 0 #ff6f00;
 }
 
+/* ... existing styles ... */
+
+#confirm-btn {
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 0 #1b5e20; /* 3D Clicky effect */
+}
+
+#confirm-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 #1b5e20;
+}
+
+/* ... */
+
 @keyframes slideDown {
     from { opacity: 0; transform: translateY(-20px); }
     to { opacity: 1; transform: translateY(0); }
