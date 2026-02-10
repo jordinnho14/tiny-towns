@@ -4,16 +4,17 @@
 <head>
   <meta charset="UTF-8" />
   <title>Tiny Towns</title>
-  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+  <link rel="icon" href="/tiny-towns/logo/tiny-towns.png">
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
-  <script type="module" crossorigin src="/tiny-towns/assets/index-DMRsC2pu.js"></script>
-  <link rel="stylesheet" crossorigin href="/tiny-towns/assets/index-Cb3V-1WL.css">
+  <script type="module" crossorigin src="/tiny-towns/assets/index-DQQcMzh_.js"></script>
+  <link rel="stylesheet" crossorigin href="/tiny-towns/assets/index-DlGNGrhS.css">
 </head>
 
 <body>
   <div id="start-screen-modal" class="modal-overlay">
     <div class="modal-content" style="max-width: 600px; width: 90%;">
-      <h1 style="margin-top:0; color:#2e7d32;">Tiny Towns</h1>
+      
+      <img src="/tiny-towns/logo/tiny-towns.png" alt="Tiny Towns" class="game-logo">
 
       <div id="landing-ui">
         <input type="text" id="player-name-input" placeholder="Enter Your Name" class="setup-select"
@@ -71,9 +72,6 @@
   </div>
 
   <div class="game-container">
-    <button id="mute-btn" class="secondary-btn" style="position:fixed; bottom:20px; right:20px; width:auto;">
-        🔊
-    </button>
     <div id="opponents-sidebar" class="sidebar-panel hidden">
       <h3>Opponents</h3>
       <div id="opponents-list"></div>
@@ -178,6 +176,9 @@
     </div>
   </div>
   <div id="toast-container"></div>
+  <button id="mute-btn" class="secondary-btn" style="position:fixed; bottom:20px; right:20px; width:auto;">
+    🔊
+  </button>
 
 </body>
 
