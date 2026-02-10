@@ -145,6 +145,11 @@ multiplayer.onStateChange = (data) => {
             }
             // ============================================================
 
+            // C. Identify Master Builder
+            let masterName = "Unknown";
+            const rawOrder = data.playerOrder || [];
+            const safeOrder = Array.isArray(rawOrder) ? rawOrder : Object.values(rawOrder);
+
 
             if (data.players) {
                 renderOpponents(
@@ -153,14 +158,10 @@ multiplayer.onStateChange = (data) => {
                     multiplayer.playerId, 
                     elements.opponentsSidebar, 
                     elements.opponentsList,
-                    calculateMasterId(data)
+                    calculateMasterId(data),
+                    safeOrder
                 );
             }
-
-            // C. Identify Master Builder
-            let masterName = "Unknown";
-            const rawOrder = data.playerOrder || [];
-            const safeOrder = Array.isArray(rawOrder) ? rawOrder : Object.values(rawOrder);
 
             if (safeOrder.length > 0 && data.players) {
                 const idx = (data.masterBuilderIndex || 0) % safeOrder.length;

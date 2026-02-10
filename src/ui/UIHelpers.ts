@@ -114,83 +114,156 @@ export function renderOpponents(
     myPlayerId: string, 
     sidebarEl: HTMLElement, 
     listEl: HTMLElement,
-    masterBuilderId: string | null // <--- NEW ARGUMENT
+    masterBuilderId: string | null,
+    playerOrder: string[] = [] 
 ) {
     // 1. Reveal Sidebar
     sidebarEl.classList.remove('hidden');
     listEl.innerHTML = '';
 
-    // 2. Loop through all players
-    Object.keys(players).forEach(key => {
-        // Skip myself
-        if (key === myPlayerId) return;
+    // 2. Calculate Neighbors
+    let leftNeighborId: string | null = null;
+    let rightNeighborId: string | null = null;
 
-        const p = players[key];
-        const isDone = (p.placedRound === currentRound) || p.isGameOver;
-        const statusClass = isDone ? "done" : "thinking";
-        
-        // CHECK IF MASTER
-        const isMaster = (key === masterBuilderId);
-
-        // Create Card HTML
-        const card = document.createElement('div');
-        card.className = 'opponent-card';
-        if (isMaster) {
-            card.style.border = "2px solid #ff9800"; // Orange border for Master
-            card.style.background = "#fff3e0";
+    if (playerOrder.length > 1) {
+        const myIndex = playerOrder.indexOf(myPlayerId);
+        if (myIndex !== -1) {
+            const count = playerOrder.length;
+            leftNeighborId = playerOrder[(myIndex - 1 + count) % count];
+            rightNeighborId = playerOrder[(myIndex + 1) % count];
         }
+    }
 
-        // Header
-        const header = document.createElement('div');
-        header.className = 'opponent-name';
-        
-        // Add Hammer Icon if Master
-        const masterIcon = isMaster ? '<span style="font-size:1.2em; margin-right:5px;">🔨</span>' : '';
+    // 3. Sort Players into Groups
+    const neighbors: string[] = [];
+    const others: string[] = [];
 
-        header.innerHTML = `
-            ${masterIcon} ${p.name}
-            <span class="status-dot ${statusClass}" title="${isDone ? 'Waiting' : 'Thinking'}"></span>
-        `;
-        card.appendChild(header);
+    // Use playerOrder to keep consistent sort, or fallback to Object keys
+    const iterator = playerOrder.length > 0 ? playerOrder : Object.keys(players);
 
-        // Grid Container
-        const gridDiv = document.createElement('div');
-        gridDiv.className = 'mini-board';
+    iterator.forEach(pid => {
+        if (pid === myPlayerId) return; // Skip self
+        if (!players[pid]) return;      // Safety check
 
-        const rawBoard = p.board;
-        const grid = (rawBoard && rawBoard.grid) ? rawBoard.grid : rawBoard;
-
-        if (grid && Array.isArray(grid)) {
-            grid.forEach((row: string[]) => {
-                row.forEach((cell: string) => {
-                    const div = document.createElement('div');
-                    div.className = 'mini-cell';
-                    if (cell !== 'NONE') {
-                        if (['WOOD', 'WHEAT', 'BRICK', 'GLASS', 'STONE'].includes(cell)) {
-                            div.classList.add(cell);
-                        } else {
-                            const safeName = cell.replace(/ /g, '-').replace(/'/g, '').toUpperCase();
-                            div.classList.add(safeName);
-                            div.title = cell;
-                            // ... (rest of class logic)
-                            const standard = [
-                                'COTTAGE', 'FARM', 'GRANARY', 'GREENHOUSE', 'ORCHARD',
-                                'WELL', 'FOUNTAIN', 'MILLSTONE', 'SHED',
-                                'CHAPEL', 'ABBEY', 'CLOISTER', 'TEMPLE',
-                                'TAVERN', 'ALMSHOUSE', 'INN', 'FEAST-HALL',
-                                'THEATER', 'BAKERY', 'TAILOR', 'MARKET',
-                                'FACTORY', 'BANK', 'WAREHOUSE', 'TRADING-POST'
-                            ];
-                            if (!standard.includes(cell)) div.classList.add('MONUMENT');
-                        }
-                    }
-                    gridDiv.appendChild(div);
-                });
-            });
+        if (pid === leftNeighborId || pid === rightNeighborId) {
+            neighbors.push(pid);
+        } else {
+            others.push(pid);
         }
-        card.appendChild(gridDiv);
-        listEl.appendChild(card);
     });
+
+    // 4. Render "Neighbors" Section
+    if (neighbors.length > 0) {
+        const header = document.createElement('div');
+        header.className = 'opponent-section-title';
+        header.textContent = 'Your Neighbors';
+        listEl.appendChild(header);
+
+        neighbors.forEach(pid => {
+            const card = createOpponentCard(
+                pid, players[pid], currentRound, masterBuilderId, 
+                pid === leftNeighborId, pid === rightNeighborId
+            );
+            listEl.appendChild(card);
+        });
+    }
+
+    // 5. Render "Others" Section
+    if (others.length > 0) {
+        const header = document.createElement('div');
+        header.className = 'opponent-section-title';
+        header.textContent = 'Other Towns';
+        header.style.marginTop = '15px'; // Extra spacing
+        listEl.appendChild(header);
+
+        others.forEach(pid => {
+            // Not immediate neighbors, so pass false for arrows
+            const card = createOpponentCard(
+                pid, players[pid], currentRound, masterBuilderId, false, false
+            );
+            listEl.appendChild(card);
+        });
+    }
+}
+
+// Helper to create the DOM element for a single opponent
+function createOpponentCard(
+    playerId: string,
+    p: any, 
+    currentRound: number, 
+    masterBuilderId: string | null,
+    isLeft: boolean,
+    isRight: boolean
+) {
+    const isDone = (p.placedRound === currentRound) || p.isGameOver;
+    const statusClass = isDone ? "done" : "thinking";
+    const isMaster = (playerId === masterBuilderId);
+
+    // Card Container
+    const card = document.createElement('div');
+    card.className = 'opponent-card';
+    if (isMaster) {
+        card.style.border = "2px solid #ff9800"; 
+        card.style.background = "#fff3e0";
+    }
+
+    // Header Construction
+    const header = document.createElement('div');
+    header.className = 'opponent-name';
+    
+    const masterIcon = isMaster ? '<span title="Master Builder" style="font-size:1.2em; margin-right:4px;">🔨</span>' : '';
+    
+    // We keep the arrows because they are useful even inside the "Neighbors" group
+    // to distinguish who is specifically Left vs Right (important for Feast Hall).
+    let leftArrow = isLeft ? `<span title="Left Neighbor" style="font-size:1.2em; margin-right:6px;">⬅️</span>` : '';
+    let rightArrow = isRight ? `<span title="Right Neighbor" style="font-size:1.2em; margin-left:6px;">➡️</span>` : '';
+
+    header.innerHTML = `
+        <div style="display:flex; align-items:center;">
+            ${leftArrow} ${masterIcon} ${p.name} ${rightArrow}
+        </div>
+        <span class="status-dot ${statusClass}" title="${isDone ? 'Waiting' : 'Thinking'}"></span>
+    `;
+    card.appendChild(header);
+
+    // Grid Construction
+    const gridDiv = document.createElement('div');
+    gridDiv.className = 'mini-board';
+
+    const rawBoard = p.board;
+    const grid = (rawBoard && rawBoard.grid) ? rawBoard.grid : rawBoard;
+
+    if (grid && Array.isArray(grid)) {
+        grid.forEach((row: string[]) => {
+            row.forEach((cell: string) => {
+                const div = document.createElement('div');
+                div.className = 'mini-cell';
+                if (cell !== 'NONE') {
+                    if (['WOOD', 'WHEAT', 'BRICK', 'GLASS', 'STONE'].includes(cell)) {
+                        div.classList.add(cell);
+                    } else {
+                        const safeName = cell.replace(/ /g, '-').replace(/'/g, '').toUpperCase();
+                        div.classList.add(safeName);
+                        div.title = cell;
+                        
+                        const standard = [
+                            'COTTAGE', 'FARM', 'GRANARY', 'GREENHOUSE', 'ORCHARD',
+                            'WELL', 'FOUNTAIN', 'MILLSTONE', 'SHED',
+                            'CHAPEL', 'ABBEY', 'CLOISTER', 'TEMPLE',
+                            'TAVERN', 'ALMSHOUSE', 'INN', 'FEAST-HALL',
+                            'THEATER', 'BAKERY', 'TAILOR', 'MARKET',
+                            'FACTORY', 'BANK', 'WAREHOUSE', 'TRADING-POST'
+                        ];
+                        if (!standard.includes(cell)) div.classList.add('MONUMENT');
+                    }
+                }
+                gridDiv.appendChild(div);
+            });
+        });
+    }
+    card.appendChild(gridDiv);
+
+    return card;
 }
 
 // --- HOST DROPDOWNS ---

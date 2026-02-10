@@ -65,6 +65,25 @@ export class MultiplayerGame {
         const snapshot = await get(gameRef);
 
         if (!snapshot.exists()) throw new Error("Game not found");
+
+        const gameData = snapshot.val();
+
+        if (playerName === "Guest") {
+            const existingPlayers = gameData.players || {};
+            let counter = 1;
+            
+            while (true) {
+                const candidate = `Guest ${counter}`;
+                // Check if anyone already has this name
+                const isTaken = Object.values(existingPlayers).some((p: any) => p.name === candidate);
+                
+                if (!isTaken) {
+                    playerName = candidate;
+                    break; // Found our name!
+                }
+                counter++;
+            }
+        }
         
         this.gameId = gameId;
         this.isHost = false;

@@ -770,6 +770,20 @@ h1, h2, h3 {
     height: fit-content;
 }
 
+/* src/style.css - Add anywhere, e.g., near .sidebar-panel */
+
+.opponent-section-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #7f8c8d;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    padding-left: 4px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 4px;
+}
+
 .opponent-card {
     background: #f8f9fa;
     border: 1px solid #eee;
