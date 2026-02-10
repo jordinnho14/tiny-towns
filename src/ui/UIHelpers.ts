@@ -254,7 +254,7 @@ function createOpponentCard(
                             'THEATER', 'BAKERY', 'TAILOR', 'MARKET',
                             'FACTORY', 'BANK', 'WAREHOUSE', 'TRADING-POST'
                         ];
-                        if (!standard.includes(cell)) div.classList.add('MONUMENT');
+                        if (!standard.includes(safeName)) div.classList.add('MONUMENT');
                     }
                 }
                 gridDiv.appendChild(div);
