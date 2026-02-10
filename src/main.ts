@@ -12,6 +12,7 @@ import {
 import { Game } from './core/Game';
 import { Renderer } from './ui/Renderer';
 import { MultiplayerGame } from './core/MultiplayerGame';
+import { AudioManager } from './core/AudioManager';
 
 // NEW IMPORTS
 import { 
@@ -33,6 +34,7 @@ import {
 const game = new Game();
 const renderer = new Renderer();
 const multiplayer = new MultiplayerGame(game);
+const audio = new AudioManager();
 
 // UI State
 let activeConstruction: any | null = null;
@@ -76,7 +78,8 @@ const elements = {
     undoBtn: document.getElementById('undo-btn') as HTMLButtonElement,
     confirmBtn: document.getElementById('confirm-btn') as HTMLButtonElement,
     finishGuildBtn: document.getElementById('finish-guild-btn')!,
-    finishTownBtn: document.getElementById('finish-town-btn')!
+    finishTownBtn: document.getElementById('finish-town-btn')!,
+    muteBtn: document.getElementById('mute-btn') as HTMLButtonElement
 };
 
 // --- CONFIGURATION ---
@@ -257,7 +260,7 @@ renderer.onCellClick = (r, c) => {
     // 1. UNIFIED FREE BUILD LOGIC (Grove University & Opaleye)
     if (pendingFreeBuildName) {
         if (cell !== 'NONE') {
-            showToast("You must choose an EMPTY square!", "error");
+            showToast("You must choose an EMPTY square!", "error", audio);
             return;
         }
 
@@ -285,14 +288,15 @@ renderer.onCellClick = (r, c) => {
 
             // D. Save & Render
             // This saves the new metadata (item removed) to the server
-            multiplayer.saveBoardOnly(); 
+            multiplayer.saveBoardOnly();
+            audio.play('build'); 
             renderAll();
             checkAndShowGameOver();
             showToast("Building constructed!", "success");
 
         } catch (e) {
             console.error("Error placing building:", e);
-            showToast("Error placing building.", "error");
+            showToast("Error placing building.", "error", audio);
         }
         return; // STOP here. Do not process other clicks.
     }
@@ -303,7 +307,7 @@ renderer.onCellClick = (r, c) => {
         const isBuilding = cell !== 'NONE' && !['WOOD','WHEAT','BRICK','GLASS','STONE'].includes(cell);
         
         if (!isBuilding) {
-            showToast("You must select an existing building to replace!", "error");
+            showToast("You must select an existing building to replace!", "error", audio);
             return;
         }
 
@@ -325,7 +329,7 @@ renderer.onCellClick = (r, c) => {
                 multiplayer.saveBoardOnly();
                 renderAll();
             } catch(e) {
-                showToast("Error replacing building.", "error");
+                showToast("Error replacing building.", "error", audio);
             }
         });
         return; // Stop processing
@@ -345,7 +349,7 @@ renderer.onCellClick = (r, c) => {
             handleResourceClick(r, c);
         }
     } catch (e) {
-        showToast((e as Error).message, "error");
+        showToast((e as Error).message, "error", audio);
     }
 };
 
@@ -353,12 +357,12 @@ renderer.onSwapClick = handleSwapClick;
 
 async function handleResourceClick(r: number, c: number) {
     if (hasActedThisTurn) {
-        showToast("You have already placed a resource this turn!", "error");
+        showToast("You have already placed a resource this turn!", "error", audio);
         return;
     }
 
     if (pendingState?.type === 'SELECT_RESOURCE') {
-        showToast("Please confirm your resource selection first!", "error");
+        showToast("Please confirm your resource selection first!", "error", audio);
         return;
     }
 
@@ -379,14 +383,14 @@ async function handleResourceClick(r: number, c: number) {
         // (We check this first so you get the "Full" error instead of the "Permission" error)
         const meta = game.board.getMetadata(r, c);
         if (meta && meta.storedResource) {
-             showToast("This Cottage is already holding a resource!", "error");
+             showToast("This Cottage is already holding a resource!", "error", audio);
              return;
         }
 
         // 2. SECONDARY CHECK: Am I allowed to do this?
         // (Bondmaker only works if I am NOT the Master Builder)
         if (isMasterBuilder) {
-            showToast("The Bondmaker only works when OTHER players name a resource!", "error");
+            showToast("The Bondmaker only works when OTHER players name a resource!", "error", audio);
             return; 
         }
     }
@@ -394,11 +398,12 @@ async function handleResourceClick(r: number, c: number) {
 
     try {
         game.placeResource(r, c);
+        audio.play('click');
         await multiplayer.commitTurn();
         renderAll();
         checkAndShowGameOver();
     } catch (e) {
-        showToast((e as Error).message, "error");
+        showToast((e as Error).message, "error", audio);
     }
 }
 
@@ -432,13 +437,18 @@ elements.confirmBtn.onclick = async () => {
         renderAll();
         
     } catch (e) {
-        showToast("Error confirming: " + e, "error");
+        showToast("Error confirming: " + e, "error", audio);
     }
 };
 
 elements.mpRestartBtn.onclick = () => {
     location.reload();
 };
+
+elements.muteBtn.onclick = () => {
+        const isMuted = audio.toggleMute();
+        elements.muteBtn.textContent = isMuted ? '🔇' : '🔊';
+    };
 
 
 // --- 4. LOBBY & START BUTTONS ---
@@ -450,7 +460,7 @@ elements.createGameBtn.onclick = async () => {
         enterLobbyMode(gameId, true);
     } catch (err) {
         console.error("Firebase Error:", err);
-        showToast("Error creating game.", "error");
+        showToast("Error creating game.", "error", audio);
     }
 };
 
@@ -458,14 +468,14 @@ elements.joinGameBtn.onclick = async () => {
     const name = elements.playerNameInput.value || "Guest";
     const gameId = elements.gameIdInput.value.trim();
     if (!gameId) {
-        showToast("Please enter a code!", "error");
+        showToast("Please enter a code!", "error", audio);
         return;
     }
     try {
         await multiplayer.joinGame(gameId, name);
         enterLobbyMode(gameId, false);
     } catch (e) {
-        showToast("Could not join game: " + e, "error");
+        showToast("Could not join game: " + e, "error", audio);
     }
 };
 
@@ -556,7 +566,7 @@ function handleConstructionClick(r: number, c: number) {
 
     if (isPatternSpot || isGlobalTarget) {
         if (cellContent && (cellContent as string).toUpperCase().replace('_', ' ') === 'TRADING POST') {
-            showToast("Cannot build on Trading Post.", "error");
+            showToast("Cannot build on Trading Post.", "error", audio);
             return;
         }
 
@@ -643,6 +653,7 @@ function handleConstructionClick(r: number, c: number) {
             }
         }
 
+        audio.play('build');
         renderAll();
         checkAndShowGameOver();
     }
@@ -758,7 +769,7 @@ async function commitWarehouseAction(endTurn: boolean) {
         renderAll();
         checkAndShowGameOver(); 
     } catch (e) {
-        showToast("Error saving warehouse: " + e, "error");
+        showToast("Error saving warehouse: " + e, "error", audio);
     }
 }
 
@@ -861,6 +872,7 @@ function renderAll() {
 
 function checkAndShowGameOver() {
     if (!hasDeclaredGameOver && game.checkGameOver() && !activeConstruction) {
+        audio.play('fanfare');
         const result = game.getScore();
         elements.finalScore.textContent = result.total.toString();
         elements.scoreList.innerHTML = '';
@@ -910,6 +922,7 @@ elements.finishTownBtn.onclick = () => {
         () => {
             // This code only runs if they click "Yes, Finish"
             multiplayer.declareGameOver().then(() => {
+                audio.play('fanfare');
                 hasDeclaredGameOver = true;
                 renderAll();
                 showToast("Town Finished!", "success");

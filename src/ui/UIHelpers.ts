@@ -1,9 +1,14 @@
+import type { AudioManager } from "../core/AudioManager";
 import type { Building, ResourceType } from "../core/Types";
 
 // --- TOASTS ---
-export function showToast(message: string, type: 'info' | 'error' | 'success' = 'info') {
+export function showToast(message: string, type: 'info' | 'error' | 'success' = 'info', audio?: AudioManager) {
     const container = document.getElementById('toast-container');
     if (!container) return;
+
+    if (type === 'error' && audio) {
+        audio.play('error');
+    }
 
     const div = document.createElement('div');
     div.className = `toast ${type}`;
