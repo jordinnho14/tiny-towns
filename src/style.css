@@ -1090,7 +1090,7 @@ h1, h2, h3 {
 .fab-btn {
     position: fixed;
     bottom: 20px;
-    right: 20px;
+    right: 20px; /* Default right */
     width: 60px;
     height: 60px;
     border-radius: 50%;
@@ -1099,17 +1099,25 @@ h1, h2, h3 {
     font-size: 24px;
     border: none;
     box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    z-index: 2000; /* On top of everything */
+    z-index: 2000;
     cursor: pointer;
-    display: none; /* Hidden by default */
+    display: none; 
     justify-content: center;
     align-items: center;
+}
+
+/* Position the Opponents button on the left */
+.fab-btn.left-fab {
+    left: 20px;
+    right: auto;
+    background: #546e7a; /* Different color to distinguish */
 }
 
 /* Sidebar "Drawer" State */
 .sidebar-open {
     transform: translateX(0) !important; /* Slide In */
 }
+.opponents-open { transform: translateX(0) !important; }
 
 /* Mobile Styles */
 @media (max-width: 768px) {
@@ -1147,10 +1155,20 @@ h1, h2, h3 {
         overflow-y: auto;
     }
 
-    /* 5. Hide Opponents Sidebar on Mobile (Too cramped) */
-    /* Only show if we specifically toggle it, otherwise hide */
-    #opponents-sidebar {
-        display: none; 
+   #opponents-sidebar {
+        display: block !important; /* Overriding our previous 'none' */
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 85%;
+        max-width: 300px;
+        height: 100vh;
+        background: white;
+        z-index: 1500;
+        box-shadow: 5px 0 15px rgba(0,0,0,0.2);
+        transform: translateX(-100%); /* Hidden off-screen LEFT */
+        transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+        overflow-y: auto;
     }
     
     /* 6. Adjust Board Grid for Tiny Screens */

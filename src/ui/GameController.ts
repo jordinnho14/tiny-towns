@@ -46,6 +46,7 @@ export class GameController {
         muteBtn: document.getElementById('mute-btn') as HTMLButtonElement,
         sidebarToggle: document.getElementById('sidebar-toggle-btn')!,
         sidebar: document.getElementById('sidebar')!,
+        opponentsToggle: document.getElementById('opponents-toggle-btn')!,
     };
 
     constructor(game: Game, renderer: Renderer, multiplayer: MultiplayerGame, audio: AudioManager) {
@@ -107,13 +108,32 @@ export class GameController {
         this.multiplayer.onOpaleyeBonus = (bName, coords) => this.onOpaleyeBonus(bName, coords);
 
         if (this.elements.sidebarToggle) {
-        this.elements.sidebarToggle.onclick = () => {
+        this.elements.sidebarToggle.onclick = (e) => {
+            e.stopPropagation(); // Prevent triggering document click
             this.elements.sidebar.classList.toggle('sidebar-open');
-
-            // Optional: Change icon based on state
-            const isOpen = this.elements.sidebar.classList.contains('sidebar-open');
-            this.elements.sidebarToggle.textContent = isOpen ? '❌' : '🏰';
+            this.elements.opponentsSidebar.classList.remove('opponents-open'); // Ensure opponents sidebar is closed
         };
+
+        this.elements.opponentsToggle.onclick = (e) => {
+            e.stopPropagation();
+            this.elements.opponentsSidebar.classList.toggle('opponents-open');
+            this.elements.sidebar.classList.remove('sidebar-open'); // Close other drawer
+        };
+
+        // Global click to close both
+        document.addEventListener('click', (e) => {
+            const target = e.target as HTMLElement;
+            
+            // Close if clicking main board area while drawers are open
+            if (this.elements.sidebar.classList.contains('sidebar-open') && !this.elements.sidebar.contains(target)) {
+                this.elements.sidebar.classList.remove('sidebar-open');
+            }
+            if (this.elements.opponentsSidebar.classList.contains('opponents-open') && !this.elements.opponentsSidebar.contains(target)) {
+                this.elements.opponentsSidebar.classList.remove('opponents-open');
+            }
+        });
+
+
     }
 
     // [ADDED] Close sidebar when clicking outside (on the main area)
