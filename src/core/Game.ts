@@ -178,8 +178,8 @@ export class Game {
         return !hasEmpty && !canBuild;
     }
 
-    getScore() {
-        return ScoreManager.calculateScore(this.board.getGrid(), this.board.metadata, this.gameRegistry);
+    getScore(finishRank?: number) {
+        return ScoreManager.calculateScore(this.board.getGrid(), this.board.metadata, this.gameRegistry, finishRank);
     }
 
     private countBuildingsOnBoard(): number {

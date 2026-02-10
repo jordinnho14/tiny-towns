@@ -1,6 +1,6 @@
 import { db } from "../firebase-config";
 // Added 'child' to the imports
-import { ref, set, onValue, push, get, update, onDisconnect, child } from "firebase/database";
+import { ref, set, onValue, push, get, update, onDisconnect, child, runTransaction } from "firebase/database";
 import { Game } from "./Game";
 import { type ResourceType } from "./Types";
 // Added MONUMENTS_LIST to imports
@@ -15,6 +15,7 @@ export class MultiplayerGame {
     public myName: string = "Unknown";
     public currentRound: number = 1; 
     private lastNeighborCounts: Record<string, Record<string, number>> = {};
+    public myFinishRank: number | null = null;
 
     public onOpaleyeBonus: ((buildingName: string, source: {r: number, c: number}) => void) | null = null;
     public onStateChange: ((state: any) => void) | null = null;
@@ -215,6 +216,10 @@ export class MultiplayerGame {
             if (data.players && data.players[this.playerId]) {
                 const myData = data.players[this.playerId];
                 
+                if (myData.finishRank) {
+                    this.myFinishRank = myData.finishRank;
+                }
+                
                 // If the server has metadata, load it into our local board
                 if (myData.board && myData.board.metadata) {
                     const newMeta = new Map<string, any>();
@@ -274,17 +279,34 @@ export class MultiplayerGame {
     async declareGameOver() {
         if (!this.gameId) return;
         
+        // 1. Transaction to claim a rank
+        const finishedCountRef = ref(db, `games/${this.gameId}/finishedCount`);
+        
+        // This function increments the counter safely on the server
+        const result = await runTransaction(finishedCountRef, (currentCount) => {
+            return (currentCount || 0) + 1;
+        });
+
+        const rank = result.snapshot.val();
+        this.myFinishRank = rank;
+
+        // 2. Save my state with the new rank
         const updates: any = {};
         const playerPath = `games/${this.gameId}/players/${this.playerId}`;
         
         updates[`${playerPath}/isGameOver`] = true;
         updates[`${playerPath}/placedRound`] = this.currentRound; 
+        updates[`${playerPath}/finishRank`] = rank; // Save rank to DB
+
+        // Calculate final score WITH the rank
+        const finalScore = this.localGame.getScore(rank).total;
+        updates[`${playerPath}/score`] = finalScore;
 
         await update(ref(db), updates);
         
         if (this.isHost) {
             setTimeout(() => {
-                // Host will process game over logic in checkTurnComplete
+                // Host will process game over logic
             }, 10);
         }
     }

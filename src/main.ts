@@ -25,7 +25,8 @@ import {
     showMonumentSelection,
     showBuildingPicker,
     showMultiBuildingPicker,
-    showOpaleyeBonusModal
+    showOpaleyeBonusModal,
+    showConfirmationModal
 } from './ui/UIHelpers';
 
 // --- 1. INITIALIZATION ---
@@ -69,7 +70,8 @@ const elements = {
     scoreList: document.getElementById('score-breakdown-list')!,
     restartBtn: document.getElementById('restart-btn')!,
     undoBtn: document.getElementById('undo-btn')!,
-    finishGuildBtn: document.getElementById('finish-guild-btn')!
+    finishGuildBtn: document.getElementById('finish-guild-btn')!,
+    finishTownBtn: document.getElementById('finish-town-btn')!
 };
 
 // --- CONFIGURATION ---
@@ -777,6 +779,24 @@ function renderAll() {
         togglePalette(false); // Disable resources
     }
 
+    const myRank = multiplayer.myFinishRank || undefined;
+    const score = game.getScore(myRank);
+    
+    const positive = score.total + score.penaltyCount;
+    const rankText = myRank ? ` (Rank: ${myRank})` : "";
+    
+    // Update the Score Header
+    document.getElementById('score-display')!.innerHTML = 
+        `Score: ${positive} <span style="font-size:12px; color:#999">(-${score.penaltyCount} empty)</span>${rankText}`;
+
+    // Toggle Button Visibility
+    // If I have already finished (declared game over), hide the button
+    if (hasDeclaredGameOver) {
+        elements.finishTownBtn.classList.add('hidden');
+    } else {
+        elements.finishTownBtn.classList.remove('hidden');
+    }
+
     renderer.render(
         game,
         activeConstruction,
@@ -828,6 +848,37 @@ function calculateMasterId(data: any): string | null {
 
 elements.finishGuildBtn.onclick = () => {
     finishGuildAction();
+};
+
+elements.finishTownBtn.onclick = () => {
+    showConfirmationModal(
+        "Finish Town?", 
+        "Are you sure you want to finish your town? You won't be able to place any more buildings.", 
+        () => {
+            // This code only runs if they click "Yes, Finish"
+            multiplayer.declareGameOver().then(() => {
+                hasDeclaredGameOver = true;
+                renderAll();
+                showToast("Town Finished!", "success");
+                
+                // Show Game Over Modal immediately
+                const result = game.getScore(multiplayer.myFinishRank || undefined);
+                
+                elements.finalScore.textContent = result.total.toString();
+                elements.scoreList.innerHTML = '';
+                
+                Object.entries(result.breakdown).forEach(([name, score]) => {
+                    if (score !== 0) addScoreListItem(name, score);
+                });
+                
+                if (result.penaltyCount > 0) {
+                    addScoreListItem('Empty Spaces', -result.penaltyCount, true);
+                }
+
+                document.getElementById('game-over-modal')!.classList.remove('hidden');
+            });
+        }
+    );
 };
 
 multiplayer.onOpaleyeBonus = (buildingName, sourceCoords) => {

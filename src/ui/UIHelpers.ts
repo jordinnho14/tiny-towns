@@ -719,3 +719,35 @@ export function showOpaleyeBonusModal(
     // 5. Show
     modal.classList.remove('hidden');
 }
+
+export function showConfirmationModal(
+    title: string, 
+    message: string, 
+    onConfirm: () => void
+) {
+    const modal = document.getElementById('confirmation-modal');
+    const titleEl = document.getElementById('confirm-title');
+    const msgEl = document.getElementById('confirm-message');
+    const cancelBtn = document.getElementById('confirm-cancel-btn');
+    const okBtn = document.getElementById('confirm-ok-btn');
+
+    if (!modal || !titleEl || !msgEl || !cancelBtn || !okBtn) return;
+
+    // Set Content
+    titleEl.textContent = title;
+    msgEl.textContent = message;
+
+    // Set Button Actions
+    // (Assigning .onclick overwrites previous listeners, which is perfect here)
+    cancelBtn.onclick = () => {
+        modal.classList.add('hidden');
+    };
+
+    okBtn.onclick = () => {
+        modal.classList.add('hidden');
+        onConfirm();
+    };
+
+    // Show
+    modal.classList.remove('hidden');
+}

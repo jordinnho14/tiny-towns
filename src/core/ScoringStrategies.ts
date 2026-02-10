@@ -12,6 +12,7 @@ export interface ScoringContext {
     metadata: Map<string, any>; // Additional metadata if needed
     registry: Building[];
     fedCottageCount: number;
+    finishRank?: number;
 }
 
 // 2. The Interface
@@ -523,5 +524,21 @@ export class RestrictedNeighborStrategy implements ScoringStrategy {
 
         // If we survived all checks, return the score
         return this.scoreAmount;
+    }
+}
+
+export class StarloomScoreStrategy implements ScoringStrategy {
+    score(ctx: ScoringContext): number {
+        // If rank is not set (game not finished), it scores 0
+        if (!ctx.finishRank) return 0;
+
+        const rank = ctx.finishRank;
+        
+        // 1st -> 6, 2nd -> 3, 3rd -> 2, 4th+ -> 0
+        if (rank === 1) return 6;
+        if (rank === 2) return 3;
+        if (rank === 3) return 2;
+        
+        return 0;
     }
 }

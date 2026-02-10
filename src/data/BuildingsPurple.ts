@@ -1,5 +1,5 @@
 import { ArchitectsGuildStrategy, FortIronweedStrategy, GroveUniversityStrategy, OpaleyeWatchStrategy, StatueBondmakerStrategy } from '../core/EffectStrategies';
-import { FixedScoreStrategy, GlobalUniqueStrategy, LargestGroupStrategy, MausoleumStrategy, MissingTypeStrategy, SavedScoreStrategy, UniqueNeighborStrategy } from '../core/ScoringStrategies';
+import { FixedScoreStrategy, GlobalUniqueStrategy, LargestGroupStrategy, MausoleumStrategy, MissingTypeStrategy, SavedScoreStrategy, StarloomScoreStrategy, UniqueNeighborStrategy } from '../core/ScoringStrategies';
 import { type Building, BuildingType, Resource } from '../core/Types';
 
 export const ARCHIVE: Building = {
@@ -186,8 +186,8 @@ export const STARLOOM: Building = {
         [Resource.WOOD, Resource.WHEAT]
     ],
     isMonument: true,
-    description: 'Gain points based on how early you complete your town.'
-    // IMPLEMENT EFFECT
+    description: 'Gain points based on how early you complete your town.',
+    scorer: new StarloomScoreStrategy()
 };
 
 
