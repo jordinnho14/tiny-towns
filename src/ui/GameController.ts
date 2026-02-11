@@ -56,6 +56,9 @@ export class GameController {
         this.audio = audio;
 
         this.bindEvents();
+        this.multiplayer.onLog = (message: string) => {            
+            showToast(message, "info");
+        };
     }
 
     public handleGameUpdate(data: any) {
@@ -652,6 +655,10 @@ export class GameController {
         if (!resourceActive) {
             if (isMyTurn) {
                 // [NEW] It is YOUR turn: Add the Gold Glow
+                if (!this.elements.scoreDisplay.classList.contains('my-turn-flag')) {
+                    if (navigator.vibrate) navigator.vibrate(200);
+                    this.elements.scoreDisplay.classList.add('my-turn-flag'); // prevent loop
+                }
                 if (paletteEl) paletteEl.classList.add('master-active');
 
                 this.multiplayerStatusMessage = "YOU are the Master Builder! Choose a resource.";

@@ -20,6 +20,11 @@ export class MultiplayerGame {
     public onOpaleyeBonus: ((buildingName: string, source: {r: number, c: number}) => void) | null = null;
     public onStateChange: ((state: any) => void) | null = null;
     public onGameStart: (() => void) | null = null;
+    public onLog: ((message: string) => void) | null = null;
+    
+    // [NEW] Memory to track what everyone had last time we checked
+    private lastKnownBuildingCounts: Record<string, Record<string, number>> = {};
+    private isFirstLoad: boolean = true;
 
     constructor(localGame: Game) {
         this.localGame = localGame;
@@ -205,6 +210,10 @@ export class MultiplayerGame {
 
             // 4. Sync Round Number
             this.currentRound = data.roundNumber || 1;
+
+            if (data.players) {
+                this.detectOpponentActivity(data.players);
+            }
 
             // --- NEIGHBOR WATCH (Opaleye Logic) ---
             if (data.status === "PLAYING" && data.players && data.playerOrder) {
@@ -414,6 +423,35 @@ export class MultiplayerGame {
         if(!deckNames) return;
         this.localGame.gameRegistry = BUILDING_REGISTRY.filter(b => deckNames.includes(b.name));
         this.localGame.scanForMatches(); 
+    }
+
+    private detectOpponentActivity(players: any) {
+        Object.entries(players).forEach(([pid, player]: [string, any]) => {
+            // Skip myself (I know what I did)
+            if (pid === this.playerId) return; 
+
+            // Count their current buildings
+            const currentCounts = this.countBuildings(player.board);
+            const prevCounts = this.lastKnownBuildingCounts[pid] || {};
+
+            // If this is NOT the first load, check for differences
+            if (!this.isFirstLoad) {
+                Object.entries(currentCounts).forEach(([bName, count]) => {
+                    const prev = prevCounts[bName] || 0;
+                    if (count > prev) {
+                        // Found a new building!
+                        if (this.onLog) {
+                            this.onLog(`${player.name} built a ${bName}!`);
+                        }
+                    }
+                });
+            }
+
+            // Update our memory for next time
+            this.lastKnownBuildingCounts[pid] = currentCounts;
+        });
+
+        this.isFirstLoad = false;
     }
 
     private serializeBoard() {
