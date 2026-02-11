@@ -1801,17 +1801,32 @@ h3 {
 
     /* 6. FINISH BUTTON */
     #finish-town-btn {
-        width: auto !important;
-        display: inline-block;
-        font-size: 10px;
-        padding: 4px 12px;
-        margin: 0 0 5px 0;
+        width: 100% !important; /* Fill the width of the panel */
+        max-width: 320px;       /* Cap width for tablets */
+        display: block;
+        
+        font-size: 14px;        /* Bigger, readable text */
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        
+        padding: 12px 0;        /* Taller touch target (easier for thumbs) */
+        margin: 5px 0 10px 0;   /* Breathing room */
+        
+        /* Outline Style (Safety) */
         background: white;
-        border: 1px solid #ef5350;
+        border: 2px solid #ef5350; /* Thicker border for visibility */
         color: #ef5350;
-        border-radius: 15px;
-        font-weight: 700;
+        
+        border-radius: 12px;    /* Smooth corners to match the dashboard */
         align-self: center;
+        transition: transform 0.1s;
+    }
+
+    /* Add a press effect so it feels responsive */
+    #finish-town-btn:active {
+        background-color: #ffebee;
+        transform: scale(0.98);
     }
 
     /* 7. BOARD SIZING */
