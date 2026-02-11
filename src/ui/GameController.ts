@@ -642,19 +642,31 @@ export class GameController {
         const currentRound = data.roundNumber || 1;
         const myStatus = data.players ? data.players[this.multiplayer.playerId] : null;
 
+        // [NEW] Get the palette element to toggle the glow class
+        const paletteEl = document.getElementById('resource-palette');
+
         if (myStatus) {
             this.hasActedThisTurn = (Number(myStatus.placedRound) === Number(currentRound));
         }
 
         if (!resourceActive) {
             if (isMyTurn) {
+                // [NEW] It is YOUR turn: Add the Gold Glow
+                if (paletteEl) paletteEl.classList.add('master-active');
+
                 this.multiplayerStatusMessage = "YOU are the Master Builder! Choose a resource.";
                 togglePalette(true);
             } else {
+                // [NEW] Not your turn: Remove glow
+                if (paletteEl) paletteEl.classList.remove('master-active');
+
                 this.multiplayerStatusMessage = `Waiting for Master Builder...`;
                 togglePalette(false);
             }
         } else {
+            // [NEW] Resource is already active: Remove glow
+            if (paletteEl) paletteEl.classList.remove('master-active');
+
             if (this.hasActedThisTurn) {
                 this.multiplayerStatusMessage = "Waiting for other players...";
                 togglePalette(false);
