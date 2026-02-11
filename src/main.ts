@@ -33,6 +33,9 @@ multiplayer.onGameStart = () => {
     // Hide start modal and prep UI
     const modal = document.getElementById('start-screen-modal');
     if (modal) modal.classList.add('hidden');
+
+    const gameContainer = document.querySelector('.game-container');
+    if (gameContainer) gameContainer.classList.remove('hidden');
     
     renderer.renderDeck(game.gameRegistry);
     gameController.renderAll();

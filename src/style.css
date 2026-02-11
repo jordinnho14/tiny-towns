@@ -2,36 +2,45 @@
    1. GLOBAL & LAYOUT
    ========================================= */
 body {
-    font-family: 'Nunito', 'Segoe UI', sans-serif; /* Friendly rounded font */
-    background-color: #f4f1ea; /* Warmer Parchment background */
-    color: #4a4a4a; /* Softer black */
+    font-family: 'Nunito', 'Segoe UI', sans-serif;
+    /* Friendly rounded font */
+    background-color: #f4f1ea;
+    /* Warmer Parchment background */
+    color: #4a4a4a;
+    /* Softer black */
     margin: 0;
     padding: 0;
     display: flex;
     justify-content: center;
-    
+
     /* Anchor to top so the board doesn't jump when sidebar grows */
-    align-items: flex-start; 
-    padding-top: 40px;      
-    padding-bottom: 40px;   
-    
+    align-items: flex-start;
+    padding-top: 40px;
+    padding-bottom: 40px;
+
     min-height: 100vh;
-    box-sizing: border-box; 
+    box-sizing: border-box;
 }
 
-h1, h2, h3 { 
-    margin-bottom: 20px; 
-    color: #2c3e50; 
-    font-weight: 800; /* Extra bold headers */
+h1,
+h2,
+h3 {
+    margin-bottom: 20px;
+    color: #2c3e50;
+    font-weight: 800;
+    /* Extra bold headers */
 }
 
 .game-logo {
     max-width: 100%;
-    width: 350px; /* Good size for a header */
+    width: 350px;
+    /* Good size for a header */
     height: auto;
-    margin: 0 auto 20px auto; /* Center it */
+    margin: 0 auto 20px auto;
+    /* Center it */
     display: block;
-    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); /* Subtle shadow for depth */
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+    /* Subtle shadow for depth */
 }
 
 /* Mobile tweak for logo */
@@ -45,18 +54,20 @@ h1, h2, h3 {
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    gap: 20px; /* Reduced gap slightly to fit 3 columns */
+    gap: 20px;
+    /* Reduced gap slightly to fit 3 columns */
     width: 100%;
-    max-width: 1400px; /* Increased width for 3 columns */
+    max-width: 1400px;
+    /* Increased width for 3 columns */
     padding: 20px;
-    flex-wrap: wrap; 
+    flex-wrap: wrap;
 }
 
 .main-area {
     display: flex;
     flex-direction: column;
-    align-items: center; 
-    flex: 1; 
+    align-items: center;
+    flex: 1;
     min-width: 320px;
 }
 
@@ -94,24 +105,51 @@ h1, h2, h3 {
     background-color: white;
     font-size: 14px;
     font-family: 'Nunito', sans-serif;
+    box-sizing: border-box;
     color: #333;
     cursor: pointer;
     width: 100%;
     transition: all 0.2s;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
 }
 
-.setup-select:hover { border-color: #bbb; }
-.setup-select:focus { border-color: #2c3e50; outline: none; }
+.setup-select:hover {
+    border-color: #bbb;
+}
+
+.setup-select:focus {
+    border-color: #2c3e50;
+    outline: none;
+}
 
 /* Dropdown Border Colors */
-.setup-select.RED { border-left: 5px solid #e53935; }
-.setup-select.GRAY { border-left: 5px solid #546e7a; }
-.setup-select.YELLOW { border-left: 5px solid #fdd835; }
-.setup-select.GREEN { border-left: 5px solid #43a047; }
-.setup-select.ORANGE { border-left: 5px solid #fb8c00; }
-.setup-select.BLACK { border-left: 5px solid #424242; }
-.setup-select.PURPLE { border-left: 5px solid #7b1fa2; }
+.setup-select.RED {
+    border-left: 5px solid #e53935;
+}
+
+.setup-select.GRAY {
+    border-left: 5px solid #546e7a;
+}
+
+.setup-select.YELLOW {
+    border-left: 5px solid #fdd835;
+}
+
+.setup-select.GREEN {
+    border-left: 5px solid #43a047;
+}
+
+.setup-select.ORANGE {
+    border-left: 5px solid #fb8c00;
+}
+
+.setup-select.BLACK {
+    border-left: 5px solid #424242;
+}
+
+.setup-select.PURPLE {
+    border-left: 5px solid #7b1fa2;
+}
 
 
 /* =========================================
@@ -119,12 +157,13 @@ h1, h2, h3 {
    ========================================= */
 
 /* The Unified Container for Score & Resources */
-.dashboard-panel, .controls {
+.dashboard-panel,
+.controls {
     margin: 0 auto 20px auto;
     background: white;
     padding: 15px 25px;
     border-radius: 16px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
     width: 100%;
     max-width: 400px;
     text-align: center;
@@ -141,21 +180,25 @@ h1, h2, h3 {
 }
 
 .res-btn {
-    width: 48px; height: 48px;
+    width: 48px;
+    height: 48px;
     cursor: pointer;
     display: flex;
-    align-items: center; 
+    align-items: center;
     justify-content: center;
     padding: 0;
     transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.res-btn:hover { transform: translateY(-3px); }
+.res-btn:hover {
+    transform: translateY(-3px);
+}
 
 .res-btn.selected {
-    transform: scale(1.15) translateY(-5px); /* Lift it up */
+    transform: scale(1.15) translateY(-5px);
+    /* Lift it up */
     z-index: 10;
-    box-shadow: 0 0 0 3px #2c3e50, 0 10px 20px rgba(0,0,0,0.2);
+    box-shadow: 0 0 0 3px #2c3e50, 0 10px 20px rgba(0, 0, 0, 0.2);
     position: relative;
 }
 
@@ -166,7 +209,8 @@ h1, h2, h3 {
     bottom: -10px;
     left: 50%;
     transform: translateX(-50%);
-    width: 0; height: 0; 
+    width: 0;
+    height: 0;
     border-left: 8px solid transparent;
     border-right: 8px solid transparent;
     border-top: 8px solid #2c3e50;
@@ -190,21 +234,21 @@ h1, h2, h3 {
     gap: 12px;
     padding: 20px;
     margin: 0 auto;
-    width: fit-content; 
+    width: fit-content;
     justify-content: center;
 
     /* Grassy Green Background */
-    background-color: #43a047; 
-    background-image: 
-        linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px);
+    background-color: #43a047;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
     background-size: 20px 20px;
 
     border-radius: 16px;
-    box-shadow: 
-        0 20px 40px rgba(0,0,0,0.3),    
-        inset 0 -6px 0 rgba(0,0,0,0.2); 
-    
+    box-shadow:
+        0 20px 40px rgba(0, 0, 0, 0.3),
+        inset 0 -6px 0 rgba(0, 0, 0, 0.2);
+
     border: 6px solid #2e7d32;
 }
 
@@ -213,11 +257,13 @@ h1, h2, h3 {
    CELLS & RESOURCES (The 3D Bits)
    ========================================= */
 .cell {
-    width: 80px; height: 80px;
+    width: 80px;
+    height: 80px;
     border-radius: 8px;
     display: flex;
-    align-items: center; justify-content: center;
-    font-size: 14px; 
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
     background-position: center;
@@ -227,52 +273,88 @@ h1, h2, h3 {
 
 /* --- STATE 1: EMPTY PLOT --- */
 .cell.empty {
-    background-color: #c8e6c9; 
+    background-color: #c8e6c9;
     color: #1b5e20;
-    box-shadow: inset 2px 2px 5px rgba(0,0,0,0.15);
+    box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.15);
     border: 1px solid #81c784;
 }
+
 .cell.empty:hover {
-    background-color: #e8f5e9; 
-    box-shadow: inset 1px 1px 3px rgba(0,0,0,0.1);
+    background-color: #e8f5e9;
+    box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 /* --- STATE 2: OCCUPIED (Pop Up) --- */
 .cell:not(.empty) {
-    transform: translateY(-4px); 
+    transform: translateY(-4px);
     z-index: 2;
-    box-shadow: 0 6px 0 rgba(0,0,0,0.15), 0 10px 15px rgba(0,0,0,0.2); 
+    box-shadow: 0 6px 0 rgba(0, 0, 0, 0.15), 0 10px 15px rgba(0, 0, 0, 0.2);
 }
 
 /* --- SHARED RESOURCE STYLING (3D Cubes) --- */
-.cell.WOOD, .res-btn.WOOD,
-.cell.WHEAT, .res-btn.WHEAT,
-.cell.BRICK, .res-btn.BRICK,
-.cell.GLASS, .res-btn.GLASS,
-.cell.STONE, .res-btn.STONE {
-    color: transparent !important; /* Hide text */
-    border: 1px solid rgba(0,0,0,0.1);
-    border-radius: 6px; 
-    
+.cell.WOOD,
+.res-btn.WOOD,
+.cell.WHEAT,
+.res-btn.WHEAT,
+.cell.BRICK,
+.res-btn.BRICK,
+.cell.GLASS,
+.res-btn.GLASS,
+.cell.STONE,
+.res-btn.STONE {
+    color: transparent !important;
+    /* Hide text */
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+
     /* 3D Bevel Lighting */
-    box-shadow: 
-        inset 3px 3px 6px rgba(255,255,255,0.35), 
-        inset -3px -3px 6px rgba(0,0,0,0.15);     
+    box-shadow:
+        inset 3px 3px 6px rgba(255, 255, 255, 0.35),
+        inset -3px -3px 6px rgba(0, 0, 0, 0.15);
 }
 
 /* Resource Colors */
-.cell.WOOD, .res-btn.WOOD   { background-color: #5d4037; } /* Brown */
-.cell.WHEAT, .res-btn.WHEAT { background-color: #fdd835; } /* Gold */
-.cell.BRICK, .res-btn.BRICK { background-color: #ef5350; } /* Red */
-.cell.GLASS, .res-btn.GLASS { background-color: #29b6f6; } /* Blue */
-.cell.STONE, .res-btn.STONE { background-color: #757575; } /* Neutral Grey */
+.cell.WOOD,
+.res-btn.WOOD {
+    background-color: #5d4037;
+}
+
+/* Brown */
+.cell.WHEAT,
+.res-btn.WHEAT {
+    background-color: #fdd835;
+}
+
+/* Gold */
+.cell.BRICK,
+.res-btn.BRICK {
+    background-color: #ef5350;
+}
+
+/* Red */
+.cell.GLASS,
+.res-btn.GLASS {
+    background-color: #29b6f6;
+}
+
+/* Blue */
+.cell.STONE,
+.res-btn.STONE {
+    background-color: #757575;
+}
+
+/* Neutral Grey */
 
 /* Deeper shadow for resources on the board */
-.cell.WOOD, .cell.WHEAT, .cell.BRICK, .cell.GLASS, .cell.STONE {
-    box-shadow: 
-        inset 3px 3px 6px rgba(255,255,255,0.35), 
-        inset -3px -3px 6px rgba(0,0,0,0.15),
-        0 6px 0 rgba(0,0,0,0.15), 0 10px 15px rgba(0,0,0,0.2); 
+.cell.WOOD,
+.cell.WHEAT,
+.cell.BRICK,
+.cell.GLASS,
+.cell.STONE {
+    box-shadow:
+        inset 3px 3px 6px rgba(255, 255, 255, 0.35),
+        inset -3px -3px 6px rgba(0, 0, 0, 0.15),
+        0 6px 0 rgba(0, 0, 0, 0.15), 0 10px 15px rgba(0, 0, 0, 0.2);
 }
 
 
@@ -280,29 +362,29 @@ h1, h2, h3 {
 /* Target any cell that is NOT empty and NOT a resource */
 .cell:not(.empty):not(.WOOD):not(.WHEAT):not(.BRICK):not(.GLASS):not(.STONE) {
     /* Base color (cream) - NO !important, so pastels can override */
-    background-color: #fcfbf9; 
+    background-color: #fcfbf9;
     border-radius: 8px;
-    
+
     /* Default border */
-    border: 3px solid #ccc; 
-    
+    border: 3px solid #ccc;
+
     /* 3D Tile Shadow */
-    box-shadow: 
-        0 4px 0 rgba(0,0,0,0.1), 
-        0 8px 10px rgba(0,0,0,0.2);
-        
+    box-shadow:
+        0 4px 0 rgba(0, 0, 0, 0.1),
+        0 8px 10px rgba(0, 0, 0, 0.2);
+
     /* Icon Sizing */
-    background-size: 70%; 
+    background-size: 70%;
     background-position: center;
     background-repeat: no-repeat;
-    
-    transform: translateY(-4px); 
+
+    transform: translateY(-4px);
 }
 
 /* Hover effect for buildings */
 .cell:not(.empty):not(.WOOD):not(.WHEAT):not(.BRICK):not(.GLASS):not(.STONE):hover {
     transform: translateY(-6px);
-    box-shadow: 0 6px 0 rgba(0,0,0,0.1), 0 12px 15px rgba(0,0,0,0.2);
+    box-shadow: 0 6px 0 rgba(0, 0, 0, 0.1), 0 12px 15px rgba(0, 0, 0, 0.2);
 }
 
 
@@ -310,51 +392,80 @@ h1, h2, h3 {
 /* These use !important to override the base foundation color */
 
 /* BLUE (Cottage) */
-.cell.COTTAGE { 
-    border-color: #00acc1 !important; 
-    background-color: #e0f7fa !important; /* Pale Cyan */
+.cell.COTTAGE {
+    border-color: #00acc1 !important;
+    background-color: #e0f7fa !important;
+    /* Pale Cyan */
 }
 
 /* RED (Farm Group) */
-.cell.FARM, .cell.GRANARY, .cell.GREENHOUSE, .cell.ORCHARD { 
-    border-color: #e53935 !important; 
-    background-color: #ffebee !important; /* Pale Red */
+.cell.FARM,
+.cell.GRANARY,
+.cell.GREENHOUSE,
+.cell.ORCHARD {
+    border-color: #e53935 !important;
+    background-color: #ffebee !important;
+    /* Pale Red */
 }
 
 /* GRAY (Well Group) */
-.cell.WELL, .cell.FOUNTAIN, .cell.MILLSTONE, .cell.SHED { 
-    border-color: #78909c !important; 
-    background-color: #eceff1 !important; /* Pale Grey */
+.cell.WELL,
+.cell.FOUNTAIN,
+.cell.MILLSTONE,
+.cell.SHED {
+    border-color: #78909c !important;
+    background-color: #eceff1 !important;
+    /* Pale Grey */
 }
 
 /* ORANGE (Chapel Group) */
-.cell.CHAPEL, .cell.ABBEY, .cell.CLOISTER, .cell.TEMPLE { 
-    border-color: #fb8c00 !important; 
-    background-color: #fff3e0 !important; /* Pale Orange */
+.cell.CHAPEL,
+.cell.ABBEY,
+.cell.CLOISTER,
+.cell.TEMPLE {
+    border-color: #fb8c00 !important;
+    background-color: #fff3e0 !important;
+    /* Pale Orange */
 }
 
 /* GREEN (Tavern Group) */
-.cell.TAVERN, .cell.ALMSHOUSE, .cell.INN, .cell.FEAST-HALL { 
-    border-color: #2e7d32 !important; 
-    background-color: #e8f5e9 !important; /* Pale Green */
+.cell.TAVERN,
+.cell.ALMSHOUSE,
+.cell.INN,
+.cell.FEAST-HALL {
+    border-color: #2e7d32 !important;
+    background-color: #e8f5e9 !important;
+    /* Pale Green */
 }
 
 /* YELLOW (Theater Group) */
-.cell.THEATER, .cell.BAKERY, .cell.TAILOR, .cell.MARKET { 
-    border-color: #fdd835 !important; 
-    background-color: #fffde7 !important; /* Pale Yellow */
+.cell.THEATER,
+.cell.BAKERY,
+.cell.TAILOR,
+.cell.MARKET {
+    border-color: #fdd835 !important;
+    background-color: #fffde7 !important;
+    /* Pale Yellow */
 }
 
 /* BLACK (Factory Group) */
-.cell.FACTORY, .cell.BANK, .cell.WAREHOUSE, .cell.TRADING-POST { 
-    border-color: #424242 !important; 
-    background-color: #f5f5f5 !important; /* Off-White */
+.cell.FACTORY,
+.cell.BANK,
+.cell.WAREHOUSE,
+.cell.TRADING-POST {
+    border-color: #424242 !important;
+    background-color: #f5f5f5 !important;
+    /* Off-White */
 }
 
 /* PURPLE (Monument) */
-.cell.MONUMENT, .cell.BARRETT, .cell.ARCHIVE, .cell.MANDRAS { 
-    border-color: #8e24aa !important; 
-    background-color: #f3e5f5 !important; /* Pale Lavender */
+.cell.MONUMENT,
+.cell.BARRETT,
+.cell.ARCHIVE,
+.cell.MANDRAS {
+    border-color: #8e24aa !important;
+    background-color: #f3e5f5 !important;
+    /* Pale Lavender */
 }
 
 
@@ -366,9 +477,9 @@ h1, h2, h3 {
     background: white;
     padding: 25px;
     border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
     text-align: left;
-    min-height: 400px; 
+    min-height: 400px;
     display: flex;
     flex-direction: column;
 }
@@ -385,16 +496,17 @@ h1, h2, h3 {
     font-weight: 800;
     font-family: 'Nunito', sans-serif;
     text-align: left;
-    color: white; 
-    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
     transition: transform 0.1s, filter 0.2s;
-    padding-right: 50px; 
+    padding-right: 50px;
     background-color: #2e7d32;
     font-size: 15px;
 }
-.build-btn:hover { 
-    transform: translateY(-2px); 
-    filter: brightness(1.1); 
+
+.build-btn:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
 }
 
 /* Icon Container (Solid White Tile inside Button) */
@@ -404,44 +516,121 @@ h1, h2, h3 {
     right: 12px;
     top: 50%;
     transform: translateY(-50%);
-    width: 32px; height: 32px;
-    background-color: #ffffff; 
+    width: 32px;
+    height: 32px;
+    background-color: #ffffff;
     border-radius: 6px;
-    border: 1px solid rgba(0,0,0,0.1); 
-    box-shadow: 0 2px 4px rgba(0,0,0,0.15); 
-    background-size: 20px 20px; 
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    background-size: 20px 20px;
     background-repeat: no-repeat;
     background-position: center;
-    z-index: 2; 
+    z-index: 2;
 }
 
 /* --- Build Button Colors --- */
-.build-btn.COTTAGE { background-color: #00acc1; }
-.build-btn.COTTAGE::after { background-image: url('/buildings/cottage.png'); }
-
-.build-btn.FARM, .build-btn.GRANARY, .build-btn.GREENHOUSE, .build-btn.ORCHARD { background-color: #e53935; }
-.build-btn.FARM::after, .build-btn.GRANARY::after, .build-btn.GREENHOUSE::after, .build-btn.ORCHARD::after { background-image: url('/buildings/farm.png'); }
-
-.build-btn.WELL, .build-btn.FOUNTAIN, .build-btn.MILLSTONE, .build-btn.SHED { background-color: #546e7a; }
-.build-btn.WELL::after, .build-btn.FOUNTAIN::after, .build-btn.MILLSTONE::after, .build-btn.SHED::after { background-image: url('/buildings/well.png'); }
-
-.build-btn.CHAPEL, .build-btn.ABBEY, .build-btn.CLOISTER, .build-btn.TEMPLE { background-color: #fb8c00; }
-.build-btn.CHAPEL::after, .build-btn.ABBEY::after, .build-btn.CLOISTER::after, .build-btn.TEMPLE::after { background-image: url('/buildings/chapel.png'); }
-
-.build-btn.TAVERN, .build-btn.ALMSHOUSE, .build-btn.INN, .build-btn.FEAST-HALL { background-color: #43a047; }
-.build-btn.TAVERN::after, .build-btn.ALMSHOUSE::after, .build-btn.INN::after, .build-btn.FEAST-HALL::after { background-image: url('/buildings/tavern.png'); }
-
-.build-btn.THEATER, .build-btn.BAKERY, .build-btn.TAILOR, .build-btn.MARKET { background-color: #fdd835; color: #4e342e; text-shadow: none; }
-.build-btn.THEATER::after, .build-btn.BAKERY::after, .build-btn.TAILOR::after, .build-btn.MARKET::after { 
-    background-image: url('/buildings/theater.png');
-    border-color: rgba(0,0,0,0.15); 
+.build-btn.COTTAGE {
+    background-color: #00acc1;
 }
 
-.build-btn.FACTORY, .build-btn.BANK, .build-btn.WAREHOUSE, .build-btn.TRADING-POST { background-color: #424242; }
-.build-btn.FACTORY::after, .build-btn.BANK::after, .build-btn.WAREHOUSE::after, .build-btn.TRADING-POST::after { background-image: url('/buildings/factory.png'); }
+.build-btn.COTTAGE::after {
+    background-image: url('/buildings/cottage.png');
+}
 
-.build-btn { background-color: #7b1fa2; }
-.build-btn::after { background-image: url('/buildings/monument.png'); }
+.build-btn.FARM,
+.build-btn.GRANARY,
+.build-btn.GREENHOUSE,
+.build-btn.ORCHARD {
+    background-color: #e53935;
+}
+
+.build-btn.FARM::after,
+.build-btn.GRANARY::after,
+.build-btn.GREENHOUSE::after,
+.build-btn.ORCHARD::after {
+    background-image: url('/buildings/farm.png');
+}
+
+.build-btn.WELL,
+.build-btn.FOUNTAIN,
+.build-btn.MILLSTONE,
+.build-btn.SHED {
+    background-color: #546e7a;
+}
+
+.build-btn.WELL::after,
+.build-btn.FOUNTAIN::after,
+.build-btn.MILLSTONE::after,
+.build-btn.SHED::after {
+    background-image: url('/buildings/well.png');
+}
+
+.build-btn.CHAPEL,
+.build-btn.ABBEY,
+.build-btn.CLOISTER,
+.build-btn.TEMPLE {
+    background-color: #fb8c00;
+}
+
+.build-btn.CHAPEL::after,
+.build-btn.ABBEY::after,
+.build-btn.CLOISTER::after,
+.build-btn.TEMPLE::after {
+    background-image: url('/buildings/chapel.png');
+}
+
+.build-btn.TAVERN,
+.build-btn.ALMSHOUSE,
+.build-btn.INN,
+.build-btn.FEAST-HALL {
+    background-color: #43a047;
+}
+
+.build-btn.TAVERN::after,
+.build-btn.ALMSHOUSE::after,
+.build-btn.INN::after,
+.build-btn.FEAST-HALL::after {
+    background-image: url('/buildings/tavern.png');
+}
+
+.build-btn.THEATER,
+.build-btn.BAKERY,
+.build-btn.TAILOR,
+.build-btn.MARKET {
+    background-color: #fdd835;
+    color: #4e342e;
+    text-shadow: none;
+}
+
+.build-btn.THEATER::after,
+.build-btn.BAKERY::after,
+.build-btn.TAILOR::after,
+.build-btn.MARKET::after {
+    background-image: url('/buildings/theater.png');
+    border-color: rgba(0, 0, 0, 0.15);
+}
+
+.build-btn.FACTORY,
+.build-btn.BANK,
+.build-btn.WAREHOUSE,
+.build-btn.TRADING-POST {
+    background-color: #424242;
+}
+
+.build-btn.FACTORY::after,
+.build-btn.BANK::after,
+.build-btn.WAREHOUSE::after,
+.build-btn.TRADING-POST::after {
+    background-image: url('/buildings/factory.png');
+}
+
+.build-btn {
+    background-color: #7b1fa2;
+}
+
+.build-btn::after {
+    background-image: url('/buildings/monument.png');
+}
 
 
 /* --- Sidebar Deck Display --- */
@@ -451,22 +640,34 @@ h1, h2, h3 {
     gap: 12px;
     margin-top: 20px;
     padding-right: 8px;
-    max-height: 60vh; 
-    overflow-y: auto; 
+    max-height: 60vh;
+    overflow-y: auto;
 }
 
 /* Custom Scrollbar */
-#deck-display::-webkit-scrollbar { width: 6px; }
-#deck-display::-webkit-scrollbar-track { background: transparent; }
-#deck-display::-webkit-scrollbar-thumb { background-color: rgba(0, 0, 0, 0.1); border-radius: 10px; }
-#deck-display::-webkit-scrollbar-thumb:hover { background-color: rgba(0, 0, 0, 0.2); }
+#deck-display::-webkit-scrollbar {
+    width: 6px;
+}
+
+#deck-display::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#deck-display::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+#deck-display::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0, 0, 0, 0.2);
+}
 
 .building-card {
     background: #fff;
     border: 1px solid #eee;
     border-radius: 10px;
     padding: 12px;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.04);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.04);
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -492,12 +693,13 @@ h1, h2, h3 {
 }
 
 .card-icon {
-    width: 28px; height: 28px;
+    width: 28px;
+    height: 28px;
     border-radius: 5px;
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
-    flex-shrink: 0; 
+    flex-shrink: 0;
     margin-left: 8px;
 }
 
@@ -507,40 +709,163 @@ h1, h2, h3 {
     align-items: flex-start;
 }
 
-.mini-pattern { display: grid; gap: 3px; }
-.pattern-cell { width: 14px; height: 14px; border-radius: 3px; background-color: #f0f0f0; }
+.mini-pattern {
+    display: grid;
+    gap: 3px;
+}
+
+.pattern-cell {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    background-color: #f0f0f0;
+}
 
 /* Pattern Colors (matching the new 3D bits) */
-.pattern-cell.WOOD  { background-color: #5d4037; }
-.pattern-cell.WHEAT { background-color: #fdd835; }
-.pattern-cell.BRICK { background-color: #ef5350; }
-.pattern-cell.GLASS { background-color: #29b6f6; }
-.pattern-cell.STONE { background-color: #757575; }
+.pattern-cell.WOOD {
+    background-color: #5d4037;
+}
+
+.pattern-cell.WHEAT {
+    background-color: #fdd835;
+}
+
+.pattern-cell.BRICK {
+    background-color: #ef5350;
+}
+
+.pattern-cell.GLASS {
+    background-color: #29b6f6;
+}
+
+.pattern-cell.STONE {
+    background-color: #757575;
+}
 
 .card-text {
-    flex: 1; font-size: 12px; color: #666; line-height: 1.4;
+    flex: 1;
+    font-size: 12px;
+    color: #666;
+    line-height: 1.4;
 }
 
 
 /* =========================================
    5. BUILDING IMAGES
    ========================================= */
-.cell.COTTAGE, .card-icon.COTTAGE, .mini-cell.COTTAGE { background-image: url('/buildings/cottage.png'); }
-.cell.FARM, .card-icon.FARM, .mini-cell.FARM, .cell.GRANARY, .card-icon.GRANARY, .mini-cell.GRANARY, .cell.GREENHOUSE, .card-icon.GREENHOUSE, .mini-cell.GREENHOUSE, .cell.ORCHARD, .card-icon.ORCHARD, .mini-cell.ORCHARD { background-image: url('/buildings/farm.png'); }
-.cell.CHAPEL, .card-icon.CHAPEL, .mini-cell.CHAPEL, .cell.ABBEY, .card-icon.ABBEY, .mini-cell.ABBEY, .cell.CLOISTER, .card-icon.CLOISTER, .mini-cell.CLOISTER, .cell.TEMPLE, .card-icon.TEMPLE, .mini-cell.TEMPLE { background-image: url('/buildings/chapel.png'); }
-.cell.TAVERN, .card-icon.TAVERN, .mini-cell.TAVERN, .cell.ALMSHOUSE, .card-icon.ALMSHOUSE, .mini-cell.ALMSHOUSE, .cell.INN, .card-icon.INN, .mini-cell.INN, .cell.FEAST-HALL, .card-icon.FEAST-HALL, .mini-cell.FEAST-HALL { background-image: url('/buildings/tavern.png'); }
-.cell.THEATER, .card-icon.THEATER, .mini-cell.THEATER, .cell.BAKERY, .card-icon.BAKERY, .mini-cell.BAKERY, .cell.TAILOR, .card-icon.TAILOR, .mini-cell.TAILOR, .cell.MARKET, .card-icon.MARKET, .mini-cell.MARKET { background-image: url('/buildings/theater.png'); }
-.cell.WELL, .card-icon.WELL, .mini-cell.WELL, .cell.FOUNTAIN, .card-icon.FOUNTAIN, .mini-cell.FOUNTAIN, .cell.SHED, .card-icon.SHED, .mini-cell.SHED, .cell.MILLSTONE, .card-icon.MILLSTONE, .mini-cell.MILLSTONE { background-image: url('/buildings/well.png'); }
-.cell.FACTORY, .card-icon.FACTORY, .mini-cell.FACTORY, .cell.BANK, .card-icon.BANK, .mini-cell.BANK, .cell.WAREHOUSE, .card-icon.WAREHOUSE, .mini-cell.WAREHOUSE, .cell.TRADING-POST, .card-icon.TRADING-POST, .mini-cell.TRADING-POST { background-image: url('/buildings/factory.png'); }
-.cell.MONUMENT, .building-card.MONUMENT .card-icon, .mini-cell.MONUMENT { background-image: url('/buildings/monument.png'); background-size: 60%; }
-.building-card.MONUMENT .card-icon { background-size: contain; }
+.cell.COTTAGE,
+.card-icon.COTTAGE,
+.mini-cell.COTTAGE {
+    background-image: url('/buildings/cottage.png');
+}
+
+.cell.FARM,
+.card-icon.FARM,
+.mini-cell.FARM,
+.cell.GRANARY,
+.card-icon.GRANARY,
+.mini-cell.GRANARY,
+.cell.GREENHOUSE,
+.card-icon.GREENHOUSE,
+.mini-cell.GREENHOUSE,
+.cell.ORCHARD,
+.card-icon.ORCHARD,
+.mini-cell.ORCHARD {
+    background-image: url('/buildings/farm.png');
+}
+
+.cell.CHAPEL,
+.card-icon.CHAPEL,
+.mini-cell.CHAPEL,
+.cell.ABBEY,
+.card-icon.ABBEY,
+.mini-cell.ABBEY,
+.cell.CLOISTER,
+.card-icon.CLOISTER,
+.mini-cell.CLOISTER,
+.cell.TEMPLE,
+.card-icon.TEMPLE,
+.mini-cell.TEMPLE {
+    background-image: url('/buildings/chapel.png');
+}
+
+.cell.TAVERN,
+.card-icon.TAVERN,
+.mini-cell.TAVERN,
+.cell.ALMSHOUSE,
+.card-icon.ALMSHOUSE,
+.mini-cell.ALMSHOUSE,
+.cell.INN,
+.card-icon.INN,
+.mini-cell.INN,
+.cell.FEAST-HALL,
+.card-icon.FEAST-HALL,
+.mini-cell.FEAST-HALL {
+    background-image: url('/buildings/tavern.png');
+}
+
+.cell.THEATER,
+.card-icon.THEATER,
+.mini-cell.THEATER,
+.cell.BAKERY,
+.card-icon.BAKERY,
+.mini-cell.BAKERY,
+.cell.TAILOR,
+.card-icon.TAILOR,
+.mini-cell.TAILOR,
+.cell.MARKET,
+.card-icon.MARKET,
+.mini-cell.MARKET {
+    background-image: url('/buildings/theater.png');
+}
+
+.cell.WELL,
+.card-icon.WELL,
+.mini-cell.WELL,
+.cell.FOUNTAIN,
+.card-icon.FOUNTAIN,
+.mini-cell.FOUNTAIN,
+.cell.SHED,
+.card-icon.SHED,
+.mini-cell.SHED,
+.cell.MILLSTONE,
+.card-icon.MILLSTONE,
+.mini-cell.MILLSTONE {
+    background-image: url('/buildings/well.png');
+}
+
+.cell.FACTORY,
+.card-icon.FACTORY,
+.mini-cell.FACTORY,
+.cell.BANK,
+.card-icon.BANK,
+.mini-cell.BANK,
+.cell.WAREHOUSE,
+.card-icon.WAREHOUSE,
+.mini-cell.WAREHOUSE,
+.cell.TRADING-POST,
+.card-icon.TRADING-POST,
+.mini-cell.TRADING-POST {
+    background-image: url('/buildings/factory.png');
+}
+
+.cell.MONUMENT,
+.building-card.MONUMENT .card-icon,
+.mini-cell.MONUMENT {
+    background-image: url('/buildings/monument.png');
+    background-size: 60%;
+}
+
+.building-card.MONUMENT .card-icon {
+    background-size: contain;
+}
 
 
 /* =========================================
    6. UI MODALS & HELPERS
    ========================================= */
 .message {
-    height: 30px; 
+    height: 30px;
     margin-top: 15px;
     font-weight: 800;
     text-align: center;
@@ -549,18 +874,24 @@ h1, h2, h3 {
 
 .modal-overlay {
     position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     background: rgba(44, 62, 80, 0.7);
     backdrop-filter: blur(2px);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 100;
+    z-index: 2500;
     opacity: 1;
     transition: opacity 0.3s ease;
 }
-.modal-overlay.hidden { opacity: 0; pointer-events: none; }
+
+.modal-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
 
 .modal-content {
     background: white;
@@ -568,51 +899,106 @@ h1, h2, h3 {
     border-radius: 20px;
     width: 400px;
     text-align: center;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
 }
 
-.big-score { font-size: 72px; font-weight: 800; color: #2c3e50; margin: 10px 0; }
+.big-score {
+    font-size: 72px;
+    font-weight: 800;
+    color: #2c3e50;
+    margin: 10px 0;
+}
 
 .score-details {
-    margin: 20px 0; text-align: left;
-    background: #f8f9fa; padding: 15px;
+    margin: 20px 0;
+    text-align: left;
+    background: #f8f9fa;
+    padding: 15px;
     border-radius: 12px;
 }
-#score-breakdown-list { list-style: none; padding: 0; margin: 0; }
-.score-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #eee; font-size: 15px; }
-.score-row:last-child { border-bottom: none; }
-.score-row.penalty { color: #e53935; font-weight: 800; }
+
+#score-breakdown-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.score-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 15px;
+}
+
+.score-row:last-child {
+    border-bottom: none;
+}
+
+.score-row.penalty {
+    color: #e53935;
+    font-weight: 800;
+}
 
 .primary-btn {
     background: #2c3e50;
-    color: white; border: none;
-    padding: 14px 30px; border-radius: 10px;
-    font-size: 16px; cursor: pointer; font-weight: 800;
+    color: white;
+    border: none;
+    padding: 14px 30px;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: 800;
     width: 100%;
     transition: background 0.2s;
     font-family: 'Nunito', sans-serif;
 }
-.primary-btn:hover { background: #34495e; }
+
+.primary-btn:hover {
+    background: #34495e;
+}
 
 .secondary-btn {
     background-color: #eceff1;
-    border: none; color: #546e7a;
-    padding: 8px 16px; border-radius: 8px;
-    cursor: pointer; font-size: 14px; font-weight: 700;
+    border: none;
+    color: #546e7a;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 700;
     transition: all 0.2s;
     font-family: 'Nunito', sans-serif;
 }
-.secondary-btn:hover:not(:disabled) { background-color: #cfd8dc; color: #37474f; }
-.secondary-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.secondary-btn:hover:not(:disabled) {
+    background-color: #cfd8dc;
+    color: #37474f;
+}
+
+.secondary-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
 
 
 /* --- ANIMATIONS & HIGHLIGHTS --- */
 
 /* 1. Placement "Pop" Animation */
 @keyframes popIn {
-    0% { transform: scale(0); opacity: 0; }
-    70% { transform: scale(1.1); opacity: 1; }
-    100% { transform: scale(1); }
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    70% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 /* Apply to any cell that IS NOT empty (Resources & Buildings) */
@@ -629,15 +1015,20 @@ h1, h2, h3 {
 }
 
 @keyframes highlightPulse {
-    from { transform: scale(0.95); }
-    to { transform: scale(1.02); }
+    from {
+        transform: scale(0.95);
+    }
+
+    to {
+        transform: scale(1.02);
+    }
 }
 
 .cell.preview-target {
     border-color: #00bcd4 !important;
     box-shadow: 0 0 0 3px #00bcd4, inset 0 0 10px rgba(0, 188, 212, 0.3) !important;
     z-index: 100 !important;
-    transform: scale(1.05) translateY(-6px) !important; 
+    transform: scale(1.05) translateY(-6px) !important;
     transition: all 0.2s ease;
 }
 
@@ -680,10 +1071,12 @@ h1, h2, h3 {
 .rank-badge {
     background: #eee;
     color: #555;
-    width: 28px; height: 28px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     display: flex;
-    align-items: center; justify-content: center;
+    align-items: center;
+    justify-content: center;
     font-weight: 800;
     font-size: 13px;
     margin-right: 12px;
@@ -710,8 +1103,15 @@ h1, h2, h3 {
     flex-direction: column;
 }
 
-.player-name { font-weight: 800; color: #333; }
-.player-details { font-size: 11px; color: #777; }
+.player-name {
+    font-weight: 800;
+    color: #333;
+}
+
+.player-details {
+    font-size: 11px;
+    color: #777;
+}
 
 .final-total {
     font-size: 20px;
@@ -726,48 +1126,65 @@ h1, h2, h3 {
     position: fixed;
     top: 20px;
     right: 20px;
-    z-index: 3000; /* Above everything */
+    z-index: 3000;
+    /* Above everything */
     display: flex;
     flex-direction: column;
     gap: 10px;
-    pointer-events: none; /* Let clicks pass through */
+    pointer-events: none;
+    /* Let clicks pass through */
 }
 
 .toast {
-    background: #2c3e50; /* Default Dark Blue */
+    background: #2c3e50;
+    /* Default Dark Blue */
     color: white;
     padding: 12px 20px;
     border-radius: 8px;
     font-family: 'Nunito', sans-serif;
     font-weight: 700;
     font-size: 14px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
     /* Animation Magic */
-    animation: slideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
-               fadeOut 0.5s 3.5s forwards; /* Fades out after 3.5s */
-    
+    animation: slideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+        fadeOut 0.5s 3.5s forwards;
+    /* Fades out after 3.5s */
+
     max-width: 300px;
-    pointer-events: auto; /* Allow clicking the toast itself if needed */
+    pointer-events: auto;
+    /* Allow clicking the toast itself if needed */
 }
 
 .toast.error {
-    background: #e53935; /* Red for errors */
+    background: #e53935;
+    /* Red for errors */
     border-left: 5px solid #b71c1c;
 }
 
 .toast.success {
-    background: #2e7d32; /* Green for success */
+    background: #2e7d32;
+    /* Green for success */
     border-left: 5px solid #1b5e20;
 }
 
 @keyframes slideIn {
-    from { transform: translateX(100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
 }
 
 @keyframes fadeOut {
-    to { opacity: 0; transform: translateY(-10px); }
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
 }
 
 /* =========================================
@@ -775,11 +1192,11 @@ h1, h2, h3 {
    ========================================= */
 .sidebar-panel {
     /* Adjust width if needed to fit your screen */
-    width: 200px; 
+    width: 200px;
     background: white;
     padding: 20px;
     border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
     display: flex;
     flex-direction: column;
     gap: 15px;
@@ -820,13 +1237,21 @@ h1, h2, h3 {
 
 /* Status dots */
 .status-dot {
-    width: 8px; height: 8px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
     background-color: #ccc;
     display: inline-block;
 }
-.status-dot.done { background-color: #43a047; box-shadow: 0 0 5px #43a047; }
-.status-dot.thinking { background-color: #fb8c00; }
+
+.status-dot.done {
+    background-color: #43a047;
+    box-shadow: 0 0 5px #43a047;
+}
+
+.status-dot.thinking {
+    background-color: #fb8c00;
+}
 
 /* The Mini Grid (4x4) */
 .mini-board {
@@ -834,75 +1259,120 @@ h1, h2, h3 {
     grid-template-columns: repeat(4, 1fr);
     gap: 2px;
     margin: 0 auto;
-    width: 120px; /* Small size */
+    width: 120px;
+    /* Small size */
     height: 120px;
-    background-color: #ccc; /* Border color */
+    background-color: #ccc;
+    /* Border color */
     border: 2px solid #ccc;
     border-radius: 4px;
 }
 
 .mini-cell {
-    width: 100%; height: 100%;
-    background-color: #fff; 
-    
+    width: 100%;
+    height: 100%;
+    background-color: #fff;
+
     /* Icon setup */
-    background-size: 75%; 
+    background-size: 75%;
     background-position: center;
     background-repeat: no-repeat;
 }
 
 /* Mini Resource Colors */
-.mini-cell.WOOD { background-color: #5d4037; }
-.mini-cell.WHEAT { background-color: #fdd835; }
-.mini-cell.BRICK { background-color: #ef5350; }
-.mini-cell.GLASS { background-color: #29b6f6; }
-.mini-cell.STONE { background-color: #757575; }
+.mini-cell.WOOD {
+    background-color: #5d4037;
+}
+
+.mini-cell.WHEAT {
+    background-color: #fdd835;
+}
+
+.mini-cell.BRICK {
+    background-color: #ef5350;
+}
+
+.mini-cell.GLASS {
+    background-color: #29b6f6;
+}
+
+.mini-cell.STONE {
+    background-color: #757575;
+}
 
 /* Mini Building Colors (Pale Backgrounds + Borders for readability) */
 
 /* Blue / Cottage */
-.mini-cell.COTTAGE { background-color: #e0f7fa; border: 1px solid #00acc1; }
+.mini-cell.COTTAGE {
+    background-color: #e0f7fa;
+    border: 1px solid #00acc1;
+}
 
 /* Red Group */
-.mini-cell.FARM, .mini-cell.GRANARY, .mini-cell.GREENHOUSE, .mini-cell.ORCHARD { 
-    background-color: #ffebee; border: 1px solid #e53935; 
+.mini-cell.FARM,
+.mini-cell.GRANARY,
+.mini-cell.GREENHOUSE,
+.mini-cell.ORCHARD {
+    background-color: #ffebee;
+    border: 1px solid #e53935;
 }
 
 /* Gray Group */
-.mini-cell.WELL, .mini-cell.FOUNTAIN, .mini-cell.MILLSTONE, .mini-cell.SHED { 
-    background-color: #eceff1; border: 1px solid #546e7a; 
+.mini-cell.WELL,
+.mini-cell.FOUNTAIN,
+.mini-cell.MILLSTONE,
+.mini-cell.SHED {
+    background-color: #eceff1;
+    border: 1px solid #546e7a;
 }
 
 /* Orange Group */
-.mini-cell.CHAPEL, .mini-cell.ABBEY, .mini-cell.CLOISTER, .mini-cell.TEMPLE { 
-    background-color: #fff3e0; border: 1px solid #fb8c00; 
+.mini-cell.CHAPEL,
+.mini-cell.ABBEY,
+.mini-cell.CLOISTER,
+.mini-cell.TEMPLE {
+    background-color: #fff3e0;
+    border: 1px solid #fb8c00;
 }
 
 /* Green Group */
-.mini-cell.TAVERN, .mini-cell.ALMSHOUSE, .mini-cell.INN, .mini-cell.FEAST-HALL { 
-    background-color: #e8f5e9; border: 1px solid #2e7d32; 
+.mini-cell.TAVERN,
+.mini-cell.ALMSHOUSE,
+.mini-cell.INN,
+.mini-cell.FEAST-HALL {
+    background-color: #e8f5e9;
+    border: 1px solid #2e7d32;
 }
 
 /* Yellow Group */
-.mini-cell.THEATER, .mini-cell.BAKERY, .mini-cell.TAILOR, .mini-cell.MARKET { 
-    background-color: #fffde7; border: 1px solid #fdd835; 
+.mini-cell.THEATER,
+.mini-cell.BAKERY,
+.mini-cell.TAILOR,
+.mini-cell.MARKET {
+    background-color: #fffde7;
+    border: 1px solid #fdd835;
 }
 
 /* Black Group */
-.mini-cell.FACTORY, .mini-cell.BANK, .mini-cell.WAREHOUSE, .mini-cell.TRADING-POST { 
-    background-color: #f5f5f5; border: 1px solid #424242; 
+.mini-cell.FACTORY,
+.mini-cell.BANK,
+.mini-cell.WAREHOUSE,
+.mini-cell.TRADING-POST {
+    background-color: #f5f5f5;
+    border: 1px solid #424242;
 }
 
 /* Monument */
-.mini-cell.MONUMENT { 
-    background-color: #f3e5f5; border: 1px solid #8e24aa; 
+.mini-cell.MONUMENT {
+    background-color: #f3e5f5;
+    border: 1px solid #8e24aa;
 }
 
 /* Fallback for generic buildings if needed */
-.mini-cell.constructed { 
-    background-color: #2c3e50; 
+.mini-cell.constructed {
+    background-color: #2c3e50;
     border: 1px solid #fff;
-    box-shadow: inset 0 0 4px rgba(0,0,0,0.5);
+    box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.5);
 }
 
 
@@ -917,36 +1387,56 @@ h1, h2, h3 {
     background-repeat: no-repeat;
     background-position: center;
     z-index: 10;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
-    
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+
     /* Optional: Add a subtle bounce so you notice it */
     transition: transform 0.2s;
 }
 
 @keyframes bounceIn {
-    0% { transform: scale(0); }
-    100% { transform: scale(1); }
+    0% {
+        transform: scale(0);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 .stored-resource-icon.cube {
     width: 24px;
     height: 24px;
     border-radius: 4px;
-    border: 1px solid rgba(0,0,0,0.2);
-    box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
 }
 
-.stored-resource-icon.WOOD { background-color: #5d4037; }
-.stored-resource-icon.WHEAT { background-color: #fdd835; }
-.stored-resource-icon.BRICK { background-color: #ef5350; }
-.stored-resource-icon.GLASS { background-color: #29b6f6; }
-.stored-resource-icon.STONE { background-color: #757575; }
+.stored-resource-icon.WOOD {
+    background-color: #5d4037;
+}
+
+.stored-resource-icon.WHEAT {
+    background-color: #fdd835;
+}
+
+.stored-resource-icon.BRICK {
+    background-color: #ef5350;
+}
+
+.stored-resource-icon.GLASS {
+    background-color: #29b6f6;
+}
+
+.stored-resource-icon.STONE {
+    background-color: #757575;
+}
 
 /* =========================================
    11. ACTION BAR (Factory Swap)
    ========================================= */
 .action-bar {
-    background: #263238; /* Dark factory color */
+    background: #263238;
+    /* Dark factory color */
     color: white;
     padding: 10px 20px;
     border-radius: 50px;
@@ -954,8 +1444,8 @@ h1, h2, h3 {
     align-items: center;
     gap: 15px;
     margin-bottom: 15px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+
     /* Animation to pop in */
     animation: slideDown 0.3s ease-out;
     z-index: 100;
@@ -970,7 +1460,8 @@ h1, h2, h3 {
 }
 
 .action-btn {
-    background: #ffa000; /* Amber */
+    background: #ffa000;
+    /* Amber */
     border: none;
     color: #3e2723;
     padding: 8px 16px;
@@ -979,7 +1470,8 @@ h1, h2, h3 {
     font-family: 'Nunito', sans-serif;
     cursor: pointer;
     transition: transform 0.1s, background 0.2s;
-    box-shadow: 0 4px 0 #ff6f00; /* 3D effect */
+    box-shadow: 0 4px 0 #ff6f00;
+    /* 3D effect */
 }
 
 .action-btn:hover {
@@ -996,7 +1488,8 @@ h1, h2, h3 {
 
 #confirm-btn {
     transition: all 0.2s ease;
-    box-shadow: 0 4px 0 #1b5e20; /* 3D Clicky effect */
+    box-shadow: 0 4px 0 #1b5e20;
+    /* 3D Clicky effect */
 }
 
 #confirm-btn:active {
@@ -1007,8 +1500,15 @@ h1, h2, h3 {
 /* ... */
 
 @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Warehouse Storage Container */
@@ -1028,38 +1528,65 @@ h1, h2, h3 {
     width: 12px;
     height: 12px;
     border-radius: 2px;
-    border: 1px solid rgba(0,0,0,0.3);
-    box-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
-.mini-resource.WOOD { background-color: #5d4037; }
-.mini-resource.WHEAT { background-color: #fdd835; }
-.mini-resource.BRICK { background-color: #ef5350; }
-.mini-resource.GLASS { background-color: #29b6f6; }
-.mini-resource.STONE { background-color: #757575; }
+
+.mini-resource.WOOD {
+    background-color: #5d4037;
+}
+
+.mini-resource.WHEAT {
+    background-color: #fdd835;
+}
+
+.mini-resource.BRICK {
+    background-color: #ef5350;
+}
+
+.mini-resource.GLASS {
+    background-color: #29b6f6;
+}
+
+.mini-resource.STONE {
+    background-color: #757575;
+}
 
 .on-board-mini {
-    width: 22px;   /* Small enough to fit 3 in a row */
+    width: 22px;
+    /* Small enough to fit 3 in a row */
     height: 22px;
-    border: 1px solid rgba(0,0,0,0.2);
+    border: 1px solid rgba(0, 0, 0, 0.2);
     border-radius: 4px;
-    box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
-    background-size: 80%; /* Ensure icon fits inside */
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+    background-size: 80%;
+    /* Ensure icon fits inside */
 }
 
 
 /* Add this to src/style.css */
 
 @keyframes goldPulse {
-    0% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7); }
-    70% { box-shadow: 0 0 0 6px rgba(255, 193, 7, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7);
+    }
+
+    70% {
+        box-shadow: 0 0 0 6px rgba(255, 193, 7, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 193, 7, 0);
+    }
 }
 
 .interactive-building {
     cursor: pointer !important;
     animation: goldPulse 2s infinite;
-    border: 2px solid #ffc107 !important; /* Gold border */
-    z-index: 5; /* Lift above neighbors */
+    border: 2px solid #ffc107 !important;
+    /* Gold border */
+    z-index: 5;
+    /* Lift above neighbors */
 }
 
 /* Optional: Add a small "SWAP" or "STORE" label on hover */
@@ -1089,7 +1616,8 @@ h1, h2, h3 {
 /* Floating Action Button (Hidden on Desktop) */
 .fab-btn {
     position: fixed;
-    right: 20px; /* Default right */
+    right: 20px;
+    /* Default right */
     width: 60px;
     height: 60px;
     border-radius: 50%;
@@ -1097,13 +1625,14 @@ h1, h2, h3 {
     color: white;
     font-size: 24px;
     border: none;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     z-index: 2000;
     cursor: pointer;
-    display: none; 
+    display: none;
     justify-content: center;
     align-items: center;
-    bottom: 30px; /* Lift them slightly higher (from 20px to 30px) */
+    bottom: 30px;
+    /* Lift them slightly higher (from 20px to 30px) */
     /* Add this to handle modern phone "notches" and home bars */
     margin-bottom: env(safe-area-inset-bottom);
 }
@@ -1112,53 +1641,268 @@ h1, h2, h3 {
 .fab-btn.left-fab {
     left: 20px;
     right: auto;
-    background: #546e7a; /* Different color to distinguish */
+    background: #546e7a;
+    /* Different color to distinguish */
 }
 
 /* Sidebar "Drawer" State */
 .sidebar-open {
-    transform: translateX(0) !important; /* Slide In */
+    transform: translateX(0) !important;
+    /* Slide In */
 }
-.opponents-open { transform: translateX(0) !important; }
+
+.opponents-open {
+    transform: translateX(0) !important;
+}
 
 /* Mobile Styles */
 @media (max-width: 768px) {
+
+    /* 1. GLOBAL MOBILE RESETS */
     body {
         overflow-x: hidden;
         height: 100%;
+        padding-top: 0;
     }
 
+    /* 2. GAME CONTAINER LAYOUT */
+    .game-container {
+        flex-direction: column;
+        align-items: center;
+        padding: 0;
+        position: relative;
+    }
+
+    .main-area {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        overflow: visible;
+    }
+
+    /* --- RESTORED HEADER ELEMENTS --- */
+
+    /* Bring back the Title */
     .main-area h1 {
-        font-size: 1.5rem;
-        margin-bottom: 10px;
+        display: block;
+        font-size: 22px;
+        /* Readable but compact */
+        margin: 15px 0 5px 0;
+        color: #2c3e50;
+        text-align: center;
+        order: -2;
+        /* Force to very top */
     }
 
-    /* Make the dashboard (Score/Resource) more compact */
-    .dashboard-panel {
-        padding: 10px 15px;
+    /* Bring back Logo (if you have one in the main area) */
+    .game-logo {
+        display: block;
+        width: 120px;
+        margin: 10px auto;
+        order: -2;
+        /* Force to very top */
+    }
+
+    /* Hide desktop description text */
+    p.description-text {
+        display: none;
+    }
+
+    #toast-container {
+        top: auto;          /* Release from top */
+        right: auto;        /* Release from right */
+        bottom: 100px;      /* Position above the FAB buttons */
+        left: 50%;          /* Center horizontally */
+        transform: translateX(-50%);
+        
+        width: max-content; /* Only as wide as the text */
+        max-width: 90%;     /* Prevent overflowing screen */
+        align-items: center; 
+    }
+    
+    .toast {
+        margin-bottom: 10px; /* Space between stacked toasts */
+        text-align: center;
+    }
+
+    /* 3. INSTRUCTION MESSAGE */
+    /* Sits between Title and Dashboard */
+    #message {
+        order: -1;
+        margin-top: 5px;
         margin-bottom: 10px;
+        font-size: 13px;
+        background: #e3f2fd;
+        padding: 8px;
+        width: 90%;
+        border-radius: 8px;
+        text-align: center;
+        color: #0d47a1;
+    }
+
+    /* 4. COMPACT STICKY DASHBOARD */
+    .dashboard-panel {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        width: 100%;
+        margin: 0;
+        padding: 5px 10px 10px 10px;
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+
+        background: white;
+        border-radius: 0 0 15px 15px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        box-sizing: border-box;
+    }
+
+    .dashboard-panel p {
+        text-align: center !important;
+        width: 100%;
+        display: block;
+        margin: 0 0 4px 0 !important;
+        font-size: 10px !important;
+        color: #999;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+    }
+
+    .dashboard-panel>div[style*="display:flex"] {
+        justify-content: center !important;
+        width: 100% !important;
+        gap: 10px !important;
+        margin-bottom: 5px;
+    }
+
+    #score-display {
+        font-size: 13px !important;
+        background: #f4f4f4;
+        padding: 2px 10px;
         border-radius: 12px;
     }
 
-    /* RESPONSIVE BOARD */
+    /* 5. RESOURCE PALETTE */
+    .resource-palette {
+        justify-content: center;
+        width: 100%;
+        gap: 6px;
+    }
+
+    .res-btn {
+        width: 40px;
+        height: 40px;
+        margin: 0;
+    }
+
+    /* 6. FINISH BUTTON */
+    #finish-town-btn {
+        width: auto !important;
+        display: inline-block;
+        font-size: 10px;
+        padding: 4px 12px;
+        margin: 0 0 5px 0;
+        background: white;
+        border: 1px solid #ef5350;
+        color: #ef5350;
+        border-radius: 15px;
+        font-weight: 700;
+        align-self: center;
+    }
+
+    /* 7. BOARD SIZING */
     .board {
+        margin-top: 10px;
+        /* Fill width but keep some breathing room */
+        max-width: 94vw;
+        /* Allow it to grow on tall screens */
+        max-height: 60dvh;
+        aspect-ratio: 1/1;
+        gap: 5px;
         padding: 10px;
-        gap: 8px; /* Slightly tighter gap */
-        width: 95vw; /* Fill the screen width */
-        max-width: 380px;
-        aspect-ratio: 1 / 1;
-        grid-template-columns: repeat(4, 1fr);
+        /* Ensure it doesn't get covered by FABs at the bottom */
+        margin-bottom: 80px;
     }
 
     .cell {
         width: 100%;
-        height: 100%; /* Becomes a square due to grid aspect-ratio */
+        height: 100%;
         max-width: none;
         max-height: none;
         border-width: 2px;
     }
 
-    /* MATCH NOTIFICATION BADGE */
+    /* 8. SIDEBARS (Drawers) */
+    #sidebar,
+    #opponents-sidebar {
+        position: fixed;
+        top: 0;
+        height: 100vh;
+        height: 100dvh;
+        background: white;
+        z-index: 1500;
+        transition: transform 0.3s ease;
+        overflow-y: auto;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    }
+
+    #sidebar {
+        right: 0;
+        width: 85%;
+        max-width: 320px;
+        transform: translateX(100%);
+        display: flex;
+        flex-direction: column;
+        padding-bottom: 40px;
+    }
+
+    #opponents-sidebar {
+        left: 0;
+        width: 85%;
+        max-width: 300px;
+        transform: translateX(-100%);
+        display: block !important;
+    }
+
+    .sidebar-open {
+        transform: translateX(0) !important;
+    }
+
+    .opponents-open {
+        transform: translateX(0) !important;
+    }
+
+    #build-menu {
+        flex-shrink: 0;
+    }
+
+    #deck-display {
+        max-height: none !important;
+        overflow-y: visible !important;
+    }
+
+    /* 9. FLOATING ACTION BUTTONS */
+    .fab-btn {
+        display: flex !important;
+        position: fixed;
+        z-index: 2000;
+        bottom: 20px;
+    }
+
+    #sidebar-toggle-btn {
+        right: 20px;
+    }
+
+    #opponents-toggle-btn {
+        left: 20px;
+        right: auto;
+    }
+
+    /* 10. BADGES & ANIMATIONS */
     .match-badge {
         position: absolute;
         top: -5px;
@@ -1170,89 +1914,123 @@ h1, h2, h3 {
         width: 22px;
         height: 22px;
         border-radius: 50%;
-        display: none; /* Hidden by default */
+        display: none;
         justify-content: center;
         align-items: center;
         border: 2px solid white;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        z-index: 2002;
     }
 
-    /* Pulse the button when you can build */
     .can-build {
+        background-color: #2e7d32 !important;
         animation: pulseMatch 1.5s infinite;
-        background: #2e7d32 !important; /* Green for "Go" */
-    }
-    /* 1. Stack the layout vertically */
-    .game-container {
-        flex-direction: column;
-        padding: 10px;
     }
 
-    /* 2. Show the Toggle Button */
-    .fab-btn {
-        display: flex;
-    }
-
-    /* 4. Transform Sidebar into a Drawer */
-    #sidebar {
-        position: fixed;
-        top: 0;
-        right: 0;
-        width: 85%;
-        max-width: 320px;
-        
-        /* [UPDATED] Use dvh (Dynamic Viewport Height) if available */
-        height: 100vh;
-        height: 100dvh; 
-        
-        background: white;
-        z-index: 1500;
-        box-shadow: -5px 0 15px rgba(0,0,0,0.2);
-        transform: translateX(100%);
-        transition: transform 0.3s ease;
-
-        /* [NEW] This is crucial: Make the drawer itself scrollable */
-        display: flex;
-        flex-direction: column;
-        overflow-y: auto; 
-        -webkit-overflow-scrolling: touch; /* Smooth scroll for iOS */
-        padding-bottom: 40px; /* Extra padding so the last button isn't on the edge */
-    }
-
-   #opponents-sidebar {
-        display: block !important; /* Overriding our previous 'none' */
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 85%;
-        max-width: 300px;
-        height: 100vh;
-        height: 100dvh;
-        background: white;
-        z-index: 1500;
-        box-shadow: 5px 0 15px rgba(0,0,0,0.2);
-        transform: translateX(-100%); /* Hidden off-screen LEFT */
-        transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
-        overflow-y: auto;
-    }
-
-    #build-menu {
-        flex-shrink: 0; /* Don't squash the buttons */
-    }
-
-    #deck-display {
-        max-height: none !important; /* Let it take as much space as it needs inside the scrolling sidebar */
-        overflow-y: visible !important;
-    }
-    
-    /* 7. Modal Adjustments */
     .modal-content {
-        width: 95%;
-        padding: 15px;
-        margin: 10px;
+        width: 90%;
+        /* Give it breathing room */
+        max-height: 85vh;
+        /* Never taller than 85% of screen */
+        overflow-y: auto;
+        /* Scroll if content is too tall */
+        padding: 20px;
+        margin: 0;
+        /* Centered by flex parent */
+
+        /* Smooth scrolling touch feel */
+        -webkit-overflow-scrolling: touch;
     }
-    
+
+    .setup-grid {
+        grid-template-columns: 1fr;
+        /* Stack vertically (1 column) */
+        gap: 12px;
+    }
+
+    /* Make the labels readable */
+    .setup-label {
+        font-size: 14px;
+        /* Up from 12px */
+        margin-bottom: 4px;
+    }
+
+    /* Make the dropdowns touch-friendly */
+    .setup-select {
+        padding: 12px;
+        font-size: 16px;
+        /* Prevents iOS zoom on focus */
+        height: 45px;
+    }
+
+    .cell:active {
+        transform: scale(0.95) !important;
+        transition: transform 0.1s;
+    }
+
+    /* Make resource buttons shrink too */
+    .res-btn:active {
+        transform: scale(0.9);
+    }
+
+
+}
+
+@keyframes pulseMatch {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.7);
+    }
+
+    70% {
+        transform: scale(1.1);
+        box-shadow: 0 0 0 10px rgba(46, 125, 50, 0);
+    }
+
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(46, 125, 50, 0);
+    }
+}
+
+/* --- COMPACT DESKTOP / TABLET TWEAKS --- */
+/* Triggers on narrower screens OR short screens (like small laptops) */
+@media (max-width: 1200px),
+(max-height: 850px) {
+
+    /* Reduce sidebar widths to give the board more room */
+    #sidebar {
+        width: 260px;
+        padding: 15px;
+    }
+
+    .sidebar-panel {
+        width: 180px;
+    }
+
+    /* Scale down the board elements */
+    .board {
+        grid-template-columns: repeat(4, 60px);
+        /* Smaller cells */
+        gap: 8px;
+        padding: 15px;
+    }
+
+    .cell {
+        width: 60px;
+        height: 60px;
+        font-size: 11px;
+        /* Smaller text for resources */
+    }
+
+    /* Adjust the header logo so it doesn't dominate vertical space */
     .game-logo {
         width: 200px;
+        margin-bottom: 10px;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+        margin-bottom: 10px;
     }
 }

@@ -21,6 +21,7 @@ export class LobbyController {
     private copyLinkBtn = document.getElementById('copy-link-btn')!;
     private setupContainer = document.getElementById('setup-container')!;
     private lobbyPlayerList = document.getElementById('lobby-player-list')!;
+    private gameContainer = document.querySelector('.game-container') as HTMLElement;
 
     // State
     public activeGameId: string | null = null;
@@ -38,6 +39,8 @@ export class LobbyController {
             renderLobbyList(data.players, this.lobbyPlayerList);
         }
     }
+
+
 
     private bindEvents() {
         // CREATE GAME
@@ -98,6 +101,8 @@ export class LobbyController {
         this.landingUI.classList.add('hidden');
         this.lobbyUI.classList.remove('hidden');
         this.shareCodeDisplay.innerText = `Code: ${gameId}`;
+
+        if (this.gameContainer) this.gameContainer.classList.add('hidden');
 
         if (isHost) {
             this.hostSettings.classList.remove('hidden');
