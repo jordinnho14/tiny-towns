@@ -30,7 +30,12 @@ export class LobbyController {
         this.multiplayer = multiplayer;
         this.audio = audio;
         this.bindEvents();
-        this.checkUrlForInvite();
+        this.tryAutoReconnect();
+        
+        // Only check URL if we didn't just auto-reconnect
+        if (!this.activeGameId) {
+            this.checkUrlForInvite();
+        }
     }
 
     // [THIS WAS MISSING]
@@ -94,10 +99,20 @@ export class LobbyController {
                 showToast("Invite Link copied!", "success", this.audio);
             });
         };
+
+        // LEAVE GAME
+        const leaveBtn = document.getElementById('leave-game-btn');
+        if (leaveBtn) {
+            leaveBtn.onclick = () => {
+                localStorage.removeItem('tt_activeGameId');
+                location.reload(); // Hard reload to clear state
+            };
+        }
     }
 
     public enterLobbyMode(gameId: string, isHost: boolean) {
         this.activeGameId = gameId;
+        localStorage.setItem('tt_activeGameId', gameId);
         this.landingUI.classList.add('hidden');
         this.lobbyUI.classList.remove('hidden');
         this.shareCodeDisplay.innerText = `Code: ${gameId}`;
@@ -164,5 +179,25 @@ export class LobbyController {
 
     private pickRandom(list: any[]) {
         return list[Math.floor(Math.random() * list.length)];
+    }
+
+    private async tryAutoReconnect() {
+        const storedGameId = localStorage.getItem('tt_activeGameId');
+        
+        if (storedGameId) {
+            console.log("Attempting auto-reconnect to:", storedGameId);
+            try {
+                // We don't need a name here because the server already knows us by ID
+                await this.multiplayer.joinGame(storedGameId, "Rejoining...");
+                
+                // If successful, UI update happens via onStateChange
+                this.enterLobbyMode(storedGameId, false); // false = assumes guest for safety, sync will fix
+                
+                showToast("Reconnected to previous game!", "success", this.audio);
+            } catch (e) {
+                console.warn("Could not reconnect:", e);
+                localStorage.removeItem('tt_activeGameId'); // Clear dead session
+            }
+        }
     }
 }

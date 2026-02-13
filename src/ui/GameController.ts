@@ -56,7 +56,7 @@ export class GameController {
         this.audio = audio;
 
         this.bindEvents();
-        this.multiplayer.onLog = (message: string) => {            
+        this.multiplayer.onLog = (message: string) => {
             showToast(message, "info");
         };
     }
@@ -136,6 +136,20 @@ export class GameController {
                 }
             });
 
+            const leaveBtn = document.getElementById('active-game-leave-btn');
+            if (leaveBtn) {
+                leaveBtn.onclick = () => {
+                    showConfirmationModal(
+                        "Leave Game?",
+                        "Are you sure? You will be returned to the lobby.",
+                        () => {
+                            // Clear session and reload to hit the lobby
+                            localStorage.removeItem('tt_activeGameId');
+                            location.reload();
+                        }
+                    );
+                };
+            }
 
         }
 

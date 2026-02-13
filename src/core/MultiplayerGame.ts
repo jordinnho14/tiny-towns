@@ -28,8 +28,16 @@ export class MultiplayerGame {
 
     constructor(localGame: Game) {
         this.localGame = localGame;
-        this.playerId = "player_" + Math.random().toString(36).substr(2, 9);
+        const storedId = localStorage.getItem('tt_playerId');
+        if (storedId) {
+            this.playerId = storedId;
+            console.log("Restored Player ID:", this.playerId);
+        } else {
+            this.playerId = "player_" + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('tt_playerId', this.playerId);
+        }
     }
+    
 
     // --- LOBBY & SETUP ---
 
