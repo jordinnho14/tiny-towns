@@ -100,19 +100,23 @@ h3 {
 
 /* "Breathing" Gold Glow for Master Builder */
 @keyframes masterGlow {
-    0% { 
+    0% {
         /* Soft Start */
         box-shadow: 0 0 5px rgba(255, 193, 7, 0.5);
         border-color: #ffb300;
         transform: scale(1);
     }
-    50% { 
+
+    50% {
         /* Intense Glow */
         box-shadow: 0 0 20px rgba(255, 193, 7, 0.8), 0 0 10px rgba(255, 193, 7, 0.4) inset;
-        border-color: #ffd54f; /* Lighter, brighter gold */
-        transform: scale(1.02); /* Subtle pop */
+        border-color: #ffd54f;
+        /* Lighter, brighter gold */
+        transform: scale(1.02);
+        /* Subtle pop */
     }
-    100% { 
+
+    100% {
         /* Back to Soft */
         box-shadow: 0 0 5px rgba(255, 193, 7, 0.5);
         border-color: #ffb300;
@@ -122,14 +126,18 @@ h3 {
 
 .master-active {
     /* Base State */
-    border: 3px solid #ffb300; /* Thicker, solid border */
-    background-color: #fffde7; /* Very light gold background tint */
-    border-radius: 16px;       /* Softer corners */
-    padding: 8px;              /* More breathing room inside */
-    
+    border: 3px solid #ffb300;
+    /* Thicker, solid border */
+    background-color: #fffde7;
+    /* Very light gold background tint */
+    border-radius: 16px;
+    /* Softer corners */
+    padding: 8px;
+    /* More breathing room inside */
+
     /* The Animation */
     animation: masterGlow 2s ease-in-out infinite;
-    
+
     /* Ensure it sits above other things to show the shadow */
     position: relative;
     z-index: 10;
@@ -1747,20 +1755,39 @@ h3 {
     }
 
     #toast-container {
-        top: auto;          /* Release from top */
-        right: auto;        /* Release from right */
-        bottom: 100px;      /* Position above the FAB buttons */
-        left: 50%;          /* Center horizontally */
+        top: auto;
+        /* Release from top */
+        right: auto;
+        /* Release from right */
+        bottom: 100px;
+        /* Position above the FAB buttons */
+        left: 50%;
+        /* Center horizontally */
         transform: translateX(-50%);
-        
-        width: max-content; /* Only as wide as the text */
-        max-width: 90%;     /* Prevent overflowing screen */
-        align-items: center; 
+
+        width: max-content;
+        /* Only as wide as the text */
+        max-width: 90%;
+        /* Prevent overflowing screen */
+        align-items: center;
     }
-    
+
     .toast {
-        margin-bottom: 10px; /* Space between stacked toasts */
+        margin-bottom: 10px;
+        /* Space between stacked toasts */
         text-align: center;
+    }
+
+    /* Inside @media (max-width: 768px) */
+
+    #help-btn {
+        top: 15px !important;
+        right: auto !important;
+        left: 15px !important;
+        /* Top-left on mobile */
+        width: 35px !important;
+        height: 35px !important;
+        font-size: 16px !important;
     }
 
     /* 3. INSTRUCTION MESSAGE */
@@ -1838,24 +1865,31 @@ h3 {
 
     /* 6. FINISH BUTTON */
     #finish-town-btn {
-        width: 100% !important; /* Fill the width of the panel */
-        max-width: 320px;       /* Cap width for tablets */
+        width: 100% !important;
+        /* Fill the width of the panel */
+        max-width: 320px;
+        /* Cap width for tablets */
         display: block;
-        
-        font-size: 14px;        /* Bigger, readable text */
+
+        font-size: 14px;
+        /* Bigger, readable text */
         font-weight: 800;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        
-        padding: 12px 0;        /* Taller touch target (easier for thumbs) */
-        margin: 5px 0 10px 0;   /* Breathing room */
-        
+
+        padding: 12px 0;
+        /* Taller touch target (easier for thumbs) */
+        margin: 5px 0 10px 0;
+        /* Breathing room */
+
         /* Outline Style (Safety) */
         background: white;
-        border: 2px solid #ef5350; /* Thicker border for visibility */
+        border: 2px solid #ef5350;
+        /* Thicker border for visibility */
         color: #ef5350;
-        
-        border-radius: 12px;    /* Smooth corners to match the dashboard */
+
+        border-radius: 12px;
+        /* Smooth corners to match the dashboard */
         align-self: center;
         transition: transform 0.1s;
     }
@@ -2089,7 +2123,8 @@ h3 {
 
 @media (max-width: 900px) and (orientation: landscape) {
     .game-container {
-        flex-direction: row; /* Side-by-side layout */
+        flex-direction: row;
+        /* Side-by-side layout */
         align-items: flex-start;
         justify-content: center;
         padding-top: 10px;
@@ -2098,23 +2133,31 @@ h3 {
 
     /* Left Side: Dashboard */
     .dashboard-panel {
-        width: 240px; 
-        height: 90vh; /* Tall sidebar */
-        overflow-y: auto; /* Scroll if needed */
+        width: 240px;
+        height: 90vh;
+        /* Tall sidebar */
+        overflow-y: auto;
+        /* Scroll if needed */
         border-radius: 15px;
         margin-right: 20px;
-        position: static; /* Let it sit naturally in flex row */
+        position: static;
+        /* Let it sit naturally in flex row */
     }
 
     /* Right Side: Board */
     .board {
-        height: 85vh; /* Fill vertical height */
-        width: 85vh;  /* Keep it square */
+        height: 85vh;
+        /* Fill vertical height */
+        width: 85vh;
+        /* Keep it square */
         max-width: none;
         max-height: none;
         margin: 0;
     }
 
     /* Hide header clutter */
-    .game-logo, .main-area h1 { display: none !important; }
+    .game-logo,
+    .main-area h1 {
+        display: none !important;
+    }
 }
