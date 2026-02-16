@@ -142,9 +142,9 @@ export class GameController {
                     showConfirmationModal(
                         "Leave Game?",
                         "Are you sure? You will be returned to the lobby.",
-                        () => {
-                            // Clear session and reload to hit the lobby
-                            localStorage.removeItem('tt_activeGameId');
+                        async () => {
+                            // [FIX] Properly leave the game on the server
+                            await this.multiplayer.leaveGame();
                             location.reload();
                         }
                     );

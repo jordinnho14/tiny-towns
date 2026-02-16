@@ -82,4 +82,8 @@ export class Board {
     getMetadata(r: number, c: number) {
         return this.metadata.get(`${r},${c}`);
     }
+
+    public setGrid(newGrid: GridCell[][]) {
+        this.grid = newGrid;
+    }
 }

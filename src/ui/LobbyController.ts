@@ -103,9 +103,9 @@ export class LobbyController {
         // LEAVE GAME
         const leaveBtn = document.getElementById('leave-game-btn');
         if (leaveBtn) {
-            leaveBtn.onclick = () => {
-                localStorage.removeItem('tt_activeGameId');
-                location.reload(); // Hard reload to clear state
+            leaveBtn.onclick = async () => {
+                await this.multiplayer.leaveGame();
+                location.reload();
             };
         }
     }

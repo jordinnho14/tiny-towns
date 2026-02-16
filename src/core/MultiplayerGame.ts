@@ -47,6 +47,7 @@ export class MultiplayerGame {
         this.gameId = newGameRef.key;
         this.isHost = true;
         this.myName = hostName;
+        this.cleanupStaleGames().catch(e => console.warn("Cleanup failed", e));
 
         const initialState = {
             status: "LOBBY",
@@ -56,6 +57,7 @@ export class MultiplayerGame {
             masterBuilderIndex: 0,
             roundNumber: 1, 
             playerOrder: [this.playerId],
+            createdAt: Date.now(),
             players: {
                 [this.playerId]: {
                     name: hostName,
@@ -81,50 +83,73 @@ export class MultiplayerGame {
         if (!snapshot.exists()) throw new Error("Game not found");
 
         const gameData = snapshot.val();
-
-        if (playerName === "Guest") {
-            const existingPlayers = gameData.players || {};
-            let counter = 1;
-            
-            while (true) {
-                const candidate = `Guest ${counter}`;
-                // Check if anyone already has this name
-                const isTaken = Object.values(existingPlayers).some((p: any) => p.name === candidate);
-                
-                if (!isTaken) {
-                    playerName = candidate;
-                    break; // Found our name!
-                }
-                counter++;
-            }
-        }
         
+        // [CHECK] Is this player already in the game?
+        const existingPlayer = gameData.players && gameData.players[this.playerId];
+
+        // [BLOCK] If game is running AND we are not a returning player -> Error
+        if (gameData.status !== "LOBBY" && !existingPlayer) {
+            throw new Error("Cannot join: Game is already in progress.");
+        }
+
         this.gameId = gameId;
-        this.isHost = false;
-        this.myName = playerName;
+        this.isHost = (gameData.hostId === this.playerId);
 
-        // Add self to Players List
-        const playerRef = ref(db, `games/${gameId}/players/${this.playerId}`);
-        await set(playerRef, {
-            name: playerName,
-            score: 0,
-            isReady: true,
-            placedRound: 0,
-            isGameOver: false,
-            board: this.serializeBoard()
-        });
+        if (existingPlayer) {
+            // --- REJOINING PATH ---
+            console.log("Rejoining game as existing player...");
+            this.myName = existingPlayer.name; 
+            
+            // Update presence
+            const playerRef = ref(db, `games/${gameId}/players/${this.playerId}`);
+            await update(playerRef, { isReady: true });
 
-        // Add self to Player Order
-        const orderRef = ref(db, `games/${gameId}/playerOrder`);
-        const orderSnap = await get(orderRef);
-        const currentOrder = orderSnap.val() || [];
-        
-        if (!currentOrder.includes(this.playerId)) {
-            currentOrder.push(this.playerId);
-            await set(orderRef, currentOrder);
+            // [NEW] Ensure we don't get deleted if we refresh again
+            onDisconnect(playerRef).update({ isReady: false });
+            
+        } else {
+            // --- NEW PLAYER PATH ---
+            // Handle Guest Name Logic
+            if (playerName === "Guest") {
+                const existingPlayers = gameData.players || {};
+                let counter = 1;
+                while (true) {
+                    const candidate = `Guest ${counter}`;
+                    const isTaken = Object.values(existingPlayers).some((p: any) => p.name === candidate);
+                    if (!isTaken) {
+                        playerName = candidate;
+                        break;
+                    }
+                    counter++;
+                }
+            }
+            this.myName = playerName;
+
+            // Initialize New Player
+            const playerRef = ref(db, `games/${gameId}/players/${this.playerId}`);
+            await set(playerRef, {
+                name: playerName,
+                score: 0,
+                isReady: true,
+                placedRound: 0,
+                isGameOver: false,
+                board: this.serializeBoard() // Send empty board
+            });
+
+            // Add to Player Order
+            const orderRef = ref(db, `games/${gameId}/playerOrder`);
+            const orderSnap = await get(orderRef);
+            const currentOrder = orderSnap.val() || [];
+            
+            if (!currentOrder.includes(this.playerId)) {
+                currentOrder.push(this.playerId);
+                await set(orderRef, currentOrder);
+            }
+            
+            // Setup Disconnect Cleanup (Only for new players/lobby phase)
+            onDisconnect(playerRef).remove();
         }
 
-        onDisconnect(playerRef).remove();
         this.subscribeToGame();
     }
 
@@ -167,6 +192,28 @@ export class MultiplayerGame {
         await update(gameRef, updates);
     }
 
+    async leaveGame() {
+        if (!this.gameId || !this.playerId) return;
+
+        const playerPath = `games/${this.gameId}/players/${this.playerId}`;
+        const gamePath = `games/${this.gameId}`;
+
+        // 1. Remove myself from the database
+        await set(ref(db, playerPath), null);
+
+        // 2. Check if the game is now empty
+        const snapshot = await get(ref(db, `games/${this.gameId}/players`));
+        if (!snapshot.exists() || Object.keys(snapshot.val()).length === 0) {
+            console.log("Game empty. Deleting game...");
+            await set(ref(db, gamePath), null);
+        }
+
+        // 3. Clear local session
+        this.gameId = null;
+        this.isHost = false;
+        localStorage.removeItem('tt_activeGameId');
+    }
+
     // New Method: Player chooses their monument
     async selectMonument(buildingName: string) {
         if (!this.gameId || !this.playerId) return;
@@ -195,6 +242,24 @@ export class MultiplayerGame {
             const data = snapshot.val();
             if (!data) return;
 
+            // [NEW] CRITICAL FIX: Protect data on Refresh
+            // Once the game starts, we must CANCEL the "Delete on Disconnect" orders
+            // that were set up during the Lobby phase.
+            if (data.status === "PLAYING") {
+                // 1. If Host: Stop the Game from deleting itself if Host refreshes
+                if (this.isHost) {
+                    onDisconnect(gameRef).cancel();
+                }
+
+                // 2. For All Players: Stop your Player Entry from deleting itself
+                const myPlayerRef = ref(db, `games/${this.gameId}/players/${this.playerId}`);
+                onDisconnect(myPlayerRef).cancel(); 
+                // Optional: Mark as "disconnected" instead of deleting
+                onDisconnect(myPlayerRef).update({ isReady: false }); 
+            }
+
+            // --- EXISTING LOGIC BELOW ---
+
             // 1. Sync Deck
             if (data.status === "PLAYING" && this.localGame.gameRegistry.length === 0) {
                  this.syncDeck(data.deck);
@@ -219,18 +284,14 @@ export class MultiplayerGame {
             // 4. Sync Round Number
             this.currentRound = data.roundNumber || 1;
 
-            if (data.players) {
-                this.detectOpponentActivity(data.players);
-            }
-
-            // --- NEIGHBOR WATCH (Opaleye Logic) ---
+            // --- NEIGHBOR WATCH ---
             if (data.status === "PLAYING" && data.players && data.playerOrder) {
                 this.checkNeighborsForOpaleye(data.players, data.playerOrder);
                 this.updateNeighborFeastHallStats(data.players, data.playerOrder);
+                this.detectOpponentActivity(data.players); // Activity Log
             }
 
-            // --- NEW: RESTORE LOCAL METADATA ---
-            // This ensures Opaleye/Warehouse items don't disappear on refresh
+            // --- RESTORE LOCAL STATE ---
             if (data.players && data.players[this.playerId]) {
                 const myData = data.players[this.playerId];
                 
@@ -238,7 +299,10 @@ export class MultiplayerGame {
                     this.myFinishRank = myData.finishRank;
                 }
                 
-                // If the server has metadata, load it into our local board
+                if (myData.board && myData.board.grid) {
+                    this.localGame.board.setGrid(myData.board.grid);
+                }
+
                 if (myData.board && myData.board.metadata) {
                     const newMeta = new Map<string, any>();
                     Object.entries(myData.board.metadata).forEach(([key, value]) => {
@@ -247,7 +311,6 @@ export class MultiplayerGame {
                     this.localGame.board.metadata = newMeta;
                 }
             }
-            // -----------------------------------
 
             // 5. Update UI
             if (this.onStateChange) this.onStateChange(data);
@@ -563,6 +626,33 @@ export class MultiplayerGame {
             this.localGame.setRightNeighborFeastHallCount(fhCount);
         } else {
             this.localGame.setRightNeighborFeastHallCount(0);
+        }
+    }
+
+    async cleanupStaleGames() {
+        const gamesRef = ref(db, 'games');
+        const snapshot = await get(gamesRef);
+        
+        if (!snapshot.exists()) return;
+
+        const games = snapshot.val();
+        const now = Date.now();
+        const MAX_AGE = 24 * 60 * 60 * 1000; // 24 Hours in milliseconds
+
+        const updates: any = {};
+        let deletedCount = 0;
+
+        Object.entries(games).forEach(([gId, game]: [string, any]) => {
+            // If game is older than 24 hours (or has no timestamp and is clearly old)
+            if (game.createdAt && (now - game.createdAt > MAX_AGE)) {
+                updates[gId] = null; // Mark for deletion
+                deletedCount++;
+            }
+        });
+
+        if (deletedCount > 0) {
+            console.log(`Cleaning up ${deletedCount} stale games...`);
+            await update(gamesRef, updates);
         }
     }
 }
