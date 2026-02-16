@@ -9,6 +9,7 @@ import {
     showMultiBuildingPicker, showConfirmationModal, showOpaleyeBonusModal
 } from "./UIHelpers";
 
+declare const confetti: any;
 export class GameController {
     private game: Game;
     private renderer: Renderer;
@@ -592,6 +593,7 @@ export class GameController {
             });
             if (result.penaltyCount > 0) this.addScoreListItem('Empty Spaces', -result.penaltyCount, true);
             this.elements.gameOverModal.classList.remove('hidden');
+            this.triggerWinConfetti();
             togglePalette(false);
         }
     }
@@ -611,6 +613,25 @@ export class GameController {
                     });
                 }
             }
+        }
+    }
+
+    private triggerWinConfetti() {
+        if (typeof confetti === 'function') {
+            // Fire from left
+            confetti({
+                origin: { x: 0.1, y: 0.8 },
+                angle: 60,
+                spread: 60,
+                particleCount: 100
+            });
+            // Fire from right
+            confetti({
+                origin: { x: 0.9, y: 0.8 },
+                angle: 120,
+                spread: 60,
+                particleCount: 100
+            });
         }
     }
 
